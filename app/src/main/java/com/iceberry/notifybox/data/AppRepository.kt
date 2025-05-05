@@ -21,12 +21,14 @@ import com.iceberry.notifybox.data.local.database.AppDao
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
+@Deprecated(message = "Not use")
 interface AppRepository {
     val apps: Flow<List<App>>
 
     suspend fun add(app: App)
 }
 
+@Deprecated(message = "Not use")
 class DefaultAppRepository @Inject constructor(
     private val appDao: AppDao
 ) : AppRepository {

@@ -22,8 +22,11 @@ import androidx.paging.PagingState
 import androidx.room.Transaction
 import com.iceberry.notifybox.data.local.database.Notify
 import com.iceberry.notifybox.data.local.database.NotifyDao
+import com.iceberry.notifybox.data.local.database.PieChartData
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 interface NotifyRepository {
@@ -34,6 +37,7 @@ interface NotifyRepository {
     suspend fun markDeletedByGroup(notifyId: Int, packageName: String)
     suspend fun markDeletedById(notifyId: Int)
     fun searchByQuery(query: String): PagingSource<Int, Notify>
+    fun statisticByPackageName(dataTime: LocalDateTime = LocalDateTime.parse("1970-01-01T00:00:00")): Flow<List<PieChartData>>
 
     class EmptyPageSource : PagingSource<Int, Notify>() {
         override fun getRefreshKey(state: PagingState<Int, Notify>): Int? = null
@@ -72,5 +76,9 @@ class DefaultNotifyRepository @Inject constructor(
     override fun searchByQuery(query: String): PagingSource<Int, Notify> {
         Log.i("NotifyRepository", "call searchByQuery")
         return if (query.isEmpty()) NotifyRepository.EmptyPageSource() else notifyDao.searchByQuery(query)
+    }
+
+    override fun statisticByPackageName(dataTime: LocalDateTime): Flow<List<PieChartData>> {
+        return notifyDao.statisticByPackageName(dataTime)
     }
 }

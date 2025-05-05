@@ -24,14 +24,11 @@ import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import androidx.paging.map
 import com.iceberry.notifybox.data.NotifyRepository
-import com.iceberry.notifybox.network.di.AppDispatchers.Default
-import com.iceberry.notifybox.network.di.Dispatcher
 import com.iceberry.notifybox.ui.list.KeyPrefix
 import com.iceberry.notifybox.ui.list.KeySuffix
 import com.iceberry.notifybox.ui.list.mappingNotifies
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -47,8 +44,7 @@ import javax.inject.Inject
 @HiltViewModel
 class GroupDetailsViewModel @Inject constructor(
     private val notifyRepository: NotifyRepository,
-    @ApplicationContext context: Context,
-    @Dispatcher(Default) dispatcher: CoroutineDispatcher
+    @ApplicationContext context: Context
 ) : ViewModel() {
     private val _notifyId = MutableStateFlow<Int?>(null)
     private val _packageName = MutableStateFlow("")

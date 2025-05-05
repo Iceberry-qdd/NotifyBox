@@ -16,10 +16,14 @@
 
 package com.iceberry.notifybox.ui.statistic
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -36,13 +40,17 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,12 +62,12 @@ fun StatisticScreen(
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val snackbarHostState = remember { SnackbarHostState() }
-//    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             val density = LocalDensity.current
             StatisticTopAppBar(
@@ -74,15 +82,30 @@ fun StatisticScreen(
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = "暂无新消息",
-                style = MaterialTheme.typography.bodyMedium.merge(color = MaterialTheme.colorScheme.outline)
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxWidth()
+                    .height(250.dp)
+                    .background(MaterialTheme.colorScheme.surface),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "数据加载中",
+                    style = MaterialTheme.typography.bodyMedium.merge(color = MaterialTheme.colorScheme.outline)
+                )
+            }
+        } else {
+            StatisticPieContent(
+                modifier = Modifier
+                    .padding(
+                        start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
+                        end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
+                        top = paddingValues.calculateTopPadding()
+                    )
+                    .background(MaterialTheme.colorScheme.surface),
+                uiState = uiState.pieChartUiState
             )
         }
     }

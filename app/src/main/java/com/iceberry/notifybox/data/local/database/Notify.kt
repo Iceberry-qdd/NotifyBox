@@ -16,6 +16,8 @@
 
 package com.iceberry.notifybox.data.local.database
 
+import android.content.Context
+import android.graphics.drawable.Drawable
 import androidx.core.app.NotificationCompat
 import androidx.paging.PagingSource
 import androidx.room.ColumnInfo
@@ -26,6 +28,9 @@ import androidx.room.FtsOptions
 import androidx.room.Insert
 import androidx.room.PrimaryKey
 import androidx.room.Query
+import com.iceberry.notifybox.ui.statistic.PieChartDataVO
+import com.iceberry.notifybox.util.IconUtils
+import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 
 @Fts4(
@@ -65,48 +70,49 @@ data class Notify(
 interface NotifyDao {
     @Query(
         """
-        SELECT t1.rowid,
-            t1.notify_id,
-            t1.title,
-            t1.content,
-            t1.package_name,
-            t1.display_name,
-            t1.created_time,
-            t1.small_icon,
-            t1.large_icon,
-            t1.channel,
-            t1.deleted_time,
-            t1.priority,
-            t2.`count`
-        FROM tb_notify t1
-        INNER JOIN (SELECT MAX(rowid) AS id, COUNT(*) AS `count` FROM tb_notify WHERE deleted_time IS NULL GROUP BY package_name, notify_id) t2
-            ON t1.rowid = t2.id
-        WHERE deleted_time IS NULL
-        ORDER BY created_time DESC"""
+            SELECT t1.rowid,
+                t1.notify_id,
+                t1.title,
+                t1.content,
+                t1.package_name,
+                t1.display_name,
+                t1.created_time,
+                t1.small_icon,
+                t1.large_icon,
+                t1.channel,
+                t1.deleted_time,
+                t1.priority,
+                t2.`count`
+            FROM tb_notify t1
+            INNER JOIN (SELECT MAX(rowid) AS id, COUNT(*) AS `count` FROM tb_notify WHERE deleted_time IS NULL GROUP BY package_name, notify_id) t2
+                ON t1.rowid = t2.id
+            WHERE deleted_time IS NULL
+            ORDER BY created_time DESC
+        """
     )
     fun getNotifies(): PagingSource<Int, Notify>
 
     @Query(
         """
-        SELECT rowid,
-            notify_id,
-            title,
-            content,
-            package_name,
-            display_name,
-            created_time,
-            small_icon,
-            large_icon,
-            channel,
-            deleted_time,
-            priority,
-            `count`
-        FROM tb_notify
-        WHERE notify_id = :notifyId
-            AND package_name = :packageName
-            AND deleted_time IS NULL
-        ORDER BY created_time DESC
-    """
+            SELECT rowid,
+                notify_id,
+                title,
+                content,
+                package_name,
+                display_name,
+                created_time,
+                small_icon,
+                large_icon,
+                channel,
+                deleted_time,
+                priority,
+                `count`
+            FROM tb_notify
+            WHERE notify_id = :notifyId
+                AND package_name = :packageName
+                AND deleted_time IS NULL
+            ORDER BY created_time DESC
+        """
     )
     fun getByNotifyId(notifyId: Int, packageName: String): PagingSource<Int, Notify>
 
@@ -133,23 +139,66 @@ interface NotifyDao {
 
     @Query(
         """
-        SELECT rowid,
-            notify_id,
-            title,
-            content,
-            package_name,
-            display_name,
-            created_time,
-            small_icon,
-            large_icon,
-            channel,
-            deleted_time,
-            priority,
-            `count`
-        FROM tb_notify
-        WHERE tb_notify MATCH :query
-            AND deleted_time IS NULL
-    """
+            SELECT rowid,
+                notify_id,
+                title,
+                content,
+                package_name,
+                display_name,
+                created_time,
+                small_icon,
+                large_icon,
+                channel,
+                deleted_time,
+                priority,
+                `count`
+            FROM tb_notify
+            WHERE tb_notify MATCH :query
+                AND deleted_time IS NULL
+        """
     )
     fun searchByQuery(query: String): PagingSource<Int, Notify>
+
+    @Query(
+        """
+            SELECT COUNT(*) AS `value`,
+                display_name AS `label`,
+                package_name,
+                1.0 * COUNT(*) / (SELECT COUNT(*) FROM tb_notify WHERE deleted_time IS NULL AND created_time >= :dataTime) AS `dest`
+            FROM tb_notify
+            WHERE deleted_time IS NULL
+                AND created_time >= :dataTime
+            GROUP BY package_name
+            ORDER BY value DESC
+        """
+    )
+    fun statisticByPackageName(dataTime: LocalDateTime): Flow<List<PieChartData>>
+}
+
+data class AppIcon(
+    val icon: Drawable? = null,
+    val largeIcon: Drawable? = null,
+    val appDisplayName: String = "Unknown"
+)
+
+data class PieChartData(
+    val value: Long,
+    val label: String,
+    @ColumnInfo(name = "package_name")
+    val packageName: String,
+    val dest: Float
+) {
+    fun toVO(context: Context): PieChartDataVO {
+        val icon = IconUtils.getPackageIcon(packageName, context)
+        return PieChartDataVO(
+            value = value,
+            label = label,
+            dest = dest,
+            appIcon = AppIcon(
+                icon = icon,
+                largeIcon = icon,
+                appDisplayName = label
+            )
+        )
+    }
 }

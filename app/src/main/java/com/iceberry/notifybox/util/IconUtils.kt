@@ -29,11 +29,11 @@ import java.io.File
 import java.security.MessageDigest
 
 object IconUtils {
-    suspend fun convertToDrawable(icon: Icon?, context: Context): Drawable? {
+    fun convertToDrawable(icon: Icon?, context: Context): Drawable? {
         return icon?.loadDrawable(context)
     }
 
-    suspend fun convertToBitmap(icon: Icon?, context: Context): Bitmap? {
+    fun convertToBitmap(icon: Icon?, context: Context): Bitmap? {
         val drawable = convertToDrawable(icon, context)
         return drawable?.let {
             if (drawable is BitmapDrawable) return@let drawable.bitmap
@@ -51,13 +51,13 @@ object IconUtils {
         }
     }
 
-    suspend fun checkSum(bitmap: Bitmap): String = ByteArrayOutputStream(bitmap.byteCount).use {
+    fun checkSum(bitmap: Bitmap): String = ByteArrayOutputStream(bitmap.byteCount).use {
         bitmap.compress(Bitmap.CompressFormat.WEBP, 100, it)
         val hashBytes = MessageDigest.getInstance("SHA-256").digest(it.toByteArray())
         hashBytes.joinToString("") { "%02x".format(it) }
     }
 
-    suspend fun smartSaveToStorage(icon: Icon?, context: Context): String? {
+    fun smartSaveToStorage(icon: Icon?, context: Context): String? {
         val bitmap = convertToBitmap(icon = icon, context = context)
         return bitmap?.let { bm ->
             val format = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

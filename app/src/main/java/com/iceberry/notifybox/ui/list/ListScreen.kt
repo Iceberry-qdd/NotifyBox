@@ -77,7 +77,7 @@ fun ListScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val items = viewModel.pager.collectAsLazyPagingItems()
 
-    val listState = rememberListColumnState(
+    val listState = rememberListColumnState<NotifyVO>(
         items = null,
         lazyListState = rememberLazyListState(),
         loading = uiState.loading,

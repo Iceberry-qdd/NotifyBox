@@ -20,12 +20,15 @@ package com.iceberry.notifybox.ui.list
 import androidx.paging.PagingSource
 import com.iceberry.notifybox.data.NotifyRepository
 import com.iceberry.notifybox.data.local.database.Notify
+import com.iceberry.notifybox.data.local.database.PieChartData
 import com.iceberry.notifybox.util.Async
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.time.LocalDateTime
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -86,6 +89,10 @@ private class FakeNotifyRepository : NotifyRepository {
     }
 
     override fun searchByQuery(query: String): PagingSource<Int, Notify> {
+        TODO("Not yet implemented")
+    }
+
+    override fun statisticByPackageName(dataTime: LocalDateTime): Flow<List<PieChartData>> {
         TODO("Not yet implemented")
     }
 }

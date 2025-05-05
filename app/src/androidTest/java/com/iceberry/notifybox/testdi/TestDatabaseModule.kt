@@ -39,6 +39,7 @@ interface FakeDataModule {
     ): NotifyRepository
 
     @Binds
+    @Deprecated(message = "Not use")
     fun bindAppRepository(
         fakeRepository: FakeAppRepository
     ): AppRepository

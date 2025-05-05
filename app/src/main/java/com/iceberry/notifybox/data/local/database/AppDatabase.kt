@@ -28,5 +28,7 @@ import com.iceberry.notifybox.data.local.di.LocalDateTimeConverter
 @TypeConverters(value = [LocalDateTimeConverter::class])
 abstract class AppDatabase : RoomDatabase() {
     abstract fun notifyDao(): NotifyDao
+
+    @Deprecated(message = "Not use")
     abstract fun appDao(): AppDao
 }

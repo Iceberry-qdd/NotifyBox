@@ -53,11 +53,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.iceberry.notifybox.ui.NBAppState
 import com.iceberry.notifybox.ui.list.ListColumnContent
+import com.iceberry.notifybox.ui.list.NotifyVO
 import com.iceberry.notifybox.ui.list.rememberListColumnState
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 import kotlinx.coroutines.launch
@@ -83,7 +82,6 @@ fun GroupDetailsScreen(
         topBar = {
             val density = LocalDensity.current
             GroupDetailsTopAppBar(
-                navController = appState.navController,
                 count = uiState.count,
                 onBack = onBackClick,
                 scrollBehavior = scrollBehavior,
@@ -127,7 +125,7 @@ fun GroupDetailsScreen(
             }
 
 
-            val listState = rememberListColumnState(
+            val listState = rememberListColumnState<NotifyVO>(
                 items = null,
                 lazyListState = rememberLazyListState(),
                 loading = uiState.loading,
@@ -159,7 +157,6 @@ fun GroupDetailsScreen(
 @Composable
 fun GroupDetailsTopAppBar(
     modifier: Modifier = Modifier,
-    navController: NavController,
     count: Int = 0,
     onBack: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior,
@@ -185,7 +182,6 @@ private fun GroupDetailsTopAppBarLightPreview() {
     NBApplicationTheme {
         GroupDetailsTopAppBar(
             onBack = {},
-            navController = rememberNavController(),
             scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
         )
     }

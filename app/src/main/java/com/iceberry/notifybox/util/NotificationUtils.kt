@@ -47,6 +47,7 @@ class NotificationUtils {
             notificationManager?.createNotificationChannel(LISTEN_SERVICE_STATUS_CHANNEL)
         }
 
+        @Suppress("SameReturnValue")
         fun createServiceStatusNotify(context: Context): Int {
             val intent = Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.Flow
     tableName = "tb_app",
     indices = [Index(value = ["package_name"], orders = [Index.Order.ASC], name = "idx_packageName", unique = true)]
 )
+@Deprecated(message = "Not use")
 data class App(
     @ColumnInfo(name = "display_name")
     val displayName: String,
@@ -42,6 +43,7 @@ data class App(
 }
 
 @Dao
+@Deprecated(message = "Not use")
 interface AppDao {
     @Query("SELECT * FROM tb_app ORDER BY id DESC LIMIT 10")
     fun getApps(): Flow<List<App>>

@@ -25,12 +25,12 @@ import androidx.paging.compose.LazyPagingItems
 
 
 @Composable
-fun rememberListColumnState(
-    items: LazyPagingItems<NotifyVO>?,
+fun <T : Any> rememberListColumnState(
+    items: LazyPagingItems<T>?,
     lazyListState: LazyListState = rememberLazyListState(),
     loading: Boolean,
     snackbarHostState: SnackbarHostState
-): ListColumnState {
+): ListColumnState<T> {
     return remember(items, lazyListState, loading, snackbarHostState) {
         ListColumnState(
             items = items,
@@ -41,8 +41,8 @@ fun rememberListColumnState(
     }
 }
 
-class ListColumnState(
-    internal val items: LazyPagingItems<NotifyVO>?,
+class ListColumnState<T : Any>(
+    internal val items: LazyPagingItems<T>?,
     internal val lazyListState: LazyListState,
     internal val loading: Boolean,
     internal val snackbarHostState: SnackbarHostState

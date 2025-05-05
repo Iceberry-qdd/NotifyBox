@@ -32,22 +32,9 @@ class ForwardViewModel @Inject constructor(
 ) : ViewModel() {
 
     val uiState: StateFlow<Boolean> = MutableStateFlow(true)
-//        .map{ it -> it}
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000L),
             false
         )
-
-//    fun addStatistics(name: String) {
-//        viewModelScope.launch {
-//            notifyRepository.add(name)
-//        }
-//    }
 }
-
-//sealed interface StatisticsUiState {
-//    object Loading : StatisticsUiState
-//    data class Error(val throwable: Throwable) : StatisticsUiState
-//    data class Success(val data: List<Notify>) : StatisticsUiState
-//}

@@ -70,13 +70,11 @@ fun NBApplicationTheme(
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-//            (view.context as Activity).window.statusBarColor = colorScheme.surface.toArgb()
             val window = (view.context as Activity).window
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 window.isNavigationBarContrastEnforced = false
             }
-//            ViewCompat.getWindowInsetsController(view)?.isAppearanceLightStatusBars = darkTheme
         }
     }
 

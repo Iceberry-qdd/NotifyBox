@@ -25,12 +25,14 @@ import com.iceberry.notifybox.data.NotifyRepository
 import com.iceberry.notifybox.data.SettingsRepository
 import com.iceberry.notifybox.data.local.database.App
 import com.iceberry.notifybox.data.local.database.Notify
+import com.iceberry.notifybox.data.local.database.PieChartData
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import java.time.LocalDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -46,6 +48,7 @@ interface DataModule {
 
     @Singleton
     @Binds
+    @Deprecated(message = "Not use")
     fun bindsAppRepository(
         appRepository: DefaultAppRepository
     ): AppRepository
@@ -83,10 +86,15 @@ class FakeNotifyRepository @Inject constructor() : NotifyRepository {
     override fun searchByQuery(query: String): PagingSource<Int, Notify> {
         throw NotImplementedError()
     }
+
+    override fun statisticByPackageName(dataTime: LocalDateTime): Flow<List<PieChartData>> {
+        throw NotImplementedError()
+    }
 }
 
 val fakeNotifies = listOf<Notify>()
 
+@Deprecated(message = "Not use")
 class FakeAppRepository @Inject constructor() : AppRepository {
     override val apps: Flow<List<App>> = flowOf(fakeApps)
 
@@ -95,4 +103,5 @@ class FakeAppRepository @Inject constructor() : AppRepository {
     }
 }
 
+@Deprecated(message = "Not use")
 val fakeApps = listOf<App>()

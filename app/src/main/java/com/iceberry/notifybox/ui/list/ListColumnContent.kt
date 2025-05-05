@@ -79,6 +79,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
 import com.iceberry.notifybox.R
+import com.iceberry.notifybox.data.local.database.AppIcon
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 import com.iceberry.notifybox.ui.theme.Red80
 import com.iceberry.notifybox.util.RelativeTimeParser
@@ -89,7 +90,7 @@ import kotlin.math.min
 @Composable
 internal fun ListColumnContent(
     modifier: Modifier = Modifier,
-    state: ListColumnState,
+    state: ListColumnState<NotifyVO>,
     items: LazyPagingItems<NotifyVO>,
     onClickItem: (NotifyVO) -> Unit,
     onDeleteItem: (NotifyVO) -> Unit
@@ -270,11 +271,11 @@ private fun NotifyItem(
                 }
             ) {
                 AppIcon(
-                    item = item,
                     modifier = Modifier
                         .size(36.dp)
                         .clip(RoundedCornerShape(percent = 25))
-                        .aspectRatio(1f)
+                        .aspectRatio(1f),
+                    icon = AppIcon(item.icon, item.largeIcon, item.appDisplayName)
                 )
             }
 
@@ -336,24 +337,24 @@ private fun NotifyItem(
 }
 
 @Composable
-private fun AppIcon(
+internal fun AppIcon(
     modifier: Modifier = Modifier,
-    item: NotifyVO
+    icon: AppIcon
 ) {
-    if (item.icon == null) {
+    if (icon.icon == null) {
         DefaultAppIcon(modifier = modifier)
     } else {
         AdaptiveIconImage(
-            drawable = item.largeIcon ?: item.icon,
+            drawable = icon.largeIcon ?: icon.icon,
             modifier = modifier,
-            contentDescription = item.appDisplayName
+            contentDescription = icon.appDisplayName
         )
     }
 }
 
 @Composable
-private fun DefaultAppIcon(
-    modifier: Modifier
+internal fun DefaultAppIcon(
+    modifier: Modifier = Modifier
 ) {
     Box(
         contentAlignment = Alignment.Center,
