@@ -27,6 +27,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -76,7 +77,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
 import com.iceberry.notifybox.R
 import com.iceberry.notifybox.data.local.database.AppIcon
@@ -87,21 +87,37 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlin.math.min
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun ListColumnContent(
     modifier: Modifier = Modifier,
     state: ListColumnState<NotifyVO>,
-    items: LazyPagingItems<NotifyVO>,
     onClickItem: (NotifyVO) -> Unit,
     onDeleteItem: (NotifyVO) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     LazyColumn(
-        modifier = modifier.fillMaxHeight(),
+        modifier = modifier
+            .fillMaxHeight(),
+//            .also{ if(!state.query.isEmpty()) it.imeNestedScroll() }, TODO Should only work when searchBar visible.
         state = state.lazyListState
     ) {
+        if (state.loading && state.query.isEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillParentMaxHeight()
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+            return@LazyColumn
+        }
+
 //      if (items.loadState.refresh == LoadState.Loading) {
-        if (items.itemCount == 0) {
+        if (state.items?.itemCount == 0) {
             item {
                 Box(
                     modifier = Modifier
@@ -115,27 +131,15 @@ internal fun ListColumnContent(
                     )
                 }
             }
+            return@LazyColumn
         }
 //      }
 
-        if (state.loading) {
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillParentMaxHeight()
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-        }
-
         items(
-            count = items.itemCount,
-            key = items.itemKey { it.key }
+            count = state.items?.itemCount ?: 0,
+            key = state.items?.itemKey { it.key }
         ) { i ->
-            items[i]?.let {
+            state.items?.get(i)?.let {
                 val deleted = remember { mutableStateOf(false) }
                 AnimatedVisibility(
                     visible = !deleted.value,
@@ -175,7 +179,7 @@ internal fun ListColumnContent(
             }
         }
 
-        if (items.loadState.append == LoadState.Loading) {
+        if (state.items?.loadState?.append == LoadState.Loading) {
             item {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }

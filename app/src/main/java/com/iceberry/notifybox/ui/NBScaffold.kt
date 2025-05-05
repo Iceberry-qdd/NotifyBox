@@ -32,6 +32,9 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
@@ -43,6 +46,7 @@ fun NBScaffold(
     modifier: Modifier = Modifier,
     appState: NBAppState,
     scrollBehavior: TopAppBarScrollBehavior,
+    scrollToTop: () -> Unit,
     content: @Composable ((PaddingValues) -> Unit)
 ) {
     val navController = appState.navController
@@ -72,13 +76,17 @@ fun NBScaffold(
                 enter = slideInVertically { fullHeight -> fullHeight },
                 exit = slideOutVertically { fullHeight -> fullHeight }
             ) {
-                NBNavigationBar(appState = appState)
+                NBNavigationBar(
+                    appState = appState,
+                    scrollToTop = scrollToTop
+                )
             }
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         floatingActionButton = {
+            val visible by remember { derivedStateOf { scrollBehavior.state.collapsedFraction < 1.0f } }
             AnimatedVisibility(
-                visible = scrollBehavior.state.collapsedFraction < 1.0f,
+                visible = visible,
                 enter = scaleIn(),
                 exit = scaleOut()
             ) {

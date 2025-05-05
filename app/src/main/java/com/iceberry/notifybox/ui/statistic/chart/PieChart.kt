@@ -109,7 +109,7 @@ fun PieChart(
 
             pieChart.description.apply {
                 isEnabled = true
-                text = "*不显示小于1%的数据"
+                text = "*其它为小于1%的数据"
                 textAlign = Paint.Align.RIGHT
                 textSize = 10f
                 textColor = convertToRGB(descTextColor)

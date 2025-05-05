@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -55,6 +56,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.iceberry.notifybox.ui.NBAppState
+import com.iceberry.notifybox.ui.ScrollToTopFab
 import com.iceberry.notifybox.ui.list.ListColumnContent
 import com.iceberry.notifybox.ui.list.NotifyVO
 import com.iceberry.notifybox.ui.list.rememberListColumnState
@@ -74,6 +76,7 @@ fun GroupDetailsScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val snackbarHostState = remember { SnackbarHostState() }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val lazyListState: LazyListState = rememberLazyListState()
 
     Scaffold(
         modifier = modifier
@@ -93,6 +96,12 @@ fun GroupDetailsScreen(
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        floatingActionButton = {
+            ScrollToTopFab(
+                scrollBehavior = scrollBehavior,
+                lazyListState = lazyListState
+            )
+        }
     ) { paddingValues ->
         if (notifyId == null) {
             Box(
@@ -126,9 +135,10 @@ fun GroupDetailsScreen(
 
 
             val listState = rememberListColumnState<NotifyVO>(
-                items = null,
-                lazyListState = rememberLazyListState(),
+                items = items,
+                lazyListState = lazyListState,
                 loading = uiState.loading,
+                query = "",
                 snackbarHostState = appState.snackbarHostState
             )
 
@@ -140,7 +150,6 @@ fun GroupDetailsScreen(
                         top = paddingValues.calculateTopPadding()
                     ),
                 state = listState,
-                items = items,
                 onClickItem = {},
                 onDeleteItem = { notify ->
                     scope.launch {

@@ -25,12 +25,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.navigation.NavDestination.Companion.hasRoute
+import com.iceberry.notifybox.navigation.ListRoute
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 
 @Composable
 fun NBNavigationBar(
     modifier: Modifier = Modifier,
-    appState: NBAppState
+    appState: NBAppState,
+    scrollToTop: () -> Unit
 ) {
     if (appState.isTopLevelDestination) {
         val currentDestination = appState.currentDestination
@@ -39,12 +41,19 @@ fun NBNavigationBar(
             modifier = modifier,
         ) {
             appState.topLevelDestinations.forEach { dest ->
+                val selected = currentDestination?.hasRoute(dest.route) == true
                 NavigationBarItem(
-                    selected = currentDestination?.hasRoute(dest.route) == true,
+                    selected = selected,
                     icon = { Icon(dest.icon, contentDescription = dest.iconText) },
                     label = { Text(dest.titleText) },
                     alwaysShowLabel = false,
-                    onClick = { appState.navigateToTopLevelDestination(dest) }
+                    onClick = {
+                        if (selected && currentDestination.hasRoute(ListRoute::class)) {
+                            scrollToTop()
+                        } else {
+                            appState.navigateToTopLevelDestination(dest)
+                        }
+                    }
                 )
             }
         }
@@ -57,7 +66,8 @@ private fun MainNavigationBarPreview() {
     NBApplicationTheme {
         NBNavigationBar(
             modifier = Modifier.fillMaxWidth(),
-            appState = rememberNBAppState()
+            appState = rememberNBAppState(),
+            scrollToTop = {}
         )
     }
 }

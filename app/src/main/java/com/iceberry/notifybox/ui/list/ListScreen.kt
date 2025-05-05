@@ -20,7 +20,9 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -30,7 +32,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Square
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -48,6 +50,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
 import androidx.core.graphics.applyCanvas
 import androidx.core.graphics.createBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -76,18 +79,19 @@ fun ListScreen(
     val scope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val items = viewModel.pager.collectAsLazyPagingItems()
+    val lazyListState = appState.curRouteLazyListState ?: rememberLazyListState()
 
     val listState = rememberListColumnState<NotifyVO>(
-        items = null,
-        lazyListState = rememberLazyListState(),
+        items = items,
+        lazyListState = lazyListState,
         loading = uiState.loading,
+        query = uiState.query,
         snackbarHostState = appState.snackbarHostState
     )
 
     ListColumnContent(
         modifier = modifier,
         state = listState,
-        items = items,
         onClickItem = onClickItem,
         onDeleteItem = { notify ->
             scope.launch {
@@ -96,23 +100,6 @@ fun ListScreen(
         }
     )
 }
-
-val fakeNotifyVOs = listOf<NotifyVO>(
-    NotifyVO(
-        id = 1,
-        key = "group-1",
-        icon = null,
-        largeIcon = null,
-        appDisplayName = "微信",
-        appPackageName = "com.tencent.mm",
-        createdTime = LocalDateTime.now().minusDays(1L),
-        title = "新消息",
-        content = "您有一条新消息",
-        channel = "msg",
-        notifyId = 1,
-        count = 989
-    )
-)
 
 @Composable
 fun AdaptiveIconImage(
@@ -149,6 +136,7 @@ fun ListTopAppBar(
     if (showSearchBar) {
         SearchTopBar(
             query = uiState.query,
+            loading = uiState.loading,
             onQueryChanged = {
                 Log.i("ListScreen", "call onQueryChanged: query = $it")
                 viewModel.setQuery(it)
@@ -215,7 +203,7 @@ fun ListFloatActionBar(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     if (currentDestination?.hasRoute(ListRoute::class) == true) {
-        FloatingActionButton(
+        ExtendedFloatingActionButton(
             onClick = {
                 if (uiState.isServiceRunning) {
                     viewModel.stopANLService(context)
@@ -226,12 +214,33 @@ fun ListFloatActionBar(
         ) {
             if (uiState.isServiceRunning) {
                 Icon(Icons.Filled.Square, "停止监听")
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "停止监听")
             } else {
                 Icon(Icons.Filled.PlayArrow, "启动监听")
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "启动监听")
             }
         }
     }
 }
+
+val fakeNotifyVOs = listOf<NotifyVO>(
+    NotifyVO(
+        id = 1,
+        key = "group-1",
+        icon = null,
+        largeIcon = null,
+        appDisplayName = "微信",
+        appPackageName = "com.tencent.mm",
+        createdTime = LocalDateTime.now().minusDays(1L),
+        title = "新消息",
+        content = "您有一条新消息",
+        channel = "msg",
+        notifyId = 1,
+        count = 989
+    )
+)
 
 @Composable
 @PreviewLightDark

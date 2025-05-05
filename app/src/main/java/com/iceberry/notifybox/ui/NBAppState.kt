@@ -16,6 +16,8 @@
 
 package com.iceberry.notifybox.ui
 
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -30,6 +32,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.iceberry.notifybox.navigation.GroupDetailsRoute
+import com.iceberry.notifybox.navigation.ListRoute
 import com.iceberry.notifybox.navigation.TopLevelDestination
 import com.iceberry.notifybox.navigation.TopLevelDestination.FORWARD
 import com.iceberry.notifybox.navigation.TopLevelDestination.LIST
@@ -38,12 +41,14 @@ import com.iceberry.notifybox.navigation.navigateToForward
 import com.iceberry.notifybox.navigation.navigateToList
 import com.iceberry.notifybox.navigation.navigateToSettings
 import kotlinx.coroutines.CoroutineScope
+import kotlin.reflect.KClass
 
 @Composable
 fun rememberNBAppState(
     navController: NavHostController = rememberNavController(),
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    lazyListStates: Map<KClass<*>, LazyListState> = mapOf(Pair(ListRoute::class, rememberLazyListState()))
 ): NBAppState {
     return remember(
         navController,
@@ -53,7 +58,8 @@ fun rememberNBAppState(
         NBAppState(
             navController = navController,
             coroutineScope = coroutineScope,
-            snackbarHostState = snackbarHostState
+            snackbarHostState = snackbarHostState,
+            lazyListStates = lazyListStates
         )
     }
 }
@@ -61,7 +67,8 @@ fun rememberNBAppState(
 class NBAppState(
     val navController: NavHostController,
     val coroutineScope: CoroutineScope,
-    val snackbarHostState: SnackbarHostState
+    val snackbarHostState: SnackbarHostState,
+    val lazyListStates: Map<KClass<*>, LazyListState>
 ) {
     private val previousDestination = mutableStateOf<NavDestination?>(null)
 
@@ -95,6 +102,13 @@ class NBAppState(
             return TopLevelDestination.entries.firstOrNull { topLevelDestination ->
                 currentDestination?.hasRoute(route = topLevelDestination.route) == true
             }
+        }
+
+    val curRouteLazyListState: LazyListState?
+        @Composable get() {
+            return lazyListStates.entries
+                .firstOrNull { (k, v) -> currentDestination?.hasRoute(k) == true }
+                ?.value
         }
 
     /**

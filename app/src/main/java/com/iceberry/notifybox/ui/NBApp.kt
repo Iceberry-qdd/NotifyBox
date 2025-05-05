@@ -27,6 +27,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -35,6 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iceberry.notifybox.navigation.NBNavHost
 import com.iceberry.notifybox.ui.list.ListViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,11 +48,18 @@ fun NBApp(
     BottomAppBarDefaults.exitAlwaysScrollBehavior()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+    val lazyListState = appState.curRouteLazyListState
 
     NBScaffold(
         modifier = Modifier.fillMaxSize(),
         appState = appState,
-        scrollBehavior = scrollBehavior
+        scrollBehavior = scrollBehavior,
+        scrollToTop = {
+            scope.launch {
+                lazyListState?.animateScrollToItem(index = 0, scrollOffset = 0)
+            }
+        }
     ) { paddingValues ->
         NBNavHost(
             modifier = Modifier

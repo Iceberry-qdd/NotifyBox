@@ -35,6 +35,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -101,6 +102,7 @@ class ListViewModel @Inject constructor(
         }
         .onEach {
             Log.i("ListViewModel#onEach", "_loading = ${_loading.value}, _query = [${_query.value}]")
+            delay(500L)
             _loading.update { false }
         }
         .cachedIn(viewModelScope)

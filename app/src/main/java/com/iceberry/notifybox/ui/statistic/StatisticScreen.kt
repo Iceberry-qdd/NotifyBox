@@ -22,11 +22,14 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.exclude
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,9 +51,9 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.iceberry.notifybox.ui.ScrollToTopFab
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,6 +66,7 @@ fun StatisticScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val snackbarHostState = remember { SnackbarHostState() }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val lazyListState: LazyListState = rememberLazyListState()
 
     Scaffold(
         modifier = modifier
@@ -81,20 +85,23 @@ fun StatisticScreen(
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        floatingActionButton = {
+            ScrollToTopFab(
+                scrollBehavior = scrollBehavior,
+                lazyListState = lazyListState
+            )
+        }
     ) { paddingValues ->
         if (uiState.isLoading) {
             Box(
                 modifier = Modifier
                     .padding(paddingValues)
                     .fillMaxWidth()
-                    .height(250.dp)
+                    .fillMaxHeight()
                     .background(MaterialTheme.colorScheme.surface),
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "数据加载中",
-                    style = MaterialTheme.typography.bodyMedium.merge(color = MaterialTheme.colorScheme.outline)
-                )
+                CircularProgressIndicator()
             }
         } else {
             StatisticPieContent(
@@ -104,8 +111,11 @@ fun StatisticScreen(
                         end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
                         top = paddingValues.calculateTopPadding()
                     )
+                    .fillMaxWidth()
+                    .fillMaxHeight()
                     .background(MaterialTheme.colorScheme.surface),
-                uiState = uiState.pieChartUiState
+                uiState = uiState.pieChartUiState,
+                lazyListState = lazyListState
             )
         }
     }

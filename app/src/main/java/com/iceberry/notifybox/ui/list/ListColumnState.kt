@@ -29,6 +29,7 @@ fun <T : Any> rememberListColumnState(
     items: LazyPagingItems<T>?,
     lazyListState: LazyListState = rememberLazyListState(),
     loading: Boolean,
+    query: String,
     snackbarHostState: SnackbarHostState
 ): ListColumnState<T> {
     return remember(items, lazyListState, loading, snackbarHostState) {
@@ -36,6 +37,7 @@ fun <T : Any> rememberListColumnState(
             items = items,
             lazyListState = lazyListState,
             loading = loading,
+            query = query,
             snackbarHostState = snackbarHostState
         )
     }
@@ -45,5 +47,6 @@ class ListColumnState<T : Any>(
     internal val items: LazyPagingItems<T>?,
     internal val lazyListState: LazyListState,
     internal val loading: Boolean,
+    internal val query: String,
     internal val snackbarHostState: SnackbarHostState
 )

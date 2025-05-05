@@ -30,6 +30,7 @@ import com.iceberry.notifybox.ui.list.mappingNotifies
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -68,7 +69,10 @@ class GroupDetailsViewModel @Inject constructor(
         }
     }.flattenConcat()
         .map { notifies -> notifies.map(mappingNotifies(context, KeyPrefix.ITEM, KeySuffix.ID)) }
-        .onEach { _loading.update { false } }
+        .onEach {
+            delay(500L)
+            _loading.update { false }
+        }
         .cachedIn(viewModelScope)
 
     val uiState: StateFlow<GroupDetailsUiState> = combine(

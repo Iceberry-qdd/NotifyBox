@@ -32,6 +32,7 @@ import com.iceberry.notifybox.ui.theme.COLOR_PALETTE
 import com.iceberry.notifybox.util.Async
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -79,10 +80,13 @@ class StatisticViewModel @Inject constructor(
         initialValue = StatisticUiState()
     )
 
-    private fun handlePieChartData(pieChartDataList: List<PieChartData>): Async<List<PieChartData>> {
+    private suspend fun handlePieChartData(pieChartDataList: List<PieChartData>): Async<List<PieChartData>> {
         if (pieChartDataList.isEmpty()) {
             return Async.Error(Throwable("暂无数据"))
         }
+
+        Async.Loading
+        delay(500L)
 
         return Async.Success(pieChartDataList)
     }

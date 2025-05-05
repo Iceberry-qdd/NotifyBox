@@ -31,6 +31,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -62,15 +64,19 @@ import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 @Composable
 fun StatisticPieContent(
     modifier: Modifier = Modifier,
-    uiState: PieChartUiState
+    uiState: PieChartUiState,
+    lazyListState: LazyListState
 ) {
     LazyColumn(
-        modifier = modifier
+        modifier = modifier,
+        state = lazyListState
     ) {
         if (!uiState.isSuccess) {
             item {
                 Box(
-                    modifier = Modifier.height(250.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillParentMaxHeight(),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -229,7 +235,8 @@ private fun StatisticScreenLightPreview() {
             uiState = PieChartUiState(
                 isSuccess = true,
                 pieChartData = listOf(INIT_PIE_CHART_DATA)
-            )
+            ),
+            lazyListState = rememberLazyListState()
         )
     }
 }

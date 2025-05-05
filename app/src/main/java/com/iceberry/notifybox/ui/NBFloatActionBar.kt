@@ -16,11 +16,26 @@
 
 package com.iceberry.notifybox.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination.Companion.hasRoute
 import com.iceberry.notifybox.navigation.TopLevelDestination
 import com.iceberry.notifybox.ui.list.ListFloatActionBar
+import kotlinx.coroutines.launch
 
 @Composable
 fun NBFloatActionBar(
@@ -31,6 +46,35 @@ fun NBFloatActionBar(
     when {
         currentDestination?.hasRoute(TopLevelDestination.LIST.route) == true -> {
             ListFloatActionBar(appState = appState)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ScrollToTopFab(
+    scrollBehavior: TopAppBarScrollBehavior,
+    lazyListState: LazyListState
+) {
+    val visible by remember {
+        derivedStateOf {
+            scrollBehavior.state.collapsedFraction < 1.0f && lazyListState.canScrollBackward
+        }
+    }
+    val scope = rememberCoroutineScope()
+    AnimatedVisibility(
+        visible = visible,
+        enter = scaleIn(),
+        exit = scaleOut()
+    ) {
+        FloatingActionButton(
+            onClick = {
+                scope.launch {
+                    lazyListState.animateScrollToItem(index = 0, scrollOffset = 0)
+                }
+            }
+        ) {
+            Icon(Icons.Filled.ArrowUpward, "返回顶部")
         }
     }
 }
