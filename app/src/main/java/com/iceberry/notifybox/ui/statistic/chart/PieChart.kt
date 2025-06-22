@@ -19,25 +19,34 @@ package com.iceberry.notifybox.ui.statistic.chart
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.PieData
+import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
+import com.github.mikephil.charting.utils.MPPointF
+import com.iceberry.notifybox.data.local.database.AppIcon
 import com.iceberry.notifybox.databinding.PieChartBinding
+import com.iceberry.notifybox.ui.theme.COLOR_PALETTE
+import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 import com.iceberry.notifybox.ui.theme.convertToRGB
 
 const val DEFAULT_CENTER_TEXT = "按应用统计"
@@ -46,6 +55,7 @@ const val DEFAULT_CENTER_TEXT = "按应用统计"
 fun PieChart(
     modifier: Modifier = Modifier,
     data: PieData = PieData(),
+    onClickEntry: (Int) -> Unit,
     onRest: (PieChartBinding.() -> Unit)? = null,
     onRelease: PieChartBinding.() -> Unit = {},
     update: PieChartBinding.() -> Unit = {}
@@ -79,8 +89,11 @@ fun PieChart(
                         if (e == null) return
                         Log.i("PieChart#onValueSelected", "e: $e, h: $h")
                         h?.let {
-                            val entry = data.getDataSetByIndex(it.dataSetIndex).getEntryForIndex(it.x.toInt())
+                            val entry = e as PieEntry
                             centerText = "${entry.label} ${entry.value.toInt()}"
+                            if (entry.data as Boolean == true) {
+                                onClickEntry(it.x.toInt())
+                            }
                         }
                     }
 
@@ -145,5 +158,81 @@ class NBPercentFormatter(private val pieChart: PieChart) : PercentFormatter(pieC
             // raw value, skip percent sign
             mFormat.format(value.toDouble())
         }
+    }
+}
+
+data class PieChartUiState(
+    val isSuccess: Boolean = true,
+    val pieChartData: List<PieChartDataVO> = listOf(INIT_PIE_CHART_DATA),
+)
+
+data class PieChartDataVO(
+    val value: Float = 0f,
+    val label: String = "",
+    val appIcon: AppIcon = AppIcon(),
+    val dest: Float = 0f,
+    val packageName: String = ""
+)
+
+/**
+ * @param pieChartDataList 要求按照dest从大到小排序
+ */
+internal fun handlePieData(pieChartDataList: List<PieChartDataVO>): PieData {
+    val otherPieEntry = pieChartDataList
+        .takeLastWhile { it.dest < 0.01 }
+        .map { PieEntry(it.value.toFloat(), it.label) }
+        .reduceOrNull { agg, e -> PieEntry(agg.value + e.value, "其它", false) }
+
+    Log.i("otherPieEntry", otherPieEntry.toString())
+
+    val pieEntries = pieChartDataList
+        .dropLastWhile { it.dest < 0.01 }
+        .map { PieEntry(it.value, it.label, true) }
+        .toMutableList()
+        .apply { otherPieEntry?.let { this.add(it) } }
+
+    return PieData().apply {
+        dataSet = PieDataSet(pieEntries, DEFAULT_CENTER_TEXT).apply {
+            setDrawIcons(false)
+            sliceSpace = 3f
+            iconsOffset = MPPointF(0f, 40f)
+            selectionShift = 8f
+            colors = COLOR_PALETTE
+
+            setDrawValues(true)
+            isUsingSliceColorAsValueLineColor = true
+            xValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
+            yValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
+            setValueTextColors(COLOR_PALETTE)
+        }
+    }
+}
+
+val INIT_PIE_CHART_DATA = PieChartDataVO(
+    value = 1f,
+    label = "NaN",
+    dest = 1.0f,
+    appIcon = AppIcon(icon = null, largeIcon = null, appDisplayName = "Unknown"),
+    packageName = ""
+)
+val INIT_PIE_DATA = handlePieData(listOf(INIT_PIE_CHART_DATA))
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@PreviewLightDark
+@Composable
+private fun PieChartPreview() {
+    NBApplicationTheme {
+        PieChart(
+            modifier = Modifier
+                .padding(vertical = 12.dp)
+                .height(250.dp)
+                .background(MaterialTheme.colorScheme.surface),
+            data = INIT_PIE_DATA,
+            onClickEntry = {},
+            onRest = {},
+            onRelease = {},
+            update = {}
+        )
     }
 }

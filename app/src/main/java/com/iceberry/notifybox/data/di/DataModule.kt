@@ -24,15 +24,16 @@ import com.iceberry.notifybox.data.DefaultSettingsRepository
 import com.iceberry.notifybox.data.NotifyRepository
 import com.iceberry.notifybox.data.SettingsRepository
 import com.iceberry.notifybox.data.local.database.App
+import com.iceberry.notifybox.data.local.database.BarChartData
 import com.iceberry.notifybox.data.local.database.Notify
 import com.iceberry.notifybox.data.local.database.PieChartData
+import com.iceberry.notifybox.ui.statistic.chart.TimeRangeFilter
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
-import java.time.LocalDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -64,31 +65,42 @@ class FakeNotifyRepository @Inject constructor() : NotifyRepository {
     override val notifies: PagingSource<Int, Notify> = TODO()
 
     override suspend fun add(notify: Notify) {
-        throw NotImplementedError()
+        TODO("Not yet implemented")
     }
 
     override fun queryByPaging(): PagingSource<Int, Notify> {
-        throw NotImplementedError()
+        TODO("Not yet implemented")
     }
 
-    override fun queryByNotifyId(notifyId: Int?, packageName: String): PagingSource<Int, Notify> {
-        throw NotImplementedError()
+    override fun queryByPaging(
+        packageName: String,
+        timeRangeFilter: TimeRangeFilter
+    ): PagingSource<Int, Notify> {
+        TODO("Not yet implemented")
+    }
+
+    override fun queryDetailByNotifyId(notifyId: Int?, packageName: String): PagingSource<Int, Notify> {
+        TODO("Not yet implemented")
     }
 
     override suspend fun markDeletedByGroup(notifyId: Int, packageName: String) {
-        throw NotImplementedError()
+        TODO("Not yet implemented")
     }
 
     override suspend fun markDeletedById(notifyId: Int) {
-        throw NotImplementedError()
+        TODO("Not yet implemented")
     }
 
     override fun searchByQuery(query: String): PagingSource<Int, Notify> {
-        throw NotImplementedError()
+        TODO("Not yet implemented")
     }
 
-    override fun statisticByPackageName(dataTime: LocalDateTime): Flow<List<PieChartData>> {
-        throw NotImplementedError()
+    override fun statisticForPieChart(timeRangeFilter: TimeRangeFilter): Flow<List<PieChartData>> {
+        TODO("Not yet implemented")
+    }
+
+    override fun statisticForBarChart(timeRangeFilter: TimeRangeFilter): Flow<List<BarChartData>> {
+        TODO("Not yet implemented")
     }
 }
 
@@ -99,7 +111,7 @@ class FakeAppRepository @Inject constructor() : AppRepository {
     override val apps: Flow<List<App>> = flowOf(fakeApps)
 
     override suspend fun add(app: App) {
-        throw NotImplementedError()
+        TODO("Not yet implemented")
     }
 }
 

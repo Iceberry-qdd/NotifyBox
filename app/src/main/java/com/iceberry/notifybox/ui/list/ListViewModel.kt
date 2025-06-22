@@ -51,7 +51,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class ListViewModel @Inject constructor(
     private val notifyRepository: NotifyRepository,
@@ -83,7 +83,7 @@ class ListViewModel @Inject constructor(
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+    @OptIn(FlowPreview::class)
     val pager = _query
         .debounce(300)
         .flatMapLatest { query ->
@@ -133,7 +133,6 @@ class ListViewModel @Inject constructor(
             val intent = Intent(context, AppNotificationListenerService::class.java)
             viewModelScope.launch {
                 context.startService(intent)
-//                AppNotificationListenerService.showNotify(context as Activity)
             }
         }
     }
@@ -143,14 +142,10 @@ class ListViewModel @Inject constructor(
             val intent = Intent(context, AppNotificationListenerService::class.java)
             viewModelScope.launch {
                 context.stopService(intent)
-//                AppNotificationListenerService.removeNotify(context as Activity)
             }
         }
     }
 
-    fun cancelANLSSettingsDialog() {
-        _showANLSDialog.update { false }
-    }
 
     fun confirmANSSettingsDialog(context: Context) {
         viewModelScope.launch {
@@ -163,13 +158,9 @@ class ListViewModel @Inject constructor(
         notifyRepository.markDeletedByGroup(notifyId, packageName)
     }
 
-    fun setQuery(query: String) {
-        _query.update { query }
-    }
-
-    fun clearQuery() {
-        _query.update { "" }
-    }
+    fun cancelANLSSettingsDialog() = _showANLSDialog.update { false }
+    fun setQuery(query: String) = _query.update { query }
+    fun clearQuery() = _query.update { "" }
 }
 
 data class NotifyVO(

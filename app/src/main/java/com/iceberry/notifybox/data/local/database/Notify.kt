@@ -28,7 +28,10 @@ import androidx.room.FtsOptions
 import androidx.room.Insert
 import androidx.room.PrimaryKey
 import androidx.room.Query
-import com.iceberry.notifybox.ui.statistic.PieChartDataVO
+import androidx.room.RawQuery
+import androidx.sqlite.db.SupportSQLiteQuery
+import com.iceberry.notifybox.ui.statistic.chart.BarChartDataVO
+import com.iceberry.notifybox.ui.statistic.chart.PieChartDataVO
 import com.iceberry.notifybox.util.IconUtils
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
@@ -70,7 +73,8 @@ data class Notify(
 interface NotifyDao {
     @Query(
         """
-            SELECT t1.rowid,
+            SELECT
+                t1.rowid,
                 t1.notify_id,
                 t1.title,
                 t1.content,
@@ -94,7 +98,35 @@ interface NotifyDao {
 
     @Query(
         """
-            SELECT rowid,
+            SELECT
+                t1.rowid,
+                t1.notify_id,
+                t1.title,
+                t1.content,
+                t1.package_name,
+                t1.display_name,
+                t1.created_time,
+                t1.small_icon,
+                t1.large_icon,
+                t1.channel,
+                t1.deleted_time,
+                t1.priority,
+                t2.`count`
+            FROM tb_notify t1
+            INNER JOIN (SELECT MAX(rowid) AS id, COUNT(*) AS `count` FROM tb_notify WHERE deleted_time IS NULL AND created_time BETWEEN :startAt AND :endAt GROUP BY package_name, notify_id) t2
+                ON t1.rowid = t2.id
+            WHERE t1.deleted_time IS NULL
+                AND t1.package_name = :packageName
+                AND t1.created_time BETWEEN :startAt AND :endAt
+            ORDER BY t1.created_time DESC
+        """
+    )
+    fun getNotifies(packageName: String, startAt: LocalDateTime, endAt: LocalDateTime): PagingSource<Int, Notify>
+
+    @Query(
+        """
+            SELECT
+                rowid,
                 notify_id,
                 title,
                 content,
@@ -114,7 +146,7 @@ interface NotifyDao {
             ORDER BY created_time DESC
         """
     )
-    fun getByNotifyId(notifyId: Int, packageName: String): PagingSource<Int, Notify>
+    fun getDetailByNotifyId(notifyId: Int, packageName: String): PagingSource<Int, Notify>
 
     @Insert
     suspend fun insertNotify(item: Notify)
@@ -139,7 +171,8 @@ interface NotifyDao {
 
     @Query(
         """
-            SELECT rowid,
+            SELECT
+                rowid,
                 notify_id,
                 title,
                 content,
@@ -161,18 +194,23 @@ interface NotifyDao {
 
     @Query(
         """
-            SELECT COUNT(*) AS `value`,
+            SELECT
+                COUNT(*) AS `value`,
                 display_name AS `label`,
                 package_name,
-                1.0 * COUNT(*) / (SELECT COUNT(*) FROM tb_notify WHERE deleted_time IS NULL AND created_time >= :dataTime) AS `dest`
+                small_icon,
+                1.0 * COUNT(*) / (SELECT COUNT(*) FROM tb_notify WHERE deleted_time IS NULL AND created_time BETWEEN :startAt AND :endAt) AS `dest`
             FROM tb_notify
             WHERE deleted_time IS NULL
-                AND created_time >= :dataTime
+                AND created_time BETWEEN :startAt AND :endAt
             GROUP BY package_name
             ORDER BY value DESC
         """
     )
-    fun statisticByPackageName(dataTime: LocalDateTime): Flow<List<PieChartData>>
+    fun statisticForPieChart(startAt: LocalDateTime, endAt: LocalDateTime): Flow<List<PieChartData>>
+
+    @RawQuery(observedEntities = [Notify::class])
+    fun statisticForBarChart(query: SupportSQLiteQuery): Flow<List<BarChartData>>
 }
 
 data class AppIcon(
@@ -182,14 +220,24 @@ data class AppIcon(
 )
 
 data class PieChartData(
-    val value: Long,
+    val value: Float,
     val label: String,
     @ColumnInfo(name = "package_name")
     val packageName: String,
+    @ColumnInfo(name = "small_icon")
+    val smallIcon: String?,
     val dest: Float
 ) {
     fun toVO(context: Context): PieChartDataVO {
-        val icon = IconUtils.getPackageIcon(packageName, context)
+        val smallIcon = smallIcon
+            ?.let { IconUtils.loadIconFormPath(it, context) }
+            ?.let { IconUtils.convertToDrawable(it, context) }
+
+        val packageIcon = smallIcon?.let {
+            return@let IconUtils.getPackageIcon(packageName, context)
+        }
+        val icon = packageIcon ?: smallIcon
+
         return PieChartDataVO(
             value = value,
             label = label,
@@ -198,7 +246,21 @@ data class PieChartData(
                 icon = icon,
                 largeIcon = icon,
                 appDisplayName = label
-            )
+            ),
+            packageName = packageName
+        )
+    }
+}
+
+data class BarChartData(
+    val y: Int, // count
+    val x: Long // timestamp(13)
+) {
+    fun toVO(index: Int): BarChartDataVO {
+        return BarChartDataVO(
+            yValue = y.toFloat(),
+            xValue = index.toFloat(), // Use index as xValue to avoid duplicate, use valueFormatter to calc label to string.
+            extra = x
         )
     }
 }

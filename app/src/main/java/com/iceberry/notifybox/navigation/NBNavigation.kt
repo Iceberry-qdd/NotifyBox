@@ -111,15 +111,14 @@ fun NavGraphBuilder.groupDetailsScreen(
 fun NavController.navigateToStatistic(navOptions: NavOptions? = null) = navigate(route = StatisticRoute, navOptions)
 
 fun NavGraphBuilder.statisticScreen(
-//    appState: NBAppState,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onNavToDetails: (NotifyVO) -> Unit
 ) {
     composable<StatisticRoute> { backStackEntry ->
-//        val route: StatisticRoute = backStackEntry.toRoute()
         StatisticScreen(
             modifier = Modifier.fillMaxSize(),
-//            appState = appState,
-            onBackClick = onBackClick
+            onBackClick = onBackClick,
+            onNavToDetails = onNavToDetails
         )
     }
 }

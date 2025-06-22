@@ -19,8 +19,10 @@ package com.iceberry.notifybox.ui.list
 
 import androidx.paging.PagingSource
 import com.iceberry.notifybox.data.NotifyRepository
+import com.iceberry.notifybox.data.local.database.BarChartData
 import com.iceberry.notifybox.data.local.database.Notify
 import com.iceberry.notifybox.data.local.database.PieChartData
+import com.iceberry.notifybox.ui.statistic.chart.TimeRangeFilter
 import com.iceberry.notifybox.util.Async
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -28,7 +30,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import java.time.LocalDateTime
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -73,7 +74,14 @@ private class FakeNotifyRepository : NotifyRepository {
         TODO("Not yet implemented")
     }
 
-    override fun queryByNotifyId(
+    override fun queryByPaging(
+        packageName: String,
+        timeRangeFilter: TimeRangeFilter
+    ): PagingSource<Int, Notify> {
+        TODO("Not yet implemented")
+    }
+
+    override fun queryDetailByNotifyId(
         notifyId: Int?,
         packageName: String
     ): PagingSource<Int, Notify> {
@@ -92,7 +100,11 @@ private class FakeNotifyRepository : NotifyRepository {
         TODO("Not yet implemented")
     }
 
-    override fun statisticByPackageName(dataTime: LocalDateTime): Flow<List<PieChartData>> {
+    override fun statisticForPieChart(timeRangeFilter: TimeRangeFilter): Flow<List<PieChartData>> {
+        TODO("Not yet implemented")
+    }
+
+    override fun statisticForBarChart(timeRangeFilter: TimeRangeFilter): Flow<List<BarChartData>> {
         TODO("Not yet implemented")
     }
 }

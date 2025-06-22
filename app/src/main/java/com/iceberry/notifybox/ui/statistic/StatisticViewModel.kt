@@ -17,29 +17,29 @@
 package com.iceberry.notifybox.ui.statistic
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.mikephil.charting.data.PieData
-import com.github.mikephil.charting.data.PieDataSet
-import com.github.mikephil.charting.data.PieEntry
-import com.github.mikephil.charting.utils.MPPointF
 import com.iceberry.notifybox.data.NotifyRepository
-import com.iceberry.notifybox.data.local.database.AppIcon
-import com.iceberry.notifybox.data.local.database.PieChartData
-import com.iceberry.notifybox.ui.statistic.chart.DEFAULT_CENTER_TEXT
-import com.iceberry.notifybox.ui.theme.COLOR_PALETTE
+import com.iceberry.notifybox.ui.statistic.chart.BarChartUiState
+import com.iceberry.notifybox.ui.statistic.chart.PieChartUiState
+import com.iceberry.notifybox.ui.statistic.chart.TimeRangeFilter
 import com.iceberry.notifybox.util.Async
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
@@ -47,108 +47,73 @@ class StatisticViewModel @Inject constructor(
     notifyRepository: NotifyRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
-    private val _isLoading = MutableStateFlow(false)
-    private val _pieChartDataAsync = notifyRepository.statisticByPackageName()
-        .map { handlePieChartData(it) }
-        .catch { emit(Async.Error(Throwable("暂无数据"))) }
+    private val _isLoading = MutableStateFlow(true)
+    private val _timeRangeFilter = MutableStateFlow(TimeRangeFilter.ALL)
 
-    val uiState: StateFlow<StatisticUiState> = combine(
-        _pieChartDataAsync, _isLoading
-    ) { pieChartDataAsync, isLoading ->
-        when (pieChartDataAsync) {
-            Async.Loading -> {
-                StatisticUiState(isLoading = true)
-            }
-
-            is Async.Error -> {
-                StatisticUiState(pieChartUiState = PieChartUiState(isSuccess = false))
-            }
-
-            is Async.Success -> {
-                StatisticUiState(
-                    isLoading = isLoading,
-                    pieChartUiState = PieChartUiState(
-                        pieChartData = pieChartDataAsync.data.map { it.toVO(context) },
-                    )
-                )
-            }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val _pieChartDataAsync = _timeRangeFilter
+        .flatMapLatest { filter ->
+            notifyRepository.statisticForPieChart(filter)
+                .map { handleChartData(it) }
+                .catch { emit(Async.Error(Throwable("暂无统计数据"))) }
         }
 
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000L),
-        initialValue = StatisticUiState()
-    )
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val _barChartDataAsync = _timeRangeFilter
+        .flatMapLatest { filter ->
+            notifyRepository.statisticForBarChart(filter)
+                .map { handleChartData(it) }
+                .catch { emit(Async.Error(Throwable("暂无统计数据"))) }
+        }
 
-    private suspend fun handlePieChartData(pieChartDataList: List<PieChartData>): Async<List<PieChartData>> {
-        if (pieChartDataList.isEmpty()) {
-            return Async.Error(Throwable("暂无数据"))
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+    val uiState: StateFlow<StatisticUiState> = combine(
+        _pieChartDataAsync, _barChartDataAsync, _isLoading
+    ) { pieChartDataAsync, barChartDataAsync, isLoading ->
+        StatisticUiState(
+            isLoading = pieChartDataAsync is Async.Loading || barChartDataAsync is Async.Loading || isLoading,
+            selectedFilter = _timeRangeFilter.value,
+            pieChartUiState = when (pieChartDataAsync) {
+                Async.Loading -> PieChartUiState()
+                is Async.Error -> PieChartUiState(isSuccess = false)
+                is Async.Success -> PieChartUiState(
+                    pieChartData = pieChartDataAsync.data.map { it.toVO(context) },
+                )
+            },
+            barChartUiState = when (barChartDataAsync) {
+                Async.Loading -> BarChartUiState()
+                is Async.Error -> BarChartUiState(isSuccess = false)
+                is Async.Success -> BarChartUiState(
+                    barChartData = barChartDataAsync.data.mapIndexed { index, it -> it.toVO(index + 1) }
+                )
+            }
+        )
+    }.debounce(150)
+        .onEach {
+            delay(500)
+            _isLoading.update { false }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = StatisticUiState()
+        )
+
+    fun toggleFilter(filter: TimeRangeFilter) = _timeRangeFilter.update { filter }
+
+    private suspend fun <T> handleChartData(chartDataList: List<T>): Async<List<T>> {
+        if (chartDataList.isEmpty()) {
+            return Async.Error(Throwable("暂无统计数据"))
         }
 
         Async.Loading
-        delay(500L)
 
-        return Async.Success(pieChartDataList)
-    }
-
-    companion object {
-        /**
-         * @param pieChartDataList 要求按照dest从大到小排序
-         */
-        fun handlePieData(pieChartDataList: List<PieChartDataVO>): PieData {
-            val otherPieEntry = pieChartDataList
-                .takeLastWhile { it.dest < 0.01 }
-                .map { PieEntry(it.value.toFloat(), it.label) }
-                .reduceOrNull { agg, e -> PieEntry(agg.value + e.value, "其它") }
-
-            Log.i("otherPieEntry", otherPieEntry.toString())
-
-            val pieEntries = pieChartDataList
-                .dropLastWhile { it.dest < 0.01 }
-                .map { PieEntry(it.value.toFloat(), it.label) }
-                .toMutableList()
-                .apply { otherPieEntry?.let { this.add(it) } }
-
-            return PieData().apply {
-                dataSet = PieDataSet(pieEntries, DEFAULT_CENTER_TEXT).apply {
-                    setDrawIcons(false)
-                    sliceSpace = 3f
-                    iconsOffset = MPPointF(0f, 40f)
-                    selectionShift = 8f
-                    colors = COLOR_PALETTE
-
-                    setDrawValues(true)
-                    isUsingSliceColorAsValueLineColor = true
-                    xValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
-                    yValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
-                    setValueTextColors(COLOR_PALETTE)
-                }
-            }
-        }
+        return Async.Success(chartDataList)
     }
 }
 
 data class StatisticUiState(
     val isLoading: Boolean = true,
-    val pieChartUiState: PieChartUiState = PieChartUiState()
-)
-
-data class PieChartUiState(
-    val isSuccess: Boolean = true,
-    val pieChartData: List<PieChartDataVO> = listOf(INIT_PIE_CHART_DATA),
-)
-
-val INIT_PIE_CHART_DATA = PieChartDataVO(
-    value = 1,
-    label = "NaN",
-    dest = 1.0f,
-    appIcon = AppIcon(icon = null, largeIcon = null, appDisplayName = "Unknown")
-)
-val INIT_PIE_DATA = StatisticViewModel.handlePieData(listOf(INIT_PIE_CHART_DATA))
-
-data class PieChartDataVO(
-    val value: Long,
-    val label: String,
-    val appIcon: AppIcon,
-    val dest: Float
+    val selectedFilter: TimeRangeFilter = TimeRangeFilter.ALL,
+    val pieChartUiState: PieChartUiState = PieChartUiState(),
+    val barChartUiState: BarChartUiState = BarChartUiState()
 )

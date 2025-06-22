@@ -16,7 +16,6 @@
 
 package com.iceberry.notifybox.ui.list
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
@@ -31,9 +30,9 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imeNestedScroll
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -96,17 +95,27 @@ internal fun ListColumnContent(
     onDeleteItem: (NotifyVO) -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val verticalArrangement by remember {
+        derivedStateOf {
+            if ((state.loading && state.query.isEmpty()) || state.items?.itemCount == 0) {
+                Arrangement.Center
+            } else {
+                Arrangement.Top
+            }
+        }
+    }
     LazyColumn(
         modifier = modifier
-            .fillMaxHeight(),
-//            .also{ if(!state.query.isEmpty()) it.imeNestedScroll() }, TODO Should only work when searchBar visible.
+            .then(if (!state.query.isEmpty()) Modifier.imeNestedScroll() else Modifier),
+        reverseLayout = false,
+        verticalArrangement = verticalArrangement,
         state = state.lazyListState
     ) {
         if (state.loading && state.query.isEmpty()) {
             item {
                 Box(
                     modifier = Modifier
-                        .fillParentMaxHeight()
+                        .padding(vertical = 24.dp)
                         .fillMaxWidth(),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -121,7 +130,7 @@ internal fun ListColumnContent(
             item {
                 Box(
                     modifier = Modifier
-                        .fillParentMaxHeight()
+                        .padding(vertical = 24.dp)
                         .fillMaxWidth(),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -146,35 +155,44 @@ internal fun ListColumnContent(
                     enter = expandVertically(),
                     exit = shrinkVertically()
                 ) {
-                    SwipeToDeleteItem(
-                        modifier = Modifier
-                            .animateItem()
-                            .fillMaxWidth(),
-                        item = it,
-                        onClick = { onClickItem(it) },
-                        onDelete = {
-                            scope.launch {
-                                deleted.value = true
+                    if (state.canDelete) {
+                        SwipeToDeleteItem(
+                            modifier = Modifier
+                                .animateItem()
+                                .fillMaxWidth(),
+                            item = it,
+                            onClick = { onClickItem(it) },
+                            onDelete = {
+                                scope.launch {
+                                    deleted.value = true
 
-                                val result = state.snackbarHostState.showSnackbar(
-                                    message = "已删除${it.count}条[${it.appDisplayName}]通知",
-                                    actionLabel = "恢复",
-                                    duration = SnackbarDuration.Long
-                                )
+                                    val result = state.snackbarHostState.showSnackbar(
+                                        message = "已删除${it.count}条[${it.appDisplayName}]通知",
+                                        actionLabel = "恢复",
+                                        duration = SnackbarDuration.Long
+                                    )
 
-                                when (result) {
-                                    SnackbarResult.ActionPerformed -> {
-                                        deleted.value = false
-                                    }
+                                    when (result) {
+                                        SnackbarResult.ActionPerformed -> {
+                                            deleted.value = false
+                                        }
 
-                                    SnackbarResult.Dismissed -> {
-                                        onDeleteItem(it)
+                                        SnackbarResult.Dismissed -> {
+                                            onDeleteItem(it)
+                                        }
                                     }
                                 }
                             }
-                        }
-                    )
-
+                        )
+                    } else {
+                        NotifyItem(
+                            modifier = modifier
+                                .clip(CardDefaults.shape)
+                                .background(MaterialTheme.colorScheme.background),
+                            item = it,
+                            onClick = { onClickItem(it) }
+                        )
+                    }
                 }
             }
         }
@@ -199,7 +217,6 @@ private fun SwipeToDeleteItem(
     LaunchedEffect(dismissState.currentValue) {
         if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
             onDelete()
-            Log.i("SwipeToDeleteItem", "call onDelete()")
         }
     }
 

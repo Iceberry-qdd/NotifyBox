@@ -50,7 +50,6 @@ class GroupDetailsViewModel @Inject constructor(
     private val _notifyId = MutableStateFlow<Int?>(null)
     private val _packageName = MutableStateFlow("")
     private val _loading = MutableStateFlow(false)
-    private val _todo = MutableStateFlow("")
     private val _count = MutableStateFlow(0)
     private val pageConfig = PagingConfig(
         pageSize = 10,
@@ -63,7 +62,7 @@ class GroupDetailsViewModel @Inject constructor(
     val pager = combine(_notifyId, _packageName) { notifyId, packageName ->
         _loading.update { true }
         if (notifyId != null && !packageName.isEmpty()) {
-            Pager(pageConfig) { notifyRepository.queryByNotifyId(_notifyId.value, _packageName.value) }.flow
+            Pager(pageConfig) { notifyRepository.queryDetailByNotifyId(_notifyId.value, _packageName.value) }.flow
         } else {
             Pager(pageConfig) { NotifyRepository.EmptyPageSource() }.flow
         }
@@ -76,8 +75,8 @@ class GroupDetailsViewModel @Inject constructor(
         .cachedIn(viewModelScope)
 
     val uiState: StateFlow<GroupDetailsUiState> = combine(
-        _loading, _todo, _count
-    ) { loading, todo, count ->
+        _loading, _count
+    ) { loading, count ->
         GroupDetailsUiState(
             loading = loading,
             count = count

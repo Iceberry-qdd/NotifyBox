@@ -18,9 +18,13 @@ package com.iceberry.notifybox.data
 
 import androidx.core.app.NotificationCompat
 import androidx.paging.PagingSource
+import androidx.sqlite.db.SupportSQLiteQuery
+import com.iceberry.notifybox.data.local.database.BarChartData
 import com.iceberry.notifybox.data.local.database.Notify
 import com.iceberry.notifybox.data.local.database.NotifyDao
+import com.iceberry.notifybox.data.local.database.PieChartData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import java.time.LocalDateTime
@@ -60,7 +64,15 @@ private class FakeNotifyDao : NotifyDao {
         TODO("Not yet implemented")
     }
 
-    override fun getByNotifyId(notifyId: Int, packageName: String): PagingSource<Int, Notify> {
+    override fun getNotifies(
+        packageName: String,
+        startAt: LocalDateTime,
+        endAt: LocalDateTime
+    ): PagingSource<Int, Notify> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getDetailByNotifyId(notifyId: Int, packageName: String): PagingSource<Int, Notify> {
         TODO("Not yet implemented")
     }
 
@@ -93,6 +105,17 @@ private class FakeNotifyDao : NotifyDao {
     }
 
     override fun searchByQuery(query: String): PagingSource<Int, Notify> {
+        TODO("Not yet implemented")
+    }
+
+    override fun statisticForPieChart(
+        startAt: LocalDateTime,
+        endAt: LocalDateTime
+    ): Flow<List<PieChartData>> {
+        TODO("Not yet implemented")
+    }
+
+    override fun statisticForBarChart(query: SupportSQLiteQuery): Flow<List<BarChartData>> {
         TODO("Not yet implemented")
     }
 }

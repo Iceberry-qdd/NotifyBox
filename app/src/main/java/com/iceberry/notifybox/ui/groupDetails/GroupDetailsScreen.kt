@@ -133,7 +133,6 @@ fun GroupDetailsScreen(
                 }
             }
 
-
             val listState = rememberListColumnState<NotifyVO>(
                 items = items,
                 lazyListState = lazyListState,
@@ -148,7 +147,8 @@ fun GroupDetailsScreen(
                         start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
                         end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
                         top = paddingValues.calculateTopPadding()
-                    ),
+                    )
+                    .fillMaxSize(),
                 state = listState,
                 onClickItem = {},
                 onDeleteItem = { notify ->

@@ -26,11 +26,12 @@ import androidx.paging.compose.LazyPagingItems
 
 @Composable
 fun <T : Any> rememberListColumnState(
-    items: LazyPagingItems<T>?,
+    items: LazyPagingItems<T>? = null,
     lazyListState: LazyListState = rememberLazyListState(),
-    loading: Boolean,
-    query: String,
-    snackbarHostState: SnackbarHostState
+    loading: Boolean = false,
+    query: String = "",
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    canDelete: Boolean = true
 ): ListColumnState<T> {
     return remember(items, lazyListState, loading, snackbarHostState) {
         ListColumnState(
@@ -38,7 +39,8 @@ fun <T : Any> rememberListColumnState(
             lazyListState = lazyListState,
             loading = loading,
             query = query,
-            snackbarHostState = snackbarHostState
+            snackbarHostState = snackbarHostState,
+            canDelete = canDelete
         )
     }
 }
@@ -48,5 +50,6 @@ class ListColumnState<T : Any>(
     internal val lazyListState: LazyListState,
     internal val loading: Boolean,
     internal val query: String,
-    internal val snackbarHostState: SnackbarHostState
+    internal val snackbarHostState: SnackbarHostState,
+    internal val canDelete: Boolean
 )

@@ -59,7 +59,8 @@ fun NBNavHost(
         )
 
         statisticScreen(
-            onBackClick = navController::popBackStack
+            onBackClick = navController::popBackStack,
+            onNavToDetails = navController::navigateToGroupDetails
         )
     }
 }
