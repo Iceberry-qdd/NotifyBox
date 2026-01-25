@@ -216,12 +216,12 @@ interface NotifyDao {
 data class AppIcon(
     val icon: Drawable? = null,
     val largeIcon: Drawable? = null,
-    val appDisplayName: String = "Unknown"
+    val appDisplayName: String? = "Unknown"
 )
 
 data class PieChartData(
     val value: Float,
-    val label: String,
+    val label: String?,
     @ColumnInfo(name = "package_name")
     val packageName: String,
     @ColumnInfo(name = "small_icon")

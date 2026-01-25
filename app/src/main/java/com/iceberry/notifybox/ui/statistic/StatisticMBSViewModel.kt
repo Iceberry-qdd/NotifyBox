@@ -81,11 +81,10 @@ class MBSViewModel @Inject constructor(
                 )
             )
         }.cachedIn(viewModelScope)
+    }.onEach {
+        delay(500L)
+        _loading.update { false }
     }
-        .onEach {
-            delay(500L)
-            _loading.update { false }
-        }
 
 
     @OptIn(ExperimentalCoroutinesApi::class)

@@ -122,7 +122,7 @@ fun StatisticContent(
             return@LazyColumn
         }
 
-        if (!uiState.pieChartUiState.isSuccess && !uiState.barChartUiState.isSuccess) {
+        if (!uiState.pieChartUiState.isSuccess || !uiState.barChartUiState.isSuccess) {
             item {
                 Box(
                     modifier = Modifier
@@ -131,7 +131,7 @@ fun StatisticContent(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "暂无数据",
+                        text = "数据加载失败",
                         style = MaterialTheme.typography.bodyMedium.merge(color = MaterialTheme.colorScheme.outline)
                     )
                 }
@@ -176,13 +176,13 @@ fun StatisticContent(
 
         items(
             count = pieChartData.size,
-            key = { i -> pieChartData[i].label }
+            key = { i -> pieChartData[i].packageName }
         ) { i ->
             StatisticItem(
                 modifier = Modifier,
                 state = rememberStatisticItemState(
                     progress = pieChartData[i].dest,
-                    title = pieChartData[i].label,
+                    title = pieChartData[i].label?: pieChartData[i].packageName,
                     value = "${pieChartData[i].value.toLong()}",
                     indicatorColor = Color(COLOR_PALETTE[i % COLOR_PALETTE.size]),
                     appIcon = pieChartData[i].appIcon,

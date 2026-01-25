@@ -168,7 +168,7 @@ data class PieChartUiState(
 
 data class PieChartDataVO(
     val value: Float = 0f,
-    val label: String = "",
+    val label: String? = "",
     val appIcon: AppIcon = AppIcon(),
     val dest: Float = 0f,
     val packageName: String = ""

@@ -55,7 +55,7 @@ class StatisticViewModel @Inject constructor(
         .flatMapLatest { filter ->
             notifyRepository.statisticForPieChart(filter)
                 .map { handleChartData(it) }
-                .catch { emit(Async.Error(Throwable("暂无统计数据"))) }
+                .catch { e -> emit(Async.Error(e)) }
         }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -63,7 +63,7 @@ class StatisticViewModel @Inject constructor(
         .flatMapLatest { filter ->
             notifyRepository.statisticForBarChart(filter)
                 .map { handleChartData(it) }
-                .catch { emit(Async.Error(Throwable("暂无统计数据"))) }
+                .catch { e -> emit(Async.Error(e)) }
         }
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
