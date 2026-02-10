@@ -76,13 +76,16 @@ class StatisticViewModel @Inject constructor(
             pieChartUiState = when (pieChartDataAsync) {
                 Async.Loading -> PieChartUiState()
                 is Async.Error -> PieChartUiState(isSuccess = false)
+                is Async.Empty -> PieChartUiState(isSuccess = true, pieChartData = listOf())
                 is Async.Success -> PieChartUiState(
                     pieChartData = pieChartDataAsync.data.map { it.toVO(context) },
                 )
+
             },
             barChartUiState = when (barChartDataAsync) {
                 Async.Loading -> BarChartUiState()
                 is Async.Error -> BarChartUiState(isSuccess = false)
+                is Async.Empty -> BarChartUiState(isSuccess = true, barChartData = listOf())
                 is Async.Success -> BarChartUiState(
                     barChartData = barChartDataAsync.data.mapIndexed { index, it -> it.toVO(index + 1) }
                 )
@@ -102,7 +105,7 @@ class StatisticViewModel @Inject constructor(
 
     private suspend fun <T> handleChartData(chartDataList: List<T>): Async<List<T>> {
         if (chartDataList.isEmpty()) {
-            return Async.Error(Throwable("暂无统计数据"))
+            return Async.Empty
         }
 
         Async.Loading

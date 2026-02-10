@@ -122,6 +122,23 @@ fun StatisticContent(
             return@LazyColumn
         }
 
+        if (uiState.pieChartUiState.pieChartData.isEmpty() || uiState.barChartUiState.barChartData.isEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillParentMaxHeight(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "暂无数据",
+                        style = MaterialTheme.typography.bodyMedium.merge(color = MaterialTheme.colorScheme.outline)
+                    )
+                }
+            }
+            return@LazyColumn
+        }
+
         if (!uiState.pieChartUiState.isSuccess || !uiState.barChartUiState.isSuccess) {
             item {
                 Box(

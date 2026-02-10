@@ -21,6 +21,7 @@ package com.iceberry.notifybox.util
  */
 sealed class Async<out T> {
     object Loading : Async<Nothing>()
+    object Empty : Async<Nothing>()
     data class Error<out T>(val throwable: Throwable) : Async<T>()
     data class Success<out T>(val data: T) : Async<T>()
 }
