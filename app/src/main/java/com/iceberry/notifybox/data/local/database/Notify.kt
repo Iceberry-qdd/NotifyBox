@@ -188,6 +188,7 @@ interface NotifyDao {
             FROM tb_notify
             WHERE tb_notify MATCH :query
                 AND deleted_time IS NULL
+            ORDER BY created_time DESC
         """
     )
     fun searchByQuery(query: String): PagingSource<Int, Notify>
