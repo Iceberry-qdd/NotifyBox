@@ -90,8 +90,8 @@ class DefaultNotifyRepository @Inject constructor(
         notifyDao.markDeletedByGroup(notifyId, packageName)
     }
 
-    override suspend fun markDeletedById(id: Int) = accessMutex.withLock {
-        notifyDao.markDeletedById(id)
+    override suspend fun markDeletedById(notifyId: Int) = accessMutex.withLock {
+        notifyDao.markDeletedById(notifyId)
     }
 
     override fun searchByQuery(query: String): PagingSource<Int, Notify> {

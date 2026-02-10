@@ -20,6 +20,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iceberry.notifybox.data.NotifyRepository
+import com.iceberry.notifybox.data.local.database.BarChartData
 import com.iceberry.notifybox.ui.statistic.chart.BarChartUiState
 import com.iceberry.notifybox.ui.statistic.chart.PieChartUiState
 import com.iceberry.notifybox.ui.statistic.chart.TimeRangeFilter
@@ -40,6 +41,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import java.time.Instant
+import java.time.ZoneId
 import javax.inject.Inject
 
 @HiltViewModel
@@ -62,6 +65,7 @@ class StatisticViewModel @Inject constructor(
     private val _barChartDataAsync = _timeRangeFilter
         .flatMapLatest { filter ->
             notifyRepository.statisticForBarChart(filter)
+                .map { handleBarChartData(it, filter) }
                 .map { handleChartData(it) }
                 .catch { e -> emit(Async.Error(e)) }
         }
@@ -111,6 +115,58 @@ class StatisticViewModel @Inject constructor(
         Async.Loading
 
         return Async.Success(chartDataList)
+    }
+
+    private fun handleBarChartData(notifyDataList: List<BarChartData>, filter: TimeRangeFilter): List<BarChartData> {
+        val (first, second) = filter.range()
+        val zoneOffset = ZoneId.systemDefault().rules.getOffset(Instant.now())
+        val startAt = if (filter == TimeRangeFilter.ALL) getAppInstalledTime() else first.toInstant(zoneOffset)
+        val endAt = second.toInstant(zoneOffset)
+
+        val allBarItemList = generateSequence(startAt) { cur ->
+            cur.plusSeconds(filter.dimension.splitTimeUnit.duration.seconds)
+        }
+            .takeWhile { !it.isAfter(endAt) }
+            .map { BarChartData(y = 0, x = it.toEpochMilli()) }
+            .toMutableList()
+
+        do {
+            allBarItemList.add(
+                BarChartData(
+                    y = 0,
+                    x = Instant
+                        .ofEpochMilli(allBarItemList.last().x)
+                        .plusSeconds(filter.dimension.splitTimeUnit.duration.seconds)
+                        .toEpochMilli()
+                )
+            )
+        } while (allBarItemList.size < 7)
+
+        var k = 0
+        for (i in 0..<allBarItemList.size - 1) {
+            val lt = Instant.ofEpochMilli(allBarItemList[i].x)
+            val gt = Instant.ofEpochMilli(allBarItemList[i + 1].x)
+
+            for (j in k..<notifyDataList.size) {
+                val data = notifyDataList[j]
+                val t = Instant.ofEpochMilli(data.x)
+                if (t.isBefore(lt) || t.isAfter(gt)) {
+                    continue
+                } else {
+                    allBarItemList[i] = BarChartData(x = allBarItemList[i].x, y = data.y)
+                    k++
+                    break
+                }
+            }
+        }
+
+        allBarItemList.removeLastOrNull()
+
+        return allBarItemList
+    }
+
+    private fun getAppInstalledTime(): Instant? {
+        return Instant.ofEpochMilli(context.packageManager.getPackageInfo(context.packageName, 0).firstInstallTime)
     }
 }
 

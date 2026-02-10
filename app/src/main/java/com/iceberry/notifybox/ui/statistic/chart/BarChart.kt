@@ -16,7 +16,6 @@
 
 package com.iceberry.notifybox.ui.statistic.chart
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -39,7 +38,6 @@ import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.formatter.DefaultAxisValueFormatter
-import com.github.mikephil.charting.formatter.DefaultValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
@@ -47,16 +45,19 @@ import com.github.mikephil.charting.utils.ColorTemplate
 import com.github.mikephil.charting.utils.MPPointF
 import com.iceberry.notifybox.data.local.database.AppIcon
 import com.iceberry.notifybox.databinding.BarChartBinding
+import com.iceberry.notifybox.ui.statistic.chart.formatter.BarValueFormatter
 import com.iceberry.notifybox.ui.statistic.chart.renderer.RoundedBarChartRenderer
 import com.iceberry.notifybox.ui.statistic.chart.renderer.XAxisRendererBarChart
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 import com.iceberry.notifybox.ui.theme.convertToRGB
+import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.TextStyle
+import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 import kotlin.random.Random
@@ -133,12 +134,9 @@ fun BarChart(
                 setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
                     override fun onValueSelected(e: Entry?, h: Highlight?) {
                         if (e == null) return
-                        Log.i("BarChart#onValueSelected", "e: $e, h: $h")
                     }
 
-                    override fun onNothingSelected() {
-                        Log.i("BarChart#onNothingSelected", "nothing selected")
-                    }
+                    override fun onNothingSelected() {}
                 })
 
                 animateY(800, Easing.EaseInOutQuad)
@@ -148,7 +146,7 @@ fun BarChart(
             }
 
             barChart.data = data.apply {
-                setValueFormatter(DefaultValueFormatter(0))
+                setValueFormatter(BarValueFormatter(0))
                 setValueTextSize(10f)
             }
 
@@ -218,12 +216,12 @@ val INIT_BAR_DATA = handleBarData(
         }
 )
 
-enum class TimeDimension(val groupBy: Array<String>, val formatter: ValueFormatter) {
-    YEAR(arrayOf("%Y"), YearAxisValueFormatter()),
-    MONTH(arrayOf("%Y", "%m"), MonthAxisValueFormatter()),
-    WEEK(arrayOf("%Y", "%m", "%d"), WeekAxisValueFormatter()),
-    DAY(arrayOf("%Y", "%m", "%d"), DayAxisValueFormatter()),
-    HOUR(arrayOf("%Y", "%m", "%d", "%H"), HourAxisValueFormatter())
+enum class TimeDimension(val groupBy: Array<String>, val formatter: ValueFormatter, val splitTimeUnit: ChronoUnit) {
+    YEAR(arrayOf("%Y"), YearAxisValueFormatter(), ChronoUnit.YEARS),
+    MONTH(arrayOf("%Y", "%m"), MonthAxisValueFormatter(), ChronoUnit.MONTHS),
+    WEEK(arrayOf("%Y", "%m", "%d"), WeekAxisValueFormatter(), ChronoUnit.WEEKS),
+    DAY(arrayOf("%Y", "%m", "%d"), DayAxisValueFormatter(), ChronoUnit.DAYS),
+    HOUR(arrayOf("%Y", "%m", "%d", "%H"), HourAxisValueFormatter(), ChronoUnit.HOURS)
 }
 
 enum class TimeRangeFilter(
@@ -239,14 +237,14 @@ enum class TimeRangeFilter(
                 now()
             )
         },
-        TimeDimension.DAY
+        TimeDimension.YEAR
     ),
     TODAY(
         "今天",
         {
             Pair(
                 now().with(LocalTime.MIN),
-                now()
+                now().with(LocalTime.MAX)
             )
         },
         TimeDimension.HOUR
@@ -265,8 +263,8 @@ enum class TimeRangeFilter(
         "本周",
         {
             Pair(
-                now().minusDays(1L * (now().dayOfWeek.value - 1)).with(LocalTime.MIN),
-                now()
+                now().with(LocalTime.MIN).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
+                now().with(LocalTime.MAX).with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
             )
         },
         TimeDimension.WEEK
@@ -275,8 +273,8 @@ enum class TimeRangeFilter(
         "本月",
         {
             Pair(
-                now().minusDays(1L * (now().dayOfMonth - 1)).with(LocalTime.MIN),
-                now()
+                now().with(LocalTime.MIN).with(TemporalAdjusters.firstDayOfMonth()),
+                now().with(LocalTime.MAX).with(TemporalAdjusters.lastDayOfMonth())
             )
         },
         TimeDimension.DAY
@@ -285,14 +283,8 @@ enum class TimeRangeFilter(
         "上月",
         {
             Pair(
-                now()
-                    .minusMonths(1)
-                    .with(TemporalAdjusters.firstDayOfMonth())
-                    .with(LocalTime.MIN),
-                now()
-                    .minusMonths(1)
-                    .with(TemporalAdjusters.lastDayOfMonth())
-                    .with(LocalTime.MAX)
+                now().minusMonths(1).with(LocalTime.MIN).with(TemporalAdjusters.firstDayOfMonth()),
+                now().minusMonths(1).with(LocalTime.MAX).with(TemporalAdjusters.lastDayOfMonth())
             )
         },
         TimeDimension.DAY
@@ -301,8 +293,18 @@ enum class TimeRangeFilter(
         "今年",
         {
             Pair(
-                now().minusDays(1L * (now().dayOfYear - 1)).with(LocalTime.MIN),
-                now()
+                now().with(LocalTime.MIN).with(TemporalAdjusters.firstDayOfYear()),
+                now().with(LocalTime.MAX).with(TemporalAdjusters.lastDayOfYear())
+            )
+        },
+        TimeDimension.MONTH
+    ),
+    LAST_YEAR(
+        "去年",
+        {
+            Pair(
+                now().with(LocalTime.MIN).minusYears(1L).with(TemporalAdjusters.firstDayOfYear()),
+                now().with(LocalTime.MAX).minusYears(1L).with(TemporalAdjusters.lastDayOfYear())
             )
         },
         TimeDimension.MONTH
