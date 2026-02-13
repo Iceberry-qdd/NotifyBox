@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 /*
  * Copyright (C) 2025 Iceberry-qdd
  *
@@ -17,11 +19,11 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.hilt.gradle)
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.serialization.compiler)
+    alias(libs.plugins.room)
 }
 
 android {
@@ -40,11 +42,11 @@ android {
             useSupportLibrary = true
         }
         versionNameSuffix = ".alpha"
+    }
 
+    room {
         // Enable room auto-migrations
-        ksp {
-            arg("room.schemaLocation", "$projectDir/schemas")
-        }
+        schemaDirectory("$projectDir/schemas")
     }
 
     buildTypes {
@@ -62,8 +64,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_17
+        }
     }
 
     buildFeatures {
@@ -77,7 +81,7 @@ android {
 
     packaging {
         resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes.add("/META-INF/{AL2.0,LGPL2.1}")
         }
     }
 }
@@ -87,6 +91,7 @@ dependencies {
     implementation(libs.androidx.paging.compose)
     implementation(libs.androidx.room.paging)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.preference.ktx)
     val composeBom = platform(libs.androidx.compose.bom)
 
     implementation(composeBom)
@@ -98,7 +103,7 @@ dependencies {
     // WorkManager dependencies
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.work)
-    kapt(libs.androidx.hilt.compiler)
+    ksp(libs.androidx.hilt.compiler)
 
     // Core Android dependencies
     implementation(libs.androidx.core.ktx)
@@ -107,13 +112,12 @@ dependencies {
 
     // Hilt Dependency Injection
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
     // Hilt and instrumented tests.
     androidTestImplementation(libs.hilt.android.testing)
-    kaptAndroidTest(libs.hilt.android.compiler)
+    kspAndroidTest(libs.hilt.android.compiler)
     // Hilt and Robolectric tests.
     testImplementation(libs.hilt.android.testing)
-    kaptTest(libs.hilt.android.compiler)
+    ksp(libs.hilt.android.compiler)
 
     // Arch Components
     implementation(libs.androidx.lifecycle.runtime.compose)

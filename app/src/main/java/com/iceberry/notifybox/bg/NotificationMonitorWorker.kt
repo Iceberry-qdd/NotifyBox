@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit
 class NotificationMonitorWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParams: WorkerParameters,
-    @Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher
+    @param:Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher
 ) : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result = withContext(ioDispatcher) {
         Log.i("NotificationMonitorWorker::doWork", "Work done successfully.")

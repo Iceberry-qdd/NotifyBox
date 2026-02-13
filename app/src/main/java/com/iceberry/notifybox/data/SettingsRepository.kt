@@ -31,7 +31,7 @@ interface SettingsRepository {
 
 class DefaultSettingsRepository @Inject constructor(
     private val settingsDatastore: NBSettingsDatastore,
-    @Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher
+    @param:Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher
 ) : SettingsRepository {
     override val settings = settingsDatastore.settingsData
 
