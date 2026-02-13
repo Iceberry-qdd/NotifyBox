@@ -42,7 +42,10 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import java.time.Instant
-import java.time.ZoneId
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneOffset
+import java.time.temporal.TemporalAdjusters
 import javax.inject.Inject
 
 @HiltViewModel
@@ -119,24 +122,37 @@ class StatisticViewModel @Inject constructor(
 
     private fun handleBarChartData(notifyDataList: List<BarChartData>, filter: TimeRangeFilter): List<BarChartData> {
         val (first, second) = filter.range()
-        val zoneOffset = ZoneId.systemDefault().rules.getOffset(Instant.now())
-        val startAt = if (filter == TimeRangeFilter.ALL) getAppInstalledTime() else first.toInstant(zoneOffset)
-        val endAt = second.toInstant(zoneOffset)
+        val zoneOffset = ZoneOffset.systemDefault().rules.getOffset(Instant.now())
+        val startAt = if (filter == TimeRangeFilter.ALL) {
+            LocalDateTime
+                .ofInstant(getAppInstalledTime(), zoneOffset)
+                .with(LocalTime.MIN)
+                .with(TemporalAdjusters.firstDayOfYear())
+        } else {
+            first
+        }
+        val endAt = if (filter == TimeRangeFilter.ALL) {
+            second
+                .with(LocalTime.MAX)
+                .with(TemporalAdjusters.lastDayOfYear())
+        } else {
+            second
+        }
 
         val allBarItemList = generateSequence(startAt) { cur ->
-            cur.plusSeconds(filter.dimension.splitTimeUnit.duration.seconds)
+            filter.dimension.iteratorFun(cur)
         }
             .takeWhile { !it.isAfter(endAt) }
-            .map { BarChartData(y = 0, x = it.toEpochMilli()) }
+            .map { BarChartData(y = 0, x = it.toInstant(zoneOffset).toEpochMilli()) }
             .toMutableList()
 
         do {
             allBarItemList.add(
                 BarChartData(
                     y = 0,
-                    x = Instant
-                        .ofEpochMilli(allBarItemList.last().x)
-                        .plusSeconds(filter.dimension.splitTimeUnit.duration.seconds)
+                    x = (allBarItemList.lastOrNull()?.x ?: 0)
+                        .let { filter.dimension.iteratorFun(LocalDateTime.ofInstant(Instant.ofEpochMilli(it), zoneOffset)) }
+                        .toInstant(zoneOffset)
                         .toEpochMilli()
                 )
             )
@@ -165,7 +181,7 @@ class StatisticViewModel @Inject constructor(
         return allBarItemList
     }
 
-    private fun getAppInstalledTime(): Instant? {
+    private fun getAppInstalledTime(): Instant {
         return Instant.ofEpochMilli(context.packageManager.getPackageInfo(context.packageName, 0).firstInstallTime)
     }
 }

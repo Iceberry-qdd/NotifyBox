@@ -61,6 +61,7 @@ class ListViewModel @Inject constructor(
     private val _showANLSDialog = MutableStateFlow(false)
     private val _serviceState = settingsRepository.settings
     private val _query = MutableStateFlow("")
+    private val _orderBy = MutableStateFlow(ListOrderBy())
     private val _loading = MutableStateFlow(true)
     private val pageConfig = PagingConfig(
         pageSize = 10,
@@ -84,12 +85,15 @@ class ListViewModel @Inject constructor(
     }
 
     @OptIn(FlowPreview::class)
-    val pager = _query
-        .debounce(300)
-        .flatMapLatest { query ->
+    val pager = combine(
+        _query, _orderBy
+    ) { query, orderBy ->
+        Pair(query, orderBy)
+    }.debounce(300)
+        .flatMapLatest { (query, orderBy) ->
             _loading.update { true }
             Pager(pageConfig) {
-                if (query.isEmpty()) notifyRepository.queryByPaging() else notifyRepository.searchByQuery(query)
+                if (query.isEmpty()) notifyRepository.queryByPaging(orderBy) else notifyRepository.searchByQuery(query)
             }.flow.map { notifies ->
                 notifies.map(
                     mappingNotifies(
@@ -101,20 +105,24 @@ class ListViewModel @Inject constructor(
             }
         }
         .onEach {
-            Log.i("ListViewModel#onEach", "_loading = ${_loading.value}, _query = [${_query.value}]")
+            Log.d(
+                "ListViewModel#onEach",
+                "_loading = ${_loading.value}, _query = [${_query.value}], _orderBy = [${_orderBy.value}]"
+            )
             delay(500L)
             _loading.update { false }
         }
         .cachedIn(viewModelScope)
 
     val uiState: StateFlow<ListUiState> = combine(
-        _showANLSDialog, _serviceState, _query, _loading
-    ) { showANLSDialog, serviceState, query, loading ->
+        _showANLSDialog, _serviceState, _query, _loading, _orderBy
+    ) { showANLSDialog, serviceState, query, loading, orderBy ->
         ListUiState(
             isServiceRunning = serviceState.isANLSRunning,
             showANLSDialog = showANLSDialog,
             query = query,
-            loading = loading
+            loading = loading,
+            orderBy = orderBy
         )
     }.stateIn(
         scope = viewModelScope,
@@ -161,6 +169,7 @@ class ListViewModel @Inject constructor(
     fun cancelANLSSettingsDialog() = _showANLSDialog.update { false }
     fun setQuery(query: String) = _query.update { query }
     fun clearQuery() = _query.update { "" }
+    fun setOrderBy(orderBy: ListOrderBy) = _orderBy.update { orderBy }
 }
 
 data class NotifyVO(
@@ -183,10 +192,19 @@ data class ListUiState(
     val showANLSDialog: Boolean = false,
     val query: String = "",
     val loading: Boolean = false,
-    val pager: PagingData<NotifyVO> = PagingData.empty<NotifyVO>()
+    val pager: PagingData<NotifyVO> = PagingData.empty(),
+    val orderBy: ListOrderBy = ListOrderBy()
 )
 
-//enum class ListType { GROUP, SEARCH }
+data class ListOrderBy(
+    val direction: OrderDirection = OrderDirection.DESC,
+    val field: OrderField = OrderField.TIME
+) {
+    override fun toString(): String = "ORDER BY ${field.dbField} ${direction.name}"
+}
+
+enum class OrderDirection { ASC, DESC }
+enum class OrderField(val dbField: String) { TIME("created_time"), PACKAGE("package_name") }
 enum class KeyPrefix { GROUP, ITEM }
 enum class KeySuffix { NOTIFY_ID, ID }
 

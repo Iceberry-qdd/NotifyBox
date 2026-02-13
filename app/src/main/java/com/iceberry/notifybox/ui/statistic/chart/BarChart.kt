@@ -38,6 +38,7 @@ import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.formatter.DefaultAxisValueFormatter
+import com.github.mikephil.charting.formatter.DefaultValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
@@ -45,11 +46,11 @@ import com.github.mikephil.charting.utils.ColorTemplate
 import com.github.mikephil.charting.utils.MPPointF
 import com.iceberry.notifybox.data.local.database.AppIcon
 import com.iceberry.notifybox.databinding.BarChartBinding
-import com.iceberry.notifybox.ui.statistic.chart.formatter.BarValueFormatter
 import com.iceberry.notifybox.ui.statistic.chart.renderer.RoundedBarChartRenderer
 import com.iceberry.notifybox.ui.statistic.chart.renderer.XAxisRendererBarChart
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 import com.iceberry.notifybox.ui.theme.convertToRGB
+import java.text.DecimalFormat
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDateTime
@@ -57,7 +58,6 @@ import java.time.LocalDateTime.now
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.TextStyle
-import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 import kotlin.random.Random
@@ -151,7 +151,7 @@ fun BarChart(
             }
 
             barChart.renderer = RoundedBarChartRenderer(barChart, barChart.animator, barChart.viewPortHandler).apply {
-                setRoundedPositiveDataSetRadius(15f)
+                setRoundedPositiveDataSetRadius(45f)
                 setRoundedNegativeDataSetRadius(45f)
             }
             barChart.setXAxisRenderer(XAxisRendererBarChart(barChart, barChart.viewPortHandler, barChart.xAxis))
@@ -216,12 +216,16 @@ val INIT_BAR_DATA = handleBarData(
         }
 )
 
-enum class TimeDimension(val groupBy: Array<String>, val formatter: ValueFormatter, val splitTimeUnit: ChronoUnit) {
-    YEAR(arrayOf("%Y"), YearAxisValueFormatter(), ChronoUnit.YEARS),
-    MONTH(arrayOf("%Y", "%m"), MonthAxisValueFormatter(), ChronoUnit.MONTHS),
-    WEEK(arrayOf("%Y", "%m", "%d"), WeekAxisValueFormatter(), ChronoUnit.WEEKS),
-    DAY(arrayOf("%Y", "%m", "%d"), DayAxisValueFormatter(), ChronoUnit.DAYS),
-    HOUR(arrayOf("%Y", "%m", "%d", "%H"), HourAxisValueFormatter(), ChronoUnit.HOURS)
+enum class TimeDimension(
+    val groupBy: Array<String>,
+    val formatter: ValueFormatter,
+    val iteratorFun: (t: LocalDateTime) -> LocalDateTime
+) {
+    YEAR(arrayOf("%Y"), YearAxisValueFormatter(), { it.plusYears(1) }),
+    MONTH(arrayOf("%Y", "%m"), MonthAxisValueFormatter(), { it.plusMonths(1) }),
+    WEEK(arrayOf("%Y", "%m", "%d"), WeekAxisValueFormatter(), { it.plusDays(1) }),
+    DAY(arrayOf("%Y", "%m", "%d"), DayAxisValueFormatter(), { it.plusDays(1) }),
+    HOUR(arrayOf("%Y", "%m", "%d", "%H"), HourAxisValueFormatter(), { it.plusHours(1) })
 }
 
 enum class TimeRangeFilter(
@@ -319,6 +323,22 @@ enum class TimeRangeFilter(
         },
         TimeDimension.YEAR
     )
+}
+
+class BarValueFormatter(digits: Int) : DefaultValueFormatter(digits) {
+    override fun getFormattedValue(value: Float): String = if (value == 0f) "" else super.getFormattedValue(value)
+
+    override fun setup(digits: Int) {
+        this.mDecimalDigits = digits
+
+        val b = StringBuffer()
+        for (i in 0..<digits) {
+            if (i == 0) b.append(".")
+            b.append("0")
+        }
+
+        mFormat = DecimalFormat("#$b")
+    }
 }
 
 class YearAxisValueFormatter() : ValueFormatter() {

@@ -27,6 +27,7 @@ import com.iceberry.notifybox.data.local.database.App
 import com.iceberry.notifybox.data.local.database.BarChartData
 import com.iceberry.notifybox.data.local.database.Notify
 import com.iceberry.notifybox.data.local.database.PieChartData
+import com.iceberry.notifybox.ui.list.ListOrderBy
 import com.iceberry.notifybox.ui.statistic.chart.TimeRangeFilter
 import dagger.Binds
 import dagger.Module
@@ -62,19 +63,18 @@ interface DataModule {
 }
 
 class FakeNotifyRepository @Inject constructor() : NotifyRepository {
-    override val notifies: PagingSource<Int, Notify> = TODO()
-
     override suspend fun add(notify: Notify) {
         TODO("Not yet implemented")
     }
 
-    override fun queryByPaging(): PagingSource<Int, Notify> {
+    override fun queryByPaging(orderBy: ListOrderBy): PagingSource<Int, Notify> {
         TODO("Not yet implemented")
     }
 
     override fun queryByPaging(
         packageName: String,
-        timeRangeFilter: TimeRangeFilter
+        timeRangeFilter: TimeRangeFilter,
+        orderBy: ListOrderBy
     ): PagingSource<Int, Notify> {
         TODO("Not yet implemented")
     }

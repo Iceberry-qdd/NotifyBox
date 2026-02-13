@@ -25,6 +25,7 @@ import com.iceberry.notifybox.data.local.database.BarChartData
 import com.iceberry.notifybox.data.local.database.Notify
 import com.iceberry.notifybox.data.local.database.NotifyDao
 import com.iceberry.notifybox.data.local.database.PieChartData
+import com.iceberry.notifybox.ui.list.ListOrderBy
 import com.iceberry.notifybox.ui.statistic.chart.TimeRangeFilter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.sync.Mutex
@@ -34,12 +35,12 @@ import java.time.ZoneId
 import javax.inject.Inject
 
 interface NotifyRepository {
-    val notifies: PagingSource<Int, Notify>
     suspend fun add(notify: Notify)
-    fun queryByPaging(): PagingSource<Int, Notify>
+    fun queryByPaging(orderBy: ListOrderBy = ListOrderBy()): PagingSource<Int, Notify>
     fun queryByPaging(
         packageName: String,
-        timeRangeFilter: TimeRangeFilter = TimeRangeFilter.ALL
+        timeRangeFilter: TimeRangeFilter = TimeRangeFilter.ALL,
+        orderBy: ListOrderBy = ListOrderBy()
     ): PagingSource<Int, Notify>
 
     fun queryDetailByNotifyId(notifyId: Int?, packageName: String): PagingSource<Int, Notify>
@@ -60,8 +61,6 @@ class DefaultNotifyRepository @Inject constructor(
 ) : NotifyRepository {
     private val accessMutex = Mutex()
 
-    override val notifies: PagingSource<Int, Notify> = notifyDao.getNotifies()
-
     @Transaction
     override suspend fun add(notify: Notify) = accessMutex.withLock {
         notifyDao.insertNotify(
@@ -69,14 +68,68 @@ class DefaultNotifyRepository @Inject constructor(
         )
     }
 
-    override fun queryByPaging(): PagingSource<Int, Notify> = notifyDao.getNotifies()
+    override fun queryByPaging(orderBy: ListOrderBy): PagingSource<Int, Notify>{
+        val sql = """
+                        SELECT
+                            t1.rowid,
+                            t1.notify_id,
+                            t1.title,
+                            t1.content,
+                            t1.package_name,
+                            t1.display_name,
+                            t1.created_time,
+                            t1.small_icon,
+                            t1.large_icon,
+                            t1.channel,
+                            t1.deleted_time,
+                            t1.priority,
+                            t2.`count`
+                        FROM tb_notify t1
+                        INNER JOIN (SELECT MAX(rowid) AS id, COUNT(*) AS `count` FROM tb_notify WHERE deleted_time IS NULL GROUP BY package_name, notify_id) t2
+                            ON t1.rowid = t2.id
+                        WHERE deleted_time IS NULL
+                        $orderBy
+        """.trimIndent()
+        return notifyDao.getNotifies(SimpleSQLiteQuery(sql))
+    }
 
     override fun queryByPaging(
         packageName: String,
-        timeRangeFilter: TimeRangeFilter
+        timeRangeFilter: TimeRangeFilter,
+        orderBy: ListOrderBy
     ): PagingSource<Int, Notify> {
-        val (first, second) = timeRangeFilter.range()
-        return notifyDao.getNotifies(packageName, first, second)
+        val zoneOffset = ZoneId.systemDefault().rules.getOffset(Instant.now())
+        val startAt = timeRangeFilter.range().first.toInstant(zoneOffset).toEpochMilli()
+        val endAt = timeRangeFilter.range().second.toInstant(zoneOffset).toEpochMilli()
+        val sql = """
+                        SELECT
+                            t1.rowid,
+                            t1.notify_id,
+                            t1.title,
+                            t1.content,
+                            t1.package_name,
+                            t1.display_name,
+                            t1.created_time,
+                            t1.small_icon,
+                            t1.large_icon,
+                            t1.channel,
+                            t1.deleted_time,
+                            t1.priority,
+                            t2.`count`
+                        FROM tb_notify t1
+                        INNER JOIN (SELECT MAX(rowid) AS id, COUNT(*) AS `count` FROM tb_notify WHERE deleted_time IS NULL AND created_time BETWEEN ? AND ? GROUP BY package_name, notify_id) t2
+                            ON t1.rowid = t2.id
+                        WHERE t1.deleted_time IS NULL
+                            AND t1.package_name = ?
+                            AND t1.created_time BETWEEN ? AND ?
+                        $orderBy
+        """.trimIndent()
+
+        val query = SimpleSQLiteQuery(
+            sql,
+            arrayOf<Any>(startAt, endAt, packageName, startAt, endAt)
+        )
+        return notifyDao.getNotifies(query)
     }
 
     override fun queryDetailByNotifyId(notifyId: Int?, packageName: String): PagingSource<Int, Notify> {
@@ -114,7 +167,7 @@ class DefaultNotifyRepository @Inject constructor(
         val endAt = second.toInstant(zoneOffset).toEpochMilli()
 
         val sqlTemplate =
-            "SELECT COUNT(*) AS y, created_time AS x FROM tb_notify WHERE deleted_time IS NULL AND created_time BETWEEN :startAt AND :endAt GROUP BY $groupBy ORDER BY created_time ASC"
+            "SELECT COUNT(*) AS y, created_time AS x FROM tb_notify WHERE deleted_time IS NULL AND created_time BETWEEN ? AND ? GROUP BY $groupBy ORDER BY created_time ASC"
         val query = SimpleSQLiteQuery(
             sqlTemplate,
             arrayOf<Any>(startAt, endAt)

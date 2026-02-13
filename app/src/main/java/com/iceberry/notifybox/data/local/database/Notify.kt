@@ -71,57 +71,8 @@ data class Notify(
 
 @Dao
 interface NotifyDao {
-    @Query(
-        """
-            SELECT
-                t1.rowid,
-                t1.notify_id,
-                t1.title,
-                t1.content,
-                t1.package_name,
-                t1.display_name,
-                t1.created_time,
-                t1.small_icon,
-                t1.large_icon,
-                t1.channel,
-                t1.deleted_time,
-                t1.priority,
-                t2.`count`
-            FROM tb_notify t1
-            INNER JOIN (SELECT MAX(rowid) AS id, COUNT(*) AS `count` FROM tb_notify WHERE deleted_time IS NULL GROUP BY package_name, notify_id) t2
-                ON t1.rowid = t2.id
-            WHERE deleted_time IS NULL
-            ORDER BY created_time DESC
-        """
-    )
-    fun getNotifies(): PagingSource<Int, Notify>
-
-    @Query(
-        """
-            SELECT
-                t1.rowid,
-                t1.notify_id,
-                t1.title,
-                t1.content,
-                t1.package_name,
-                t1.display_name,
-                t1.created_time,
-                t1.small_icon,
-                t1.large_icon,
-                t1.channel,
-                t1.deleted_time,
-                t1.priority,
-                t2.`count`
-            FROM tb_notify t1
-            INNER JOIN (SELECT MAX(rowid) AS id, COUNT(*) AS `count` FROM tb_notify WHERE deleted_time IS NULL AND created_time BETWEEN :startAt AND :endAt GROUP BY package_name, notify_id) t2
-                ON t1.rowid = t2.id
-            WHERE t1.deleted_time IS NULL
-                AND t1.package_name = :packageName
-                AND t1.created_time BETWEEN :startAt AND :endAt
-            ORDER BY t1.created_time DESC
-        """
-    )
-    fun getNotifies(packageName: String, startAt: LocalDateTime, endAt: LocalDateTime): PagingSource<Int, Notify>
+    @RawQuery(observedEntities = [Notify::class])
+    fun getNotifies(query: SupportSQLiteQuery): PagingSource<Int, Notify>
 
     @Query(
         """

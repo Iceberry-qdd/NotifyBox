@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material.icons.filled.PlayArrow
@@ -157,7 +158,7 @@ fun ListTopAppBar(
                 IconButton(onClick = routeToStatistic) {
                     Icon(Icons.Filled.PieChart, "统计分析")
                 }
-                ListTopAppBarMenu(orderBy = orderBy)
+                ListTopAppBarMenu(orderBy = uiState.orderBy)
             },
             modifier = modifier,
             scrollBehavior = scrollBehavior,
@@ -168,26 +169,47 @@ fun ListTopAppBar(
 
 @Composable
 fun ListTopAppBarMenu(
-    orderBy: (FtsOptions.Order, String) -> Unit
+    viewModel: ListViewModel = hiltViewModel(),
+    orderBy: ListOrderBy
 ) {
     TopAppBarDropdownMenu(
         iconContent = { Icon(Icons.Filled.MoreVert, "更多选项") }
     ) { closeMenu ->
         DropdownMenuItem(
+            leadingIcon = {
+                if(orderBy.field == OrderField.TIME && orderBy.direction == OrderDirection.ASC){
+                    Icon(Icons.Default.Check, contentDescription = "已选择")
+                }
+            },
             text = { Text("按日期正序") },
-            onClick = { orderBy(FtsOptions.Order.ASC, "time"); closeMenu() },
+            onClick = { viewModel.setOrderBy(ListOrderBy(direction = OrderDirection.ASC, field = OrderField.TIME)); closeMenu() },
         )
         DropdownMenuItem(
+            leadingIcon = {
+                if(orderBy.field == OrderField.TIME && orderBy.direction == OrderDirection.DESC){
+                    Icon(Icons.Default.Check, contentDescription = "已选择")
+                }
+            },
             text = { Text("按日期倒序") },
-            onClick = { orderBy(FtsOptions.Order.DESC, "time"); closeMenu() },
+            onClick = { viewModel.setOrderBy(ListOrderBy(direction = OrderDirection.DESC, field = OrderField.TIME)); closeMenu() },
         )
         DropdownMenuItem(
+            leadingIcon = {
+                if(orderBy.field == OrderField.PACKAGE && orderBy.direction == OrderDirection.ASC){
+                    Icon(Icons.Default.Check, contentDescription = "已选择")
+                }
+            },
             text = { Text("按包名正序") },
-            onClick = { orderBy(FtsOptions.Order.ASC, "package"); closeMenu() },
+            onClick = { viewModel.setOrderBy(ListOrderBy(direction = OrderDirection.ASC, field = OrderField.PACKAGE)); closeMenu() },
         )
         DropdownMenuItem(
-            text = { Text("按包名正序") },
-            onClick = { orderBy(FtsOptions.Order.DESC, "package"); closeMenu() },
+            leadingIcon = {
+                if(orderBy.field == OrderField.PACKAGE && orderBy.direction == OrderDirection.DESC){
+                    Icon(Icons.Default.Check, contentDescription = "已选择")
+                }
+            },
+            text = { Text("按包名倒序") },
+            onClick = { viewModel.setOrderBy(ListOrderBy(direction = OrderDirection.DESC, field = OrderField.PACKAGE)); closeMenu() },
         )
     }
 }
@@ -247,7 +269,7 @@ val fakeNotifyVOs = listOf<NotifyVO>(
 private fun ListTopAppBarDropdownMenuDarkPreview() {
     NBApplicationTheme {
         ListTopAppBarMenu(
-            orderBy = { order, field -> {} }
+            orderBy = ListOrderBy()
         )
     }
 }
