@@ -68,7 +68,7 @@ class DefaultNotifyRepository @Inject constructor(
         )
     }
 
-    override fun queryByPaging(orderBy: ListOrderBy): PagingSource<Int, Notify>{
+    override fun queryByPaging(orderBy: ListOrderBy): PagingSource<Int, Notify> {
         val sql = """
                         SELECT
                             t1.rowid,

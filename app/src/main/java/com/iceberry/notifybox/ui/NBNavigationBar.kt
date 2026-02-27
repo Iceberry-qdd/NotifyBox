@@ -25,7 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.navigation.NavDestination.Companion.hasRoute
-import com.iceberry.notifybox.navigation.ListRoute
+import com.iceberry.notifybox.navigation.Route
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 
 @Composable
@@ -48,7 +48,7 @@ fun NBNavigationBar(
                     label = { Text(dest.titleText) },
                     alwaysShowLabel = false,
                     onClick = {
-                        if (selected && currentDestination.hasRoute(ListRoute::class)) {
+                        if (selected && currentDestination.hasRoute(Route.ListRoute::class)) {
                             scrollToTop()
                         } else {
                             appState.navigateToTopLevelDestination(dest)

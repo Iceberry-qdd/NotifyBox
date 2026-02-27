@@ -17,57 +17,72 @@
 package com.iceberry.notifybox.ui.setting
 
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.iceberry.notifybox.ui.NBAppState
+import com.iceberry.notifybox.ui.rememberNBAppState
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingScreen(
     modifier: Modifier = Modifier,
-    viewModel: SettingViewModel = hiltViewModel()
+    viewModel: SettingViewModel = hiltViewModel(),
+    appState: NBAppState,
+    onClickItem: (NavigateData) -> Unit
 ) {
-    val items by viewModel.uiState.collectAsStateWithLifecycle()
-    if (items) {
-        SettingScreen(
-            modifier = modifier
-        )
-    }
-}
+    val items by viewModel.pager.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val lazyListState = appState.curRouteLazyListState ?: rememberLazyListState()
+    val listState = rememberSettingColumnState(
+        lazyListState = lazyListState,
+        loading = uiState.loading,
+        snackbarHostState = appState.snackbarHostState
+    )
 
-@Composable
-internal fun SettingScreen(
-    modifier: Modifier = Modifier
-) {
-    Text("设置")
+    SettingContent(
+        modifier = modifier,
+        state = listState,
+        data = items,
+        onClickItem = onClickItem
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingTopAppBar(
     modifier: Modifier = Modifier,
-    windowInsets: WindowInsets = TopAppBarDefaults.windowInsets
+    scrollBehavior: TopAppBarScrollBehavior,
+    windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
 ) {
     TopAppBar(
         title = { Text(text = "设置") },
         modifier = modifier,
+        scrollBehavior = scrollBehavior,
         windowInsets = windowInsets
     )
 }
-
-// Previews
 
 @Preview(showBackground = true)
 @Composable
 private fun DefaultPreview() {
     NBApplicationTheme {
-        SettingScreen()
+        SettingScreen(
+            onClickItem = {},
+            appState = rememberNBAppState()
+        )
     }
 }
 
@@ -75,14 +90,20 @@ private fun DefaultPreview() {
 @Composable
 private fun PortraitPreview() {
     NBApplicationTheme {
-        SettingScreen()
+        SettingScreen(
+            appState = rememberNBAppState(),
+            onClickItem = {}
+        )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @PreviewLightDark
 @Composable
 private fun SettingTopAppBarLightPreview() {
     NBApplicationTheme {
-        SettingTopAppBar()
+        SettingTopAppBar(
+            scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+        )
     }
 }

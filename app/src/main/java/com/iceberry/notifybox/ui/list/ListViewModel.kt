@@ -59,7 +59,7 @@ class ListViewModel @Inject constructor(
     @ApplicationContext context: Context
 ) : ViewModel() {
     private val _showANLSDialog = MutableStateFlow(false)
-    private val _serviceState = settingsRepository.settings
+    private val _settings = settingsRepository.settings
     private val _query = MutableStateFlow("")
     private val _orderBy = MutableStateFlow(ListOrderBy())
     private val _loading = MutableStateFlow(true)
@@ -72,7 +72,7 @@ class ListViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            _serviceState
+            _settings
                 .map { it -> it.isANLSRunning }
                 .collectLatest {
                     if (it) {
@@ -115,10 +115,10 @@ class ListViewModel @Inject constructor(
         .cachedIn(viewModelScope)
 
     val uiState: StateFlow<ListUiState> = combine(
-        _showANLSDialog, _serviceState, _query, _loading, _orderBy
-    ) { showANLSDialog, serviceState, query, loading, orderBy ->
+        _showANLSDialog, _settings, _query, _loading, _orderBy
+    ) { showANLSDialog, settings, query, loading, orderBy ->
         ListUiState(
-            isServiceRunning = serviceState.isANLSRunning,
+            isServiceRunning = settings.isANLSRunning,
             showANLSDialog = showANLSDialog,
             query = query,
             loading = loading,
@@ -153,7 +153,6 @@ class ListViewModel @Inject constructor(
             }
         }
     }
-
 
     fun confirmANSSettingsDialog(context: Context) {
         viewModelScope.launch {

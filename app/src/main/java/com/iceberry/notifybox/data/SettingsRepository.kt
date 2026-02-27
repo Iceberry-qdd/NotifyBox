@@ -16,10 +16,11 @@
 
 package com.iceberry.notifybox.data
 
-import com.iceberry.notifybox.datastore.NBSettingsDatastore
+import com.iceberry.notifybox.datastore.NBSettingsDatasource
 import com.iceberry.notifybox.datastore.SettingsData
 import com.iceberry.notifybox.network.di.AppDispatchers.IO
 import com.iceberry.notifybox.network.di.Dispatcher
+import com.iceberry.notifybox.ui.setting.SettingOptions
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -27,15 +28,26 @@ import javax.inject.Inject
 interface SettingsRepository {
     val settings: Flow<SettingsData>
     suspend fun setANLSRunning(status: Boolean)
+    suspend fun setDarkThemeConfig(darkThemeConfig: SettingOptions.Theme)
+    suspend fun setLanguageConfig(languageConfig: SettingOptions.Language)
+    suspend fun setShouldHideOnboarding(shouldHidePolicy: Boolean)
 }
 
 class DefaultSettingsRepository @Inject constructor(
-    private val settingsDatastore: NBSettingsDatastore,
+    private val settingsDatastore: NBSettingsDatasource,
     @param:Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher
 ) : SettingsRepository {
     override val settings = settingsDatastore.settingsData
 
-    override suspend fun setANLSRunning(status: Boolean) = with(ioDispatcher) {
+    override suspend fun setANLSRunning(status: Boolean) =
         settingsDatastore.setANLSRunning(status)
-    }
+
+    override suspend fun setShouldHideOnboarding(shouldHidePolicy: Boolean) =
+        settingsDatastore.setShouldHideOnboarding(shouldHidePolicy)
+
+    override suspend fun setDarkThemeConfig(darkThemeConfig: SettingOptions.Theme) =
+        settingsDatastore.setDarkThemeConfig(darkThemeConfig)
+
+    override suspend fun setLanguageConfig(languageConfig: SettingOptions.Language) =
+        settingsDatastore.setLanguageConfig(languageConfig)
 }

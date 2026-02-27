@@ -31,8 +31,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
-import com.iceberry.notifybox.navigation.GroupDetailsRoute
-import com.iceberry.notifybox.navigation.ListRoute
+import com.iceberry.notifybox.navigation.Route
 import com.iceberry.notifybox.navigation.TopLevelDestination
 import com.iceberry.notifybox.navigation.TopLevelDestination.FORWARD
 import com.iceberry.notifybox.navigation.TopLevelDestination.LIST
@@ -48,7 +47,7 @@ fun rememberNBAppState(
     navController: NavHostController = rememberNavController(),
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    lazyListStates: Map<KClass<*>, LazyListState> = mapOf(Pair(ListRoute::class, rememberLazyListState()))
+    lazyListStates: Map<KClass<*>, LazyListState> = mapOf(Pair(Route.ListRoute::class, rememberLazyListState()))
 ): NBAppState {
     return remember(
         navController,
@@ -81,7 +80,7 @@ class NBAppState(
 
     val isGroupDetailsRoute: Boolean
         @Composable get() {
-            return currentDestination?.hasRoute(GroupDetailsRoute::class) == true
+            return currentDestination?.hasRoute(Route.GroupDetailsRoute::class) == true
         }
 
     val currentDestination: NavDestination?
@@ -147,5 +146,4 @@ class NBAppState(
             }
         }
     }
-
 }

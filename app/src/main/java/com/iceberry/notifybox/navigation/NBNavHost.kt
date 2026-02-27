@@ -38,7 +38,7 @@ fun NBNavHost(
 
     NavHost(
         navController = navController,
-        startDestination = ListRoute,
+        startDestination = Route.ListRoute,
         modifier = modifier,
         enterTransition = { slideInHorizontally(animationSpec = spring()) { fullWidth -> fullWidth * if (isTopLevelDestination) -1 else 1 } },
         exitTransition = { slideOutHorizontally(animationSpec = spring()) { fullWidth -> fullWidth * if (isTopLevelDestination) -1 else 1 } }
@@ -51,7 +51,10 @@ fun NBNavHost(
 
         forwardScreen()
 
-        settingsScreen()
+        settingsScreen(
+            appState = appState,
+            onItemClick = { navController.navigate(route = it.route, navOptions = it.navOptions) }
+        )
 
         groupDetailsScreen(
             appState = appState,
@@ -61,6 +64,10 @@ fun NBNavHost(
         statisticScreen(
             onBackClick = navController::popBackStack,
             onNavToDetails = navController::navigateToGroupDetails
+        )
+
+        aboutScreen(
+            onBackClick = navController::popBackStack,
         )
     }
 }

@@ -37,9 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.room.FtsOptions
-import com.iceberry.notifybox.navigation.ForwardRoute
-import com.iceberry.notifybox.navigation.ListRoute
-import com.iceberry.notifybox.navigation.SettingRoute
+import com.iceberry.notifybox.navigation.Route
 import com.iceberry.notifybox.ui.forward.ForwardTopAppBar
 import com.iceberry.notifybox.ui.list.ListTopAppBar
 import com.iceberry.notifybox.ui.setting.SettingTopAppBar
@@ -75,7 +73,7 @@ fun NBTopAppBar(
     windowInsets: WindowInsets = TopAppBarDefaults.windowInsets
 ) {
     when {
-        currentDestination?.hasRoute(ListRoute::class) == true -> {
+        currentDestination?.hasRoute(Route.ListRoute::class) == true -> {
             ListTopAppBar(
                 routeToStatistic = routeToStatistic,
                 orderBy = orderBy,
@@ -84,12 +82,15 @@ fun NBTopAppBar(
             )
         }
 
-        currentDestination?.hasRoute(ForwardRoute::class) == true -> {
+        currentDestination?.hasRoute(Route.ForwardRoute::class) == true -> {
             ForwardTopAppBar(windowInsets = windowInsets)
         }
 
-        currentDestination?.hasRoute(SettingRoute::class) == true -> {
-            SettingTopAppBar(windowInsets = windowInsets)
+        currentDestination?.hasRoute(Route.SettingRoute::class) == true -> {
+            SettingTopAppBar(
+                scrollBehavior = scrollBehavior,
+                windowInsets = windowInsets
+            )
         }
 
 //        currentDestination?.hasRoute(GroupDetailsRoute::class) == true -> {

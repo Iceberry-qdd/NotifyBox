@@ -26,38 +26,48 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.iceberry.notifybox.ui.NBAppState
+import com.iceberry.notifybox.ui.about.AboutScreen
 import com.iceberry.notifybox.ui.forward.ForwardScreen
 import com.iceberry.notifybox.ui.groupDetails.GroupDetailsScreen
 import com.iceberry.notifybox.ui.list.ListScreen
 import com.iceberry.notifybox.ui.list.ListViewModel
 import com.iceberry.notifybox.ui.list.NotifyVO
+import com.iceberry.notifybox.ui.setting.NavigateData
 import com.iceberry.notifybox.ui.setting.SettingScreen
 import com.iceberry.notifybox.ui.statistic.StatisticScreen
 import kotlinx.serialization.Serializable
 
-@Serializable
-object ListRoute
+sealed interface Route {
+    @Serializable
+    object ListRoute : Route
 
-@Serializable
-object ForwardRoute
+    @Serializable
+    object ForwardRoute : Route
 
-@Serializable
-object SettingRoute
+    @Serializable
+    object SettingRoute : Route
 
-@Serializable
-data class GroupDetailsRoute(val notifyId: Int? = null, val packageName: String)
+    @Serializable
+    data class GroupDetailsRoute(val notifyId: Int? = null, val packageName: String) : Route
 
-@Serializable
-object StatisticRoute
+    @Serializable
+    object StatisticRoute : Route
 
-fun NavController.navigateToList(navOptions: NavOptions) = navigate(route = ListRoute, navOptions)
+    @Serializable
+    object AboutRoute : Route
+
+    @Serializable
+    object NopRoute : Route
+}
+
+fun NavController.navigateToList(navOptions: NavOptions) = navigate(route = Route.ListRoute, navOptions)
 
 fun NavGraphBuilder.listScreen(
     appState: NBAppState,
     viewModel: ListViewModel,
     onItemClick: (NotifyVO) -> Unit
 ) {
-    composable<ListRoute> {
+    composable<Route.ListRoute> {
         ListScreen(
             modifier = Modifier.fillMaxSize(),
             appState = appState,
@@ -67,22 +77,27 @@ fun NavGraphBuilder.listScreen(
     }
 }
 
-fun NavController.navigateToForward(navOptions: NavOptions) = navigate(route = ForwardRoute, navOptions)
+fun NavController.navigateToForward(navOptions: NavOptions) = navigate(route = Route.ForwardRoute, navOptions)
 
 fun NavGraphBuilder.forwardScreen() {
-    composable<ForwardRoute> {
+    composable<Route.ForwardRoute> {
         ForwardScreen(
             modifier = Modifier.padding(16.dp)
         )
     }
 }
 
-fun NavController.navigateToSettings(navOptions: NavOptions) = navigate(route = SettingRoute, navOptions)
+fun NavController.navigateToSettings(navOptions: NavOptions) = navigate(route = Route.SettingRoute, navOptions)
 
-fun NavGraphBuilder.settingsScreen() {
-    composable<SettingRoute> {
+fun NavGraphBuilder.settingsScreen(
+    appState: NBAppState,
+    onItemClick: (NavigateData) -> Unit
+) {
+    composable<Route.SettingRoute> {
         SettingScreen(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.fillMaxSize(),
+            onClickItem = onItemClick,
+            appState = appState
         )
     }
 }
@@ -90,14 +105,14 @@ fun NavGraphBuilder.settingsScreen() {
 fun NavController.navigateToGroupDetails(
     initialNotify: NotifyVO? = null,
     navOptions: NavOptions? = null
-) = navigate(route = GroupDetailsRoute(initialNotify?.notifyId, initialNotify?.appPackageName ?: ""), navOptions)
+) = navigate(route = Route.GroupDetailsRoute(initialNotify?.notifyId, initialNotify?.appPackageName ?: ""), navOptions)
 
 fun NavGraphBuilder.groupDetailsScreen(
     appState: NBAppState,
     onBackClick: () -> Unit
 ) {
-    composable<GroupDetailsRoute> { backStackEntry ->
-        val route: GroupDetailsRoute = backStackEntry.toRoute()
+    composable<Route.GroupDetailsRoute> { backStackEntry ->
+        val route: Route.GroupDetailsRoute = backStackEntry.toRoute()
         GroupDetailsScreen(
             modifier = Modifier.fillMaxSize(),
             appState = appState,
@@ -108,17 +123,28 @@ fun NavGraphBuilder.groupDetailsScreen(
     }
 }
 
-fun NavController.navigateToStatistic(navOptions: NavOptions? = null) = navigate(route = StatisticRoute, navOptions)
+fun NavController.navigateToStatistic(navOptions: NavOptions? = null) = navigate(route = Route.StatisticRoute, navOptions)
 
 fun NavGraphBuilder.statisticScreen(
     onBackClick: () -> Unit,
     onNavToDetails: (NotifyVO) -> Unit
 ) {
-    composable<StatisticRoute> { backStackEntry ->
+    composable<Route.StatisticRoute> { backStackEntry ->
         StatisticScreen(
             modifier = Modifier.fillMaxSize(),
             onBackClick = onBackClick,
             onNavToDetails = onNavToDetails
+        )
+    }
+}
+
+fun NavGraphBuilder.aboutScreen(
+    onBackClick: () -> Unit,
+) {
+    composable<Route.AboutRoute> { backStackEntry ->
+        AboutScreen(
+            modifier = Modifier.fillMaxSize(),
+            onBackClick = onBackClick
         )
     }
 }

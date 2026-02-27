@@ -51,7 +51,7 @@ import javax.inject.Inject
 @HiltViewModel
 class StatisticViewModel @Inject constructor(
     notifyRepository: NotifyRepository,
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) : ViewModel() {
     private val _isLoading = MutableStateFlow(true)
     private val _timeRangeFilter = MutableStateFlow(TimeRangeFilter.ALL)

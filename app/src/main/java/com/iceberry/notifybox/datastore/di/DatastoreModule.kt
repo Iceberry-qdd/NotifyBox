@@ -18,9 +18,10 @@ package com.iceberry.notifybox.datastore.di
 
 import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.dataStoreFile
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import androidx.datastore.preferences.core.Preferences
+import com.iceberry.notifybox.datastore.Settings
+import com.iceberry.notifybox.datastore.SettingsSerializer
 import com.iceberry.notifybox.network.di.AppDispatchers.IO
 import com.iceberry.notifybox.network.di.ApplicationScope
 import com.iceberry.notifybox.network.di.Dispatcher
@@ -36,18 +37,18 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DatastoreModule {
-    const val FILE_EXTENSION = "preferences_pb"
-
     @Provides
     @Singleton
     internal fun providesSettingsDatastore(
         @ApplicationContext context: Context,
         @Dispatcher(IO) ioDispatcher: CoroutineDispatcher,
-        @ApplicationScope scope: CoroutineScope
-    ): DataStore<Preferences> =
-        PreferenceDataStoreFactory.create(
-            scope = CoroutineScope(scope.coroutineContext + ioDispatcher),
+        @ApplicationScope scope: CoroutineScope,
+        userPreferencesSerializer: SettingsSerializer,
+    ): DataStore<Settings> =
+        DataStoreFactory.create(
+            serializer = userPreferencesSerializer,
+            scope = CoroutineScope(scope.coroutineContext + ioDispatcher)
         ) {
-            context.dataStoreFile("settings.${FILE_EXTENSION}")
+            context.dataStoreFile("settings.pb")
         }
 }

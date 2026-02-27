@@ -24,6 +24,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.serialization.compiler)
     alias(libs.plugins.room)
+    alias(libs.plugins.protobuf)
 }
 
 android {
@@ -73,7 +74,7 @@ android {
     buildFeatures {
         compose = true
         aidl = false
-        buildConfig = false
+        buildConfig = true
         renderScript = false
         shaders = false
         viewBinding = true
@@ -86,12 +87,32 @@ android {
     }
 }
 
+protobuf {
+    protoc {
+        artifact = libs.protobuf.protoc.get().toString()
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                create("java") {
+                    option("lite")
+                }
+                create("kotlin") {
+                    option("lite")
+                }
+            }
+        }
+    }
+}
+
 dependencies {
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)
     implementation(libs.androidx.room.paging)
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.preference.ktx)
+    implementation(libs.androidx.datastore)
+    implementation(libs.protobuf.kotlin.lite)
+    implementation(libs.androidx.appcompat)
     val composeBom = platform(libs.androidx.compose.bom)
 
     implementation(composeBom)

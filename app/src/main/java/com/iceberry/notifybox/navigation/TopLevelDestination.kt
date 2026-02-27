@@ -33,18 +33,18 @@ enum class TopLevelDestination(
         icon = Icons.AutoMirrored.Filled.List,
         iconText = "列表",
         titleText = "列表",
-        route = ListRoute::class
+        route = Route.ListRoute::class
     ),
     FORWARD(
         icon = Icons.Filled.SwapHoriz,
         iconText = "转发",
         titleText = "转发",
-        route = ForwardRoute::class
+        route = Route.ForwardRoute::class
     ),
     SETTINGS(
         icon = Icons.Filled.Settings,
         iconText = "设置",
         titleText = "设置",
-        route = SettingRoute::class
+        route = Route.SettingRoute::class
     )
 }

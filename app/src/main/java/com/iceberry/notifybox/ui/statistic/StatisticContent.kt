@@ -199,7 +199,7 @@ fun StatisticContent(
                 modifier = Modifier,
                 state = rememberStatisticItemState(
                     progress = pieChartData[i].dest,
-                    title = pieChartData[i].label?: pieChartData[i].packageName,
+                    title = pieChartData[i].label ?: pieChartData[i].packageName,
                     value = "${pieChartData[i].value.toLong()}",
                     indicatorColor = Color(COLOR_PALETTE[i % COLOR_PALETTE.size]),
                     appIcon = pieChartData[i].appIcon,

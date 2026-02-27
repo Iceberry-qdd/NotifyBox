@@ -27,7 +27,9 @@ import com.iceberry.notifybox.data.local.database.App
 import com.iceberry.notifybox.data.local.database.BarChartData
 import com.iceberry.notifybox.data.local.database.Notify
 import com.iceberry.notifybox.data.local.database.PieChartData
+import com.iceberry.notifybox.datastore.SettingsData
 import com.iceberry.notifybox.ui.list.ListOrderBy
+import com.iceberry.notifybox.ui.setting.SettingOptions
 import com.iceberry.notifybox.ui.statistic.chart.TimeRangeFilter
 import dagger.Binds
 import dagger.Module
@@ -117,3 +119,23 @@ class FakeAppRepository @Inject constructor() : AppRepository {
 
 @Deprecated(message = "Not use")
 val fakeApps = listOf<App>()
+
+class FakeSettingsRepository @Inject constructor() : SettingsRepository {
+    override val settings: Flow<SettingsData> = flowOf()
+
+    override suspend fun setANLSRunning(status: Boolean) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun setDarkThemeConfig(darkThemeConfig: SettingOptions.Theme) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun setLanguageConfig(languageConfig: SettingOptions.Language) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun setShouldHideOnboarding(shouldHidePolicy: Boolean) {
+        TODO("Not yet implemented")
+    }
+}

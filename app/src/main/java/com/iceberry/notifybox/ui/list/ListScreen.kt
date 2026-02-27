@@ -60,7 +60,7 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.room.FtsOptions
 import com.iceberry.notifybox.R
-import com.iceberry.notifybox.navigation.ListRoute
+import com.iceberry.notifybox.navigation.Route
 import com.iceberry.notifybox.ui.NBAppState
 import com.iceberry.notifybox.ui.SearchTopBar
 import com.iceberry.notifybox.ui.TopAppBarDropdownMenu
@@ -82,7 +82,7 @@ fun ListScreen(
     val items = viewModel.pager.collectAsLazyPagingItems()
     val lazyListState = appState.curRouteLazyListState ?: rememberLazyListState()
 
-    val listState = rememberListColumnState<NotifyVO>(
+    val listState = rememberListColumnState(
         items = items,
         lazyListState = lazyListState,
         loading = uiState.loading,
@@ -177,39 +177,67 @@ fun ListTopAppBarMenu(
     ) { closeMenu ->
         DropdownMenuItem(
             leadingIcon = {
-                if(orderBy.field == OrderField.TIME && orderBy.direction == OrderDirection.ASC){
+                if (orderBy.field == OrderField.TIME && orderBy.direction == OrderDirection.ASC) {
                     Icon(Icons.Default.Check, contentDescription = "已选择")
                 }
             },
             text = { Text("按日期正序") },
-            onClick = { viewModel.setOrderBy(ListOrderBy(direction = OrderDirection.ASC, field = OrderField.TIME)); closeMenu() },
+            onClick = {
+                viewModel.setOrderBy(
+                    ListOrderBy(
+                        direction = OrderDirection.ASC,
+                        field = OrderField.TIME
+                    )
+                ); closeMenu()
+            },
         )
         DropdownMenuItem(
             leadingIcon = {
-                if(orderBy.field == OrderField.TIME && orderBy.direction == OrderDirection.DESC){
+                if (orderBy.field == OrderField.TIME && orderBy.direction == OrderDirection.DESC) {
                     Icon(Icons.Default.Check, contentDescription = "已选择")
                 }
             },
             text = { Text("按日期倒序") },
-            onClick = { viewModel.setOrderBy(ListOrderBy(direction = OrderDirection.DESC, field = OrderField.TIME)); closeMenu() },
+            onClick = {
+                viewModel.setOrderBy(
+                    ListOrderBy(
+                        direction = OrderDirection.DESC,
+                        field = OrderField.TIME
+                    )
+                ); closeMenu()
+            },
         )
         DropdownMenuItem(
             leadingIcon = {
-                if(orderBy.field == OrderField.PACKAGE && orderBy.direction == OrderDirection.ASC){
+                if (orderBy.field == OrderField.PACKAGE && orderBy.direction == OrderDirection.ASC) {
                     Icon(Icons.Default.Check, contentDescription = "已选择")
                 }
             },
             text = { Text("按包名正序") },
-            onClick = { viewModel.setOrderBy(ListOrderBy(direction = OrderDirection.ASC, field = OrderField.PACKAGE)); closeMenu() },
+            onClick = {
+                viewModel.setOrderBy(
+                    ListOrderBy(
+                        direction = OrderDirection.ASC,
+                        field = OrderField.PACKAGE
+                    )
+                ); closeMenu()
+            },
         )
         DropdownMenuItem(
             leadingIcon = {
-                if(orderBy.field == OrderField.PACKAGE && orderBy.direction == OrderDirection.DESC){
+                if (orderBy.field == OrderField.PACKAGE && orderBy.direction == OrderDirection.DESC) {
                     Icon(Icons.Default.Check, contentDescription = "已选择")
                 }
             },
             text = { Text("按包名倒序") },
-            onClick = { viewModel.setOrderBy(ListOrderBy(direction = OrderDirection.DESC, field = OrderField.PACKAGE)); closeMenu() },
+            onClick = {
+                viewModel.setOrderBy(
+                    ListOrderBy(
+                        direction = OrderDirection.DESC,
+                        field = OrderField.PACKAGE
+                    )
+                ); closeMenu()
+            },
         )
     }
 }
@@ -224,7 +252,7 @@ fun ListFloatActionBar(
     val currentDestination = appState.currentDestination
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    if (currentDestination?.hasRoute(ListRoute::class) == true) {
+    if (currentDestination?.hasRoute(Route.ListRoute::class) == true) {
         ExtendedFloatingActionButton(
             onClick = {
                 if (uiState.isServiceRunning) {

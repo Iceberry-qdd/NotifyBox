@@ -47,7 +47,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MBSViewModel @Inject constructor(
     notifyRepository: NotifyRepository,
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) : ViewModel() {
     private val _packageName = MutableStateFlow("")
     private val _loading = MutableStateFlow(false)

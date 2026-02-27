@@ -183,8 +183,6 @@ internal fun handlePieData(pieChartDataList: List<PieChartDataVO>): PieData {
         .map { PieEntry(it.value.toFloat(), it.label) }
         .reduceOrNull { agg, e -> PieEntry(agg.value + e.value, "其它", false) }
 
-    Log.i("otherPieEntry", otherPieEntry.toString())
-
     val pieEntries = pieChartDataList
         .dropLastWhile { it.dest < 0.01 }
         .map { PieEntry(it.value, it.label, true) }
