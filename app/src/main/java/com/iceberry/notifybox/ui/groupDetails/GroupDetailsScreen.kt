@@ -133,7 +133,7 @@ fun GroupDetailsScreen(
                 }
             }
 
-            val listState = rememberListColumnState<NotifyVO>(
+            val listState = rememberListColumnState(
                 items = items,
                 lazyListState = lazyListState,
                 loading = uiState.loading,

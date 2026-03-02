@@ -31,6 +31,7 @@ interface SettingsRepository {
     suspend fun setDarkThemeConfig(darkThemeConfig: SettingOptions.Theme)
     suspend fun setLanguageConfig(languageConfig: SettingOptions.Language)
     suspend fun setShouldHideOnboarding(shouldHidePolicy: Boolean)
+    suspend fun setEnableLog(enableLog: SettingOptions.Bool)
 }
 
 class DefaultSettingsRepository @Inject constructor(
@@ -44,6 +45,10 @@ class DefaultSettingsRepository @Inject constructor(
 
     override suspend fun setShouldHideOnboarding(shouldHidePolicy: Boolean) =
         settingsDatastore.setShouldHideOnboarding(shouldHidePolicy)
+
+    override suspend fun setEnableLog(enableLog: SettingOptions.Bool) {
+        settingsDatastore.setEnableLog(enableLog)
+    }
 
     override suspend fun setDarkThemeConfig(darkThemeConfig: SettingOptions.Theme) =
         settingsDatastore.setDarkThemeConfig(darkThemeConfig)

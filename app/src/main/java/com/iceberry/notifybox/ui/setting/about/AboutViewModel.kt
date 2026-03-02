@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.iceberry.notifybox.ui.about
+package com.iceberry.notifybox.ui.setting.about
 
 import android.content.Context
 import androidx.lifecycle.ViewModel

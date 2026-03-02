@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Iceberry-qdd.
+ * Copyright (c) 2025-2026 Iceberry-qdd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.iceberry.notifybox.ui.about
+package com.iceberry.notifybox.ui.setting.about
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -73,7 +73,7 @@ fun AboutContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @PreviewLightDark
 @Composable
-private fun AboutScreenPreview() {
+private fun AboutContentPreview() {
     NBApplicationTheme {
         AboutContent(
             modifier = Modifier

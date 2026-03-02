@@ -27,4 +27,5 @@ message Settings {
   bool should_hide_policy = 2;
   DarkThemeConfigProto dark_theme_config = 3;
   LanguageConfigProto language_config = 4;
+  bool enable_log = 5;
 }

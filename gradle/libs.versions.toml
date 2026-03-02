@@ -26,9 +26,10 @@ paging = "3.4.1"
 datastorePreferences = "1.2.0"
 mpAndroidChart = "v3.1.0"
 datastore = "1.2.0"
-protobufKotlinLite = "4.33.5"
+protobufKotlinLite = "4.34.0"
 protobuf = "0.9.5"
 appcompat = "1.7.1"
+timber = "5.0.1"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCore" }
@@ -71,6 +72,7 @@ androidx-datastore = { group = "androidx.datastore", name = "datastore", version
 protobuf-kotlin-lite = { group = "com.google.protobuf", name = "protobuf-kotlin-lite", version.ref = "protobufKotlinLite" }
 protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobufKotlinLite" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

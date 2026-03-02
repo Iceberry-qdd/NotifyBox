@@ -43,7 +43,7 @@ fun SettingScreen(
     appState: NBAppState,
     onClickItem: (NavigateData) -> Unit
 ) {
-    val items by viewModel.pager.collectAsState()
+    val items by viewModel.pager.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val lazyListState = appState.curRouteLazyListState ?: rememberLazyListState()
     val listState = rememberSettingColumnState(

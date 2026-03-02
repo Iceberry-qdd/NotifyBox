@@ -42,6 +42,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -73,8 +74,16 @@ class AppNotificationListenerService() : NotificationListenerService() {
         val packageName = sbn?.packageName
         val displayName = getDisplayName(context, packageName)
 
-        if (title == null && content == null) return
-        if (packageName == null) return
+        if (packageName == null){
+            Timber.tag("sbn-${sbn?.id}").w("The packageName is null, skipped")
+            return
+        }
+        if (title == null && content == null){
+            Timber.tag("sbn-${packageName}").w("[${sbn.id}]The title or content is null, skipped")
+            return
+        }
+
+        Timber.tag("sbn-${packageName}").i("${sbn.id}")
 
         scope.launch {
             val notify = withContext(dispatcher) {
@@ -108,6 +117,7 @@ class AppNotificationListenerService() : NotificationListenerService() {
         scope.launch {
             settingsRepository.setANLSRunning(true)
         }
+        Timber.tag("NLService").i("Start notify listener service...")
         Toast.makeText(context, "启动监听服务...", Toast.LENGTH_SHORT).show()
         return START_STICKY
     }
@@ -116,6 +126,7 @@ class AppNotificationListenerService() : NotificationListenerService() {
         scope.launch {
             settingsRepository.setANLSRunning(false)
         }
+        Timber.tag("NLService").i("Stop notify listener service...")
         Toast.makeText(context, "监听服务已停止", Toast.LENGTH_SHORT).show()
     }
 
@@ -129,7 +140,7 @@ class AppNotificationListenerService() : NotificationListenerService() {
                 val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
                 context.startActivity(intent)
             } catch (e: Exception) {
-                Log.e("openNotificationListenSettings", e.message, e)
+                Timber.tag("openNotificationListenSettings").e(e)
             }
         }
 
@@ -142,17 +153,17 @@ class AppNotificationListenerService() : NotificationListenerService() {
             val runningServices = activityManager.getRunningServices(Int.MAX_VALUE)
 
             if (runningServices.isEmpty()) {
-                Log.i("service128", "NLService not found, so it's not running!")
+                Timber.tag("NLService").i("NLService not found, so it's not running!")
                 return false
             }
 
             for (serviceInfo in runningServices) {
                 if (AppNotificationListenerService::class.java.name == serviceInfo.service.className) {
-                    Log.i("service134", "NLService found, so it's running!")
+                    Timber.tag("NLService").i("NLService found, so it's running!")
                     return true
                 }
             }
-            Log.i("service138", "NLService not found, so it's not running!")
+            Timber.tag("NLService").i("NLService not found, so it's not running!")
             return false
         }
 
@@ -162,7 +173,7 @@ class AppNotificationListenerService() : NotificationListenerService() {
                     val applicationInfo = context.packageManager.getApplicationInfo(it, ApplicationInfo.FLAG_INSTALLED)
                     context.packageManager.getApplicationLabel(applicationInfo).toString()
                 }
-                    .onFailure { e -> Log.e(null, e.message, e) }
+                    .onFailure { e -> Timber.tag("NLService").e(e) }
                     .getOrDefault(null)
             }
         }

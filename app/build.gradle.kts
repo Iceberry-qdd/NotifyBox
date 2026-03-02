@@ -113,6 +113,7 @@ dependencies {
     implementation(libs.androidx.datastore)
     implementation(libs.protobuf.kotlin.lite)
     implementation(libs.androidx.appcompat)
+    implementation(libs.timber)
     val composeBom = platform(libs.androidx.compose.bom)
 
     implementation(composeBom)

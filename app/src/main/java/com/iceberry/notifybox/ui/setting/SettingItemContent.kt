@@ -449,8 +449,8 @@ fun ReloadIconSettingItem(
                     content = { Text("取消") }
                 )
             },
-            title = { Text("重载应用图标？") },
-            text = { Text("重载应用图标后，通知将统一显示为应用图标。（非必要请勿执行此操作）") },
+            title = { Text(data.description) },
+            text = { Text("重载通知图标后，获取到的通知将统一显示为所属应用的图标。（非必要请勿执行此操作）") },
             properties = DialogProperties(
                 dismissOnBackPress = true,
                 dismissOnClickOutside = false
@@ -620,7 +620,7 @@ fun ImportSettingItem(
                     key = "override_import",
                     name = "覆盖导入",
                     value = SettingOptions.Nop.NOP,
-                    description = "导入后将仅包含已导入通知数据",
+                    description = "删除所有数据后导入",
                     actionType = SettingActionTypeEnum.CUSTOM,
                     group = SettingGroupEnum.BACKUP,
                     icon = Icons.Default.Draw
@@ -639,7 +639,7 @@ fun ImportSettingItem(
                     key = "merge_import",
                     name = "合并导入",
                     value = SettingOptions.Nop.NOP,
-                    description = "导入后将与现有通知数据共存",
+                    description = "导入数据与当前数据合并",
                     actionType = SettingActionTypeEnum.CUSTOM,
                     group = SettingGroupEnum.BACKUP,
                     icon = Icons.Default.Merge
@@ -685,6 +685,7 @@ private fun ImportSettingItemPreview() {
 private fun SettingItem(
     modifier: Modifier,
     data: SettingItemVO<*>,
+    iconModifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     content: @Composable (() -> Unit)
 ) {
@@ -703,6 +704,7 @@ private fun SettingItem(
             horizontalArrangement = Arrangement.spacedBy(space = 24.dp)
         ) {
             Icon(
+                modifier = iconModifier,
                 imageVector = data.icon,
                 contentDescription = data.icon.name
             )
@@ -712,7 +714,7 @@ private fun SettingItem(
                 Text(text = data.name)
                 Text(
                     text = data.description,
-                    style = MaterialTheme.typography.titleSmall
+                    style = MaterialTheme.typography.bodyMedium.merge(color = MaterialTheme.colorScheme.outline)
                 )
             }
             content()

@@ -35,6 +35,7 @@ val LimeA200 = Color(0xFFEEFF41)
 val Orange500 = Color(0xFFFF9800)
 val CyanA200 = Color(0xFF18FFFF)
 val Teal500 = Color(0xFF009688)
+val Green500 = Color(0xFF34A853)
 
 val COLOR_PALETTE = ColorTemplate.MATERIAL_COLORS.plus(
     intArrayOf(

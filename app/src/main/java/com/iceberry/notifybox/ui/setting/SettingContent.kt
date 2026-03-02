@@ -56,7 +56,6 @@ fun SettingContent(
     LazyColumn(
         modifier = modifier
             .background(MaterialTheme.colorScheme.background),
-
         state = state.lazyListState
     ) {
         items(
@@ -123,7 +122,31 @@ fun SettingGroup(
                                 .background(MaterialTheme.colorScheme.background)
                                 .wrapContentHeight(),
                             data = it as SettingItemVO<SettingOptions.Bool>,
-                            onCheckedChange = {}
+                            onClick = {
+                                when (it.key) {
+                                    "log" -> {
+                                        if (it.value.bool) {
+                                            onClickItem(
+                                                NavigateData(route = Route.LogRoute)
+                                            )
+                                        }
+                                    }
+
+                                    else -> {}
+                                }
+                            },
+                            onCheckedChange = { value ->
+                                when (it.key) {
+                                    "log" -> {
+                                        viewModel.setEnableLog(
+                                            SettingOptions.Bool.entries.firstOrNull { v -> v.bool == value }
+                                                ?: SettingOptions.Bool.FALSE
+                                        )
+                                    }
+
+                                    else -> {}
+                                }
+                            }
                         )
                     }
 

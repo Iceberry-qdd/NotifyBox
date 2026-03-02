@@ -57,6 +57,9 @@ sealed interface Route {
     object AboutRoute : Route
 
     @Serializable
+    object LogRoute : Route
+
+    @Serializable
     object NopRoute : Route
 }
 
@@ -143,6 +146,17 @@ fun NavGraphBuilder.aboutScreen(
 ) {
     composable<Route.AboutRoute> { backStackEntry ->
         AboutScreen(
+            modifier = Modifier.fillMaxSize(),
+            onBackClick = onBackClick
+        )
+    }
+}
+
+fun NavGraphBuilder.logScreen(
+    onBackClick: () -> Unit,
+) {
+    composable<Route.LogRoute> { backStackEntry ->
+        LogScreen(
             modifier = Modifier.fillMaxSize(),
             onBackClick = onBackClick
         )

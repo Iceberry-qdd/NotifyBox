@@ -138,4 +138,8 @@ class FakeSettingsRepository @Inject constructor() : SettingsRepository {
     override suspend fun setShouldHideOnboarding(shouldHidePolicy: Boolean) {
         TODO("Not yet implemented")
     }
+
+    override suspend fun setEnableLog(enableLog: SettingOptions.Bool) {
+        TODO("Not yet implemented")
+    }
 }

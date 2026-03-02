@@ -69,5 +69,10 @@ fun NBNavHost(
         aboutScreen(
             onBackClick = navController::popBackStack,
         )
+
+        logScreen(
+            onBackClick = navController::popBackStack,
+        )
+
     }
 }

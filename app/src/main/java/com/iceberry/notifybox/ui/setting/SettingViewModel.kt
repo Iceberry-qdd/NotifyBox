@@ -18,14 +18,12 @@ package com.iceberry.notifybox.ui.setting
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Autorenew
-import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.BatteryStd
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.SettingsBackupRestore
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.ViewModel
@@ -33,7 +31,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavOptions
 import com.iceberry.notifybox.BuildConfig
 import com.iceberry.notifybox.data.SettingsRepository
+import com.iceberry.notifybox.icon.MoveItem
+import com.iceberry.notifybox.icon.ResetImage
 import com.iceberry.notifybox.navigation.Route
+import com.iceberry.notifybox.ui.log.TimberFlow
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,6 +53,14 @@ class SettingViewModel @Inject constructor(
 ) : ViewModel() {
     private val _loading = MutableStateFlow(true)
     private val _state2 = MutableStateFlow(true)
+
+    init {
+        viewModelScope.launch {
+            settingsRepository.settings.map { v -> v.enableLog.bool }.collect { enable ->
+                if (!enable) TimberFlow.clear()
+            }
+        }
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val pager = settingsRepository.settings
@@ -99,18 +108,18 @@ class SettingViewModel @Inject constructor(
                     id = 5L,
                     key = "reload_icon",
                     value = SettingOptions.Nop.NOP,
-                    name = "重载应用图标",
-                    description = "重新加载应用图标",
+                    name = "重载通知图标",
+                    description = "重新加载通知图标",
                     actionType = SettingActionTypeEnum.CUSTOM,
                     group = SettingGroupEnum.DATA_PERMISSION,
-                    icon = Icons.Default.Refresh
+                    icon = Icons.Filled.ResetImage
                 ),
                 SettingItemVO(
                     id = 6L,
                     key = "log",
-                    value = SettingOptions.Bool.FALSE,
+                    value = it.enableLog,
                     name = "日志",
-                    description = "记录应用日志",
+                    description = if (it.enableLog.bool) "点击查看日志" else "记录应用运行日志",
                     actionType = SettingActionTypeEnum.SWITCH,
                     group = SettingGroupEnum.DATA_PERMISSION,
                     icon = Icons.AutoMirrored.Filled.Article
@@ -182,6 +191,12 @@ class SettingViewModel @Inject constructor(
             }
 
             else -> {}
+        }
+    }
+
+    fun setEnableLog(enableLog: SettingOptions.Bool) {
+        viewModelScope.launch {
+            settingsRepository.setEnableLog(enableLog)
         }
     }
 }

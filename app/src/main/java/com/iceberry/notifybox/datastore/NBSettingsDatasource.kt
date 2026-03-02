@@ -25,7 +25,8 @@ data class SettingsData(
     val darkThemeConfig: SettingOptions.Theme,
     val languageConfig: SettingOptions.Language,
     val shouldHidePolicy: Boolean,
-    val isANLSRunning: Boolean
+    val isANLSRunning: Boolean,
+    val enableLog: SettingOptions.Bool
 )
 
 class NBSettingsDatasource @Inject constructor(
@@ -57,7 +58,8 @@ class NBSettingsDatasource @Inject constructor(
                     LanguageConfigProto.LANGUAGE_CONFIG_EN_US -> SettingOptions.Language.EN_US
                 },
                 shouldHidePolicy = it.shouldHidePolicy,
-                isANLSRunning = it.isAnlsRunning
+                isANLSRunning = it.isAnlsRunning,
+                enableLog = SettingOptions.Bool.entries.firstOrNull{ v -> v.bool == it.enableLog } ?: SettingOptions.Bool.FALSE
             )
         }
 
@@ -96,6 +98,14 @@ class NBSettingsDatasource @Inject constructor(
         settings.updateData {
             it.copy {
                 this.isAnlsRunning = isAnlsRunning
+            }
+        }
+    }
+
+    suspend fun setEnableLog(enableLog: SettingOptions.Bool) {
+        settings.updateData {
+            it.copy {
+                this.enableLog = enableLog.bool
             }
         }
     }
