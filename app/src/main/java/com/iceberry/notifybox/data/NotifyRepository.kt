@@ -21,6 +21,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.room.Transaction
 import androidx.sqlite.db.SimpleSQLiteQuery
+import com.iceberry.notifybox.data.local.database.AppDatabase
 import com.iceberry.notifybox.data.local.database.BarChartData
 import com.iceberry.notifybox.data.local.database.Notify
 import com.iceberry.notifybox.data.local.database.NotifyDao
@@ -57,7 +58,8 @@ interface NotifyRepository {
 }
 
 class DefaultNotifyRepository @Inject constructor(
-    private val notifyDao: NotifyDao
+    private val notifyDao: NotifyDao,
+    private val database: AppDatabase
 ) : NotifyRepository {
     private val accessMutex = Mutex()
 
@@ -141,10 +143,12 @@ class DefaultNotifyRepository @Inject constructor(
 
     override suspend fun markDeletedByGroup(notifyId: Int, packageName: String) = accessMutex.withLock {
         notifyDao.markDeletedByGroup(notifyId, packageName)
+        database.invalidationTracker.refreshVersionsAsync()
     }
 
     override suspend fun markDeletedById(notifyId: Int) = accessMutex.withLock {
         notifyDao.markDeletedById(notifyId)
+        database.invalidationTracker.refreshVersionsAsync()
     }
 
     override fun searchByQuery(query: String): PagingSource<Int, Notify> {

@@ -17,10 +17,11 @@
 package com.iceberry.notifybox.data.local.di
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Room
 import androidx.room.TypeConverter
-import com.iceberry.notifybox.data.local.database.AppDao
 import com.iceberry.notifybox.data.local.database.AppDatabase
+import com.iceberry.notifybox.data.local.database.DeviceDao
 import com.iceberry.notifybox.data.local.database.NotifyDao
 import dagger.Module
 import dagger.Provides
@@ -42,8 +43,8 @@ class DatabaseModule {
     }
 
     @Provides
-    fun provideAppDao(appDatabase: AppDatabase): AppDao {
-        return appDatabase.appDao()
+    fun provideDeviceDao(appDatabase: AppDatabase): DeviceDao {
+        return appDatabase.deviceDao()
     }
 
     @Provides
@@ -53,7 +54,11 @@ class DatabaseModule {
             appContext,
             AppDatabase::class.java,
             "Notifies.db"
-        ).build()
+        ).addMigrations(AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5)
+            .setQueryCallback({ sqlQuery, bindArgs ->
+            Log.d("Room", "sqlQuery = $sqlQuery, args = $bindArgs")
+        }) { it.run() }
+            .build()
     }
 }
 

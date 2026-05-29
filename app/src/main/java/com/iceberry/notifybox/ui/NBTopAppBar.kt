@@ -67,10 +67,10 @@ internal fun TopAppBarDropdownMenu(
 @Composable
 fun NBTopAppBar(
     currentDestination: NavDestination?,
-    routeToStatistic: () -> Unit,
-    orderBy: (FtsOptions.Order, String) -> Unit,
     scrollBehavior: TopAppBarScrollBehavior,
-    windowInsets: WindowInsets = TopAppBarDefaults.windowInsets
+    windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
+    routeToStatistic: () -> Unit,
+    orderBy: (FtsOptions.Order, String) -> Unit
 ) {
     when {
         currentDestination?.hasRoute(Route.ListRoute::class) == true -> {
@@ -83,7 +83,10 @@ fun NBTopAppBar(
         }
 
         currentDestination?.hasRoute(Route.ForwardRoute::class) == true -> {
-            ForwardTopAppBar(windowInsets = windowInsets)
+            ForwardTopAppBar(
+                scrollBehavior = scrollBehavior,
+                windowInsets = windowInsets
+            )
         }
 
         currentDestination?.hasRoute(Route.SettingRoute::class) == true -> {

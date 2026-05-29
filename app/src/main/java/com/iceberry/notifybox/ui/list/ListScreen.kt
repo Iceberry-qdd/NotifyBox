@@ -77,7 +77,6 @@ fun ListScreen(
     appState: NBAppState,
     onClickItem: (NotifyVO) -> Unit
 ) {
-    val scope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val items = viewModel.pager.collectAsLazyPagingItems()
     val lazyListState = appState.curRouteLazyListState ?: rememberLazyListState()
@@ -87,7 +86,8 @@ fun ListScreen(
         lazyListState = lazyListState,
         loading = uiState.loading,
         query = uiState.query,
-        snackbarHostState = appState.snackbarHostState
+        snackbarHostState = appState.snackbarHostState,
+        coroutineScope = appState.coroutineScope
     )
 
     ListColumnContent(
@@ -95,7 +95,7 @@ fun ListScreen(
         state = listState,
         onClickItem = onClickItem,
         onDeleteItem = { notify ->
-            scope.launch {
+            appState.coroutineScope.launch {
                 viewModel.markDeletedByGroup(notify.notifyId, notify.appPackageName)
             }
         }

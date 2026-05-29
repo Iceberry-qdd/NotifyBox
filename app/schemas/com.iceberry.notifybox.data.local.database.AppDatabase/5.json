@@ -1,0 +1,153 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 5,
+    "identityHash": "191e970b52e528edccd06a5c6aaf5f6d",
+    "entities": [
+      {
+        "tableName": "tb_notify",
+        "createSql": "CREATE VIRTUAL TABLE IF NOT EXISTS `${TABLE_NAME}` USING FTS4(`title` TEXT, `content` TEXT, `package_name` TEXT NOT NULL, `display_name` TEXT, `small_icon` TEXT, `large_icon` TEXT, `notify_id` INTEGER NOT NULL, `channel` TEXT, `priority` INTEGER NOT NULL, `created_time` INTEGER NOT NULL, `deleted_time` INTEGER, `count` INTEGER NOT NULL, tokenize=icu, notindexed=`small_icon`, notindexed=`large_icon`, notindexed=`notify_id`, notindexed=`channel`, notindexed=`priority`, notindexed=`created_time`, notindexed=`deleted_time`, notindexed=`count`)",
+        "fields": [
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "content",
+            "columnName": "content",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "packageName",
+            "columnName": "package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "displayName",
+            "columnName": "display_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "smallIcon",
+            "columnName": "small_icon",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "largeIcon",
+            "columnName": "large_icon",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "notifyId",
+            "columnName": "notify_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "channel",
+            "columnName": "channel",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "priority",
+            "columnName": "priority",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdTime",
+            "columnName": "created_time",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deletedTime",
+            "columnName": "deleted_time",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "count",
+            "columnName": "count",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "rowid"
+          ]
+        },
+        "ftsVersion": "FTS4",
+        "ftsOptions": {
+          "tokenizer": "icu",
+          "tokenizerArgs": [],
+          "contentTable": "",
+          "languageIdColumnName": "",
+          "matchInfo": "FTS4",
+          "notIndexedColumns": [
+            "small_icon",
+            "large_icon",
+            "notify_id",
+            "channel",
+            "priority",
+            "created_time",
+            "deleted_time",
+            "count"
+          ],
+          "prefixSizes": [],
+          "preferredOrder": "ASC"
+        },
+        "contentSyncTriggers": []
+      },
+      {
+        "tableName": "devices",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`deviceUniqueId` TEXT NOT NULL, `endpointId` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `lastSeen` INTEGER NOT NULL, PRIMARY KEY(`deviceUniqueId`))",
+        "fields": [
+          {
+            "fieldPath": "deviceUniqueId",
+            "columnName": "deviceUniqueId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endpointId",
+            "columnName": "endpointId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastSeen",
+            "columnName": "lastSeen",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "deviceUniqueId"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '191e970b52e528edccd06a5c6aaf5f6d')"
+    ]
+  }
+}

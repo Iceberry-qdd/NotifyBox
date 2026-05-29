@@ -43,7 +43,7 @@ class NotificationUtils {
 
         fun registerServiceStatusChannel(context: Context) {
             val notificationManager: NotificationManager? =
-                getSystemService<NotificationManager>(context, NotificationManager::class.java)
+                getSystemService(context, NotificationManager::class.java)
             notificationManager?.createNotificationChannel(LISTEN_SERVICE_STATUS_CHANNEL)
         }
 
@@ -63,7 +63,7 @@ class NotificationUtils {
             val builder =
                 NotificationCompat
                     .Builder(context, LISTEN_SERVICE_STATUS_CHANNEL.id)
-                    .setSmallIcon(R.mipmap.ic_launcher_round)
+                    .setSmallIcon(R.drawable.ic_stat_name)
                     .setContentTitle("正在监听通知栏")
                     .setContentText("点击查看详情")
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)

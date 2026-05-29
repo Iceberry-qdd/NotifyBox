@@ -17,30 +17,98 @@
 package com.iceberry.notifybox.ui.forward
 
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.iceberry.notifybox.ui.NBAppState
+import com.iceberry.notifybox.ui.rememberNBAppState
+import com.iceberry.notifybox.ui.setting.export.ExportContent
+import com.iceberry.notifybox.ui.setting.export.ExportViewModel
+import com.iceberry.notifybox.ui.setting.export.NearByPermissionsEffect
+import com.iceberry.notifybox.ui.setting.export.NoNearByPermissionsContent
+import com.iceberry.notifybox.ui.setting.export.PermissionsState
+import com.iceberry.notifybox.ui.setting.rememberSettingColumnState
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForwardScreen(
     modifier: Modifier = Modifier,
-    viewModel: ForwardViewModel = hiltViewModel()
+    viewModel: ForwardViewModel = hiltViewModel(),
+    exportViewModel: ExportViewModel = hiltViewModel(),
+    appState: NBAppState
 ) {
-    val items by viewModel.uiState.collectAsStateWithLifecycle()
-    if (items) {
-        InternalForwardScreen(
-            modifier = modifier
-        )
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val exportUiState by exportViewModel.uiState.collectAsStateWithLifecycle()
+    val pager by exportViewModel.pager.collectAsStateWithLifecycle()
+    val lazyListState = appState.curRouteLazyListState ?: rememberLazyListState()
+    val listState = rememberForwardColumnState(
+        lazyListState = lazyListState,
+        loading = uiState.loading,
+        snackbarHostState = appState.snackbarHostState
+    )
+
+    var launchTrigger by remember { mutableIntStateOf(0) }
+    NearByPermissionsEffect(
+        launchTrigger = launchTrigger,
+        onTriggerReset = { launchTrigger = 0 },
+        onPermissionsChange = {
+            viewModel.changePermissionsState(it)
+            exportViewModel.changePermissionsState(it)
+        }
+    )
+
+    when (uiState.permissionsState) {
+        PermissionsState.GRANTED -> {
+            DisposableEffect(Unit) {
+                exportViewModel.startNearByDiscovery()
+                onDispose {
+                    exportViewModel.stopNearByDiscovery()
+                }
+            }
+            ExportContent(
+                modifier = modifier,
+                uiState = exportUiState,
+                lazyListState = lazyListState,
+                list = pager,
+                doConnect = { exportViewModel.doConnect(it) },
+                doExport = { exportViewModel.doExport(it) }
+            )
+        }
+
+        else -> {
+            NoNearByPermissionsContent(
+                modifier = modifier,
+                permissionsState = uiState.permissionsState,
+                onPermissionsChange = {
+                    viewModel.changePermissionsState(it)
+                    exportViewModel.changePermissionsState(it)
+                },
+                onAuthorize = { launchTrigger++ }
+            )
+        }
     }
+
 }
 
 @Composable
@@ -54,12 +122,29 @@ internal fun InternalForwardScreen(
 @Composable
 fun ForwardTopAppBar(
     modifier: Modifier = Modifier,
-    windowInsets: WindowInsets = TopAppBarDefaults.windowInsets
+    windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
+    scrollBehavior: TopAppBarScrollBehavior,
+    viewModel: ExportViewModel = hiltViewModel()
 ) {
+    val scope = rememberCoroutineScope()
+
     TopAppBar(
         modifier = modifier,
         title = { Text(text = "转发") },
-        windowInsets = windowInsets
+        windowInsets = windowInsets,
+        scrollBehavior = scrollBehavior,
+        actions = {
+            IconButton(
+                onClick = {
+                    scope.launch { viewModel.enableScan() }
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = "重新扫描"
+                )
+            }
+        }
     )
 }
 
@@ -69,7 +154,9 @@ fun ForwardTopAppBar(
 @Composable
 private fun DefaultPreview() {
     NBApplicationTheme {
-        ForwardScreen()
+        ForwardScreen(
+            appState = rememberNBAppState()
+        )
     }
 }
 
@@ -77,14 +164,19 @@ private fun DefaultPreview() {
 @Composable
 private fun PortraitPreview() {
     NBApplicationTheme {
-        ForwardScreen()
+        ForwardScreen(
+            appState = rememberNBAppState()
+        )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @PreviewLightDark
 @Composable
 private fun ForwardTopAppBarLightPreview() {
     NBApplicationTheme {
-        ForwardTopAppBar()
+        ForwardTopAppBar(
+            scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+        )
     }
 }

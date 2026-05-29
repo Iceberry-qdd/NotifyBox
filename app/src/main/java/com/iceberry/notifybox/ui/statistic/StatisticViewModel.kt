@@ -60,7 +60,7 @@ class StatisticViewModel @Inject constructor(
     private val _pieChartDataAsync = _timeRangeFilter
         .flatMapLatest { filter ->
             notifyRepository.statisticForPieChart(filter)
-                .map { handleChartData(it) }
+                .map { if (it.isEmpty()) Async.Empty else Async.Success(it) }
                 .catch { e -> emit(Async.Error(e)) }
         }
 
@@ -68,17 +68,19 @@ class StatisticViewModel @Inject constructor(
     private val _barChartDataAsync = _timeRangeFilter
         .flatMapLatest { filter ->
             notifyRepository.statisticForBarChart(filter)
-                .map { handleBarChartData(it, filter) }
-                .map { handleChartData(it) }
+                .map { 
+                    val barData = handleBarChartData(it, filter)
+                    if (barData.isEmpty()) Async.Empty else Async.Success(barData)
+                }
                 .catch { e -> emit(Async.Error(e)) }
         }
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     val uiState: StateFlow<StatisticUiState> = combine(
-        _pieChartDataAsync, _barChartDataAsync, _isLoading
-    ) { pieChartDataAsync, barChartDataAsync, isLoading ->
+        _pieChartDataAsync, _barChartDataAsync
+    ) { pieChartDataAsync, barChartDataAsync ->
         StatisticUiState(
-            isLoading = pieChartDataAsync is Async.Loading || barChartDataAsync is Async.Loading || isLoading,
+            isLoading = pieChartDataAsync is Async.Loading || barChartDataAsync is Async.Loading,
             selectedFilter = _timeRangeFilter.value,
             pieChartUiState = when (pieChartDataAsync) {
                 Async.Loading -> PieChartUiState()
@@ -99,10 +101,7 @@ class StatisticViewModel @Inject constructor(
             }
         )
     }.debounce(150)
-        .onEach {
-            delay(500)
-            _isLoading.update { false }
-        }.stateIn(
+        .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
             initialValue = StatisticUiState()

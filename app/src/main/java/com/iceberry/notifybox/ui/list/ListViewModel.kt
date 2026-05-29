@@ -217,9 +217,7 @@ internal fun mappingNotifies(context: Context, keyPrefix: KeyPrefix, keySuffix: 
             ?.let { IconUtils.loadIconFormPath(it, context) }
             ?.let { IconUtils.convertToDrawable(it, context) }
 
-        val packageIcon = smallIcon?.let {
-            return@let IconUtils.getPackageIcon(notify.packageName, context)
-        }
+        val packageIcon = IconUtils.getPackageIcon(notify.packageName, context)
 
         @Suppress("LocalVariableName")
         val _keySuffix = when (keySuffix) {

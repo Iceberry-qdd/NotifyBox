@@ -16,6 +16,7 @@
 
 package com.iceberry.notifybox.ui.setting
 
+import android.content.Context
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.automirrored.filled.Login
@@ -36,6 +37,7 @@ import com.iceberry.notifybox.icon.ResetImage
 import com.iceberry.notifybox.navigation.Route
 import com.iceberry.notifybox.ui.log.TimberFlow
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -45,11 +47,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingViewModel @Inject constructor(
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
     private val _loading = MutableStateFlow(true)
     private val _state2 = MutableStateFlow(true)
@@ -129,20 +133,20 @@ class SettingViewModel @Inject constructor(
                     key = "export",
                     value = SettingOptions.Nop.NOP,
                     name = "导出数据",
-                    description = "导出数据用于备份",
-                    actionType = SettingActionTypeEnum.CUSTOM,
+                    description = "将数据导出至另一台设备",
+                    actionType = SettingActionTypeEnum.NAVIGATE,
                     group = SettingGroupEnum.BACKUP,
-                    icon = Icons.Default.Backup
+                    icon = Icons.Default.MoveItem
                 ),
                 SettingItemVO(
                     id = 8L,
                     key = "restore",
                     value = SettingOptions.Nop.NOP,
                     name = "导入数据",
-                    description = "导入已有备份数据",
+                    description = "导入其它设备中的数据",
                     actionType = SettingActionTypeEnum.CUSTOM,
                     group = SettingGroupEnum.BACKUP,
-                    icon = Icons.Default.SettingsBackupRestore
+                    icon = Icons.AutoMirrored.Filled.Login
                 ),
                 SettingItemVO(
                     id = 9L,
@@ -197,6 +201,15 @@ class SettingViewModel @Inject constructor(
     fun setEnableLog(enableLog: SettingOptions.Bool) {
         viewModelScope.launch {
             settingsRepository.setEnableLog(enableLog)
+        }
+    }
+
+    fun reloadIcons(onComplete: () -> Unit) {
+        viewModelScope.launch {
+            context.filesDir.listFiles { _, name -> name.endsWith(".webp") }?.forEach { 
+                it.delete()
+            }
+            onComplete()
         }
     }
 }

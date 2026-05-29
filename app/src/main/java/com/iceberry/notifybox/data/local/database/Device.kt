@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Iceberry-qdd.
+ * Copyright (c) 2026 Iceberry-qdd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,38 +16,34 @@
 
 package com.iceberry.notifybox.data.local.database
 
-import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Entity
-import androidx.room.Index
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
-@Entity(
-    tableName = "tb_app",
-    indices = [Index(value = ["package_name"], orders = [Index.Order.ASC], name = "idx_packageName", unique = true)]
+@Entity(tableName = "devices")
+data class Device(
+    @PrimaryKey val deviceUniqueId: String,
+    val endpointId: String,
+    val name: String,
+    val description: String = "",
+    val lastSeen: Long = System.currentTimeMillis()
 )
-@Deprecated(message = "Not use")
-data class App(
-    @ColumnInfo(name = "display_name")
-    val displayName: String,
-    @ColumnInfo(name = "package_name")
-    val packageName: String,
-    val icon: String?,
-    val version: Int?
-) {
-    @PrimaryKey(autoGenerate = true)
-    var id: Int = 0
-}
 
 @Dao
-@Deprecated(message = "Not use")
-interface AppDao {
-    @Query("SELECT * FROM tb_app ORDER BY id DESC LIMIT 10")
-    fun getApps(): Flow<List<App>>
+interface DeviceDao {
+    @Query("SELECT * FROM devices ORDER BY lastSeen DESC")
+    fun getAllDevices(): Flow<List<Device>>
 
-    @Insert
-    suspend fun insertApp(item: App)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertDevice(device: Device)
+
+    @Query("DELETE FROM devices WHERE deviceUniqueId = :deviceUniqueId")
+    suspend fun deleteDevice(deviceUniqueId: String)
+
+    @Query("DELETE FROM devices")
+    suspend fun clearAll()
 }

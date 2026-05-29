@@ -18,6 +18,7 @@ package com.iceberry.notifybox.data.local.database
 
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.paging.PagingSource
 import androidx.room.ColumnInfo
@@ -69,10 +70,18 @@ data class Notify(
     var id: Int = 0
 }
 
+data class NotifyIcons(
+    @ColumnInfo(name = "small_icon") val smallIcon: String?,
+    @ColumnInfo(name = "large_icon") val largeIcon: String?
+)
+
 @Dao
 interface NotifyDao {
     @RawQuery(observedEntities = [Notify::class])
     fun getNotifies(query: SupportSQLiteQuery): PagingSource<Int, Notify>
+
+    @Query("SELECT COUNT(*) FROM tb_notify")
+    suspend fun getNotifiesCount(): Int
 
     @Query(
         """
@@ -120,6 +129,12 @@ interface NotifyDao {
     @Query("UPDATE tb_notify SET deleted_time = DATETIME('now') WHERE rowid = :id AND deleted_time IS NULL")
     suspend fun markDeletedById(id: Int)
 
+    @Query("SELECT small_icon, large_icon FROM tb_notify WHERE deleted_time < :threshold")
+    suspend fun getIconsOfOldDeletedNotifies(threshold: LocalDateTime): List<NotifyIcons>
+
+    @Query("DELETE FROM tb_notify WHERE deleted_time < :threshold")
+    suspend fun deleteOldDeletedNotifies(threshold: LocalDateTime): Int
+
     @Query(
         """
             SELECT
@@ -151,6 +166,7 @@ interface NotifyDao {
                 display_name AS `label`,
                 package_name,
                 small_icon,
+                large_icon,
                 1.0 * COUNT(*) / (SELECT COUNT(*) FROM tb_notify WHERE deleted_time IS NULL AND created_time BETWEEN :startAt AND :endAt) AS `dest`
             FROM tb_notify
             WHERE deleted_time IS NULL
@@ -178,25 +194,28 @@ data class PieChartData(
     val packageName: String,
     @ColumnInfo(name = "small_icon")
     val smallIcon: String?,
+    @ColumnInfo(name = "large_icon")
+    val largeIcon: String?,
     val dest: Float
 ) {
     fun toVO(context: Context): PieChartDataVO {
+        val largeIcon = largeIcon
+            ?.let { IconUtils.loadIconFormPath(it, context) }
+            ?.let { IconUtils.convertToDrawable(it, context) }
+
         val smallIcon = smallIcon
             ?.let { IconUtils.loadIconFormPath(it, context) }
             ?.let { IconUtils.convertToDrawable(it, context) }
 
-        val packageIcon = smallIcon?.let {
-            return@let IconUtils.getPackageIcon(packageName, context)
-        }
-        val icon = packageIcon ?: smallIcon
+        val packageIcon = IconUtils.getPackageIcon(packageName, context)
 
         return PieChartDataVO(
             value = value,
             label = label,
             dest = dest,
             appIcon = AppIcon(
-                icon = icon,
-                largeIcon = icon,
+                icon = packageIcon ?: smallIcon,
+                largeIcon = largeIcon,
                 appDisplayName = label
             ),
             packageName = packageName

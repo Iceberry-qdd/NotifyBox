@@ -180,7 +180,7 @@ data class PieChartDataVO(
 internal fun handlePieData(pieChartDataList: List<PieChartDataVO>): PieData {
     val otherPieEntry = pieChartDataList
         .takeLastWhile { it.dest < 0.01 }
-        .map { PieEntry(it.value.toFloat(), it.label) }
+        .map { PieEntry(it.value, it.label) }
         .reduceOrNull { agg, e -> PieEntry(agg.value + e.value, "其它", false) }
 
     val pieEntries = pieChartDataList

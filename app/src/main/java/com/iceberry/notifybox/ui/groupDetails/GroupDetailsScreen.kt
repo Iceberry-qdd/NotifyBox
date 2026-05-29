@@ -138,7 +138,8 @@ fun GroupDetailsScreen(
                 lazyListState = lazyListState,
                 loading = uiState.loading,
                 query = "",
-                snackbarHostState = appState.snackbarHostState
+                snackbarHostState = snackbarHostState,
+                coroutineScope = appState.coroutineScope
             )
 
             ListColumnContent(
@@ -152,7 +153,7 @@ fun GroupDetailsScreen(
                 state = listState,
                 onClickItem = {},
                 onDeleteItem = { notify ->
-                    scope.launch {
+                    appState.coroutineScope.launch {
                         viewModel.markDeletedById(notify.id)
                     }
                 }

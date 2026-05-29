@@ -35,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
@@ -45,6 +46,7 @@ import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.iceberry.notifybox.navigation.Route
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingContent(
@@ -70,6 +72,7 @@ fun SettingContent(
                     .wrapContentHeight(),
                 group = SettingGroupEnum.entries[it],
                 items = data[SettingGroupEnum.entries[it]] ?: emptyList(),
+                snackbarHostState = state.snackbarHostState,
                 onClickItem = onClickItem
             )
         }
@@ -97,9 +100,11 @@ fun SettingGroup(
     viewModel: SettingViewModel = hiltViewModel(),
     group: SettingGroupEnum,
     items: List<SettingItemVO<*>>,
+    snackbarHostState: SnackbarHostState,
     onClickItem: (NavigateData) -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = modifier,
@@ -186,6 +191,7 @@ fun SettingGroup(
                             data = it,
                             navigateData = when (it.key) {
                                 "about" -> NavigateData(route = Route.AboutRoute)
+                                "export" -> NavigateData(route = Route.ExportRoute)
                                 else -> NavigateData()
                             },
                             onClickItem = onClickItem
@@ -236,21 +242,27 @@ fun SettingGroup(
                                         .background(MaterialTheme.colorScheme.background)
                                         .wrapContentHeight(),
                                     data = it,
-                                    onConfirm = { }
+                                    onConfirm = { 
+                                        viewModel.reloadIcons {
+                                            scope.launch {
+                                                snackbarHostState.showSnackbar("重载图标完成")
+                                            }
+                                        }
+                                    }
                                 )
                             }
 
-                            "export" -> {
-                                ExportSettingItem(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(CardDefaults.shape)
-                                        .background(MaterialTheme.colorScheme.background)
-                                        .wrapContentHeight(),
-                                    data = it,
-                                    onSelectFormat = {}
-                                )
-                            }
+//                            "export" -> {
+//                                ExportSettingItem(
+//                                    modifier = Modifier
+//                                        .fillMaxWidth()
+//                                        .clip(CardDefaults.shape)
+//                                        .background(MaterialTheme.colorScheme.background)
+//                                        .wrapContentHeight(),
+//                                    data = it,
+//                                    onSelectFormat = {}
+//                                )
+//                            }
 
                             "restore" -> {
                                 ImportSettingItem(
@@ -260,7 +272,9 @@ fun SettingGroup(
                                         .background(MaterialTheme.colorScheme.background)
                                         .wrapContentHeight(),
                                     data = it,
-                                    onSelectMethod = {}
+                                    onSelectMethod = {mode ->
+                                        onClickItem(NavigateData(route = Route.ImportsRoute(mode)))
+                                    }
                                 )
                             }
 
@@ -326,6 +340,7 @@ private fun SettingGroupPreview() {
                 .wrapContentHeight(),
             group = SettingGroupEnum.DISPLAY,
             items = fakeSettingItemVOS,
+            snackbarHostState = SnackbarHostState(),
             onClickItem = {}
         )
     }

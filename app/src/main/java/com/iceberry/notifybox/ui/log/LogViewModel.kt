@@ -47,15 +47,17 @@ class LogViewModel @Inject constructor(
     val uiState: StateFlow<LogUiState> = combine(
         logs, _isLoading, _logLevel
     ) { logs, isLoading, logLevel ->
+        val filteredLogs = logs.filter { logLevel == null || it.level.priority >= logLevel }
+        
         if (isLoading) {
             return@combine LogUiState(isLoading = true, level = logLevel)
         }
 
-        if (logs.isEmpty()) {
+        if (filteredLogs.isEmpty()) {
             return@combine LogUiState(isLoading = false, level = logLevel, isSuccess = true)
         }
 
-        return@combine LogUiState(isLoading = false, level = logLevel, pager = logs)
+        return@combine LogUiState(isLoading = false, level = logLevel, pager = filteredLogs)
     }
         .onEach { _isLoading.update { false } }
         .stateIn(

@@ -17,8 +17,10 @@
 package com.iceberry.notifybox.ui.setting.about
 
 import android.content.Context
+import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.iceberry.notifybox.data.local.database.AppDatabase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,18 +34,27 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AboutViewModel @Inject constructor(
-    @param:ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context,
+    private val database: AppDatabase
 ) : ViewModel() {
-    private val _isLoading = MutableStateFlow(true)
-    private val _state2 = MutableStateFlow(false)
+    private val _isLoading = MutableStateFlow(false)
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     val uiState: StateFlow<AboutUiState> = combine(
-        _isLoading, _state2
-    ) { isLoading, state2 ->
+        _isLoading, MutableStateFlow(true) // Placeholder for more state if needed
+    ) { isLoading, _ ->
+        val installSource = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            context.packageManager.getInstallSourceInfo(context.packageName).installingPackageName
+        } else {
+            @Suppress("DEPRECATION")
+            context.packageManager.getInstallerPackageName(context.packageName)
+        }
+
         AboutUiState(
             isLoading = isLoading,
-            state2 = state2
+            dbVersion = database.openHelper.readableDatabase.version.toString(),
+            abi = Build.SUPPORTED_ABIS.firstOrNull() ?: "unknown",
+            installSource = if (installSource == "com.android.vending") "play" else "other"
         )
     }
         .stateIn(
@@ -55,5 +66,7 @@ class AboutViewModel @Inject constructor(
 
 data class AboutUiState(
     val isLoading: Boolean = true,
-    val state2: Boolean = false
+    val dbVersion: String = "",
+    val abi: String = "",
+    val installSource: String = ""
 )

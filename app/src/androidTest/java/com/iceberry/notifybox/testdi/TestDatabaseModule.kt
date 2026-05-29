@@ -16,10 +16,8 @@
 
 package com.iceberry.notifybox.testdi
 
-import com.iceberry.notifybox.data.AppRepository
 import com.iceberry.notifybox.data.NotifyRepository
 import com.iceberry.notifybox.data.di.DataModule
-import com.iceberry.notifybox.data.di.FakeAppRepository
 import com.iceberry.notifybox.data.di.FakeNotifyRepository
 import dagger.Binds
 import dagger.Module
@@ -37,10 +35,4 @@ interface FakeDataModule {
     fun bindNotifyRepository(
         fakeRepository: FakeNotifyRepository
     ): NotifyRepository
-
-    @Binds
-    @Deprecated(message = "Not use")
-    fun bindAppRepository(
-        fakeRepository: FakeAppRepository
-    ): AppRepository
 }

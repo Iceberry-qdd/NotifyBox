@@ -485,103 +485,104 @@ private fun ReloadIconSettingItemPreview() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ExportSettingItem(
-    modifier: Modifier,
-    data: SettingItemVO<*>,
-    onClick: () -> Unit = {},
-    onSelectFormat: (SettingOptions.ExportFormat) -> Unit
-) {
-    var showBottomSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = false
-    )
-    val scope = rememberCoroutineScope()
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun ExportSettingItem(
+//    modifier: Modifier,
+//    data: SettingItemVO<*>,
+//    onClick: () -> Unit = {},
+//    onSelectFormat: (SettingOptions.ExportFormat) -> Unit
+//) {
+//    var showBottomSheet by remember { mutableStateOf(false) }
+//    val sheetState = rememberModalBottomSheetState(
+//        skipPartiallyExpanded = false
+//    )
+//    val scope = rememberCoroutineScope()
+//
+//    SettingItem(
+//        modifier = modifier,
+//        iconModifier = Modifier.rotate(180f),
+//        data = data,
+//        onClick = {
+//            showBottomSheet = true
+//            onClick()
+//        }
+//    ) {}
+//
+//    if (showBottomSheet) {
+//        ModalBottomSheet(
+//            onDismissRequest = { showBottomSheet = false },
+//            sheetState = sheetState,
+//            properties = ModalBottomSheetProperties(),
+//            containerColor = MaterialTheme.colorScheme.background
+//        ) {
+//            SettingItem(
+//                modifier = modifier,
+//                data = SettingItemVO(
+//                    id = 1L,
+//                    key = "export_csv",
+//                    name = "导出为CSV",
+//                    value = SettingOptions.Nop.NOP,
+//                    description = "将数据导出为CSV文件，不包含应用图标",
+//                    actionType = SettingActionTypeEnum.CUSTOM,
+//                    group = SettingGroupEnum.BACKUP,
+//                    icon = Icons.Default.TableView
+//                ),
+//                onClick = {
+//                    scope.launch {
+//                        onSelectFormat(SettingOptions.ExportFormat.CSV)
+//                        sheetState.hide()
+//                    }
+//                }
+//            ) {}
+//            SettingItem(
+//                modifier = modifier,
+//                data = SettingItemVO(
+//                    id = 2L,
+//                    key = "export_zip",
+//                    name = "导出为ZIP",
+//                    value = SettingOptions.Nop.NOP,
+//                    description = "将数据导出为ZIP文件，包含应用图标",
+//                    actionType = SettingActionTypeEnum.CUSTOM,
+//                    group = SettingGroupEnum.BACKUP,
+//                    icon = Icons.Default.FolderZip
+//                ),
+//                onClick = {
+//                    scope.launch {
+//                        onSelectFormat(SettingOptions.ExportFormat.ZIP)
+//                        sheetState.hide()
+//                    }
+//                }
+//            ) {}
+//        }
+//    }
+//}
 
-    SettingItem(
-        modifier = modifier,
-        data = data,
-        onClick = {
-            showBottomSheet = true
-            onClick()
-        }
-    ) {}
-
-    if (showBottomSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showBottomSheet = false },
-            sheetState = sheetState,
-            properties = ModalBottomSheetProperties(),
-            containerColor = MaterialTheme.colorScheme.background
-        ) {
-            SettingItem(
-                modifier = modifier,
-                data = SettingItemVO(
-                    id = 1L,
-                    key = "export_csv",
-                    name = "导出为CSV",
-                    value = SettingOptions.Nop.NOP,
-                    description = "将数据导出为CSV文件，不包含应用图标",
-                    actionType = SettingActionTypeEnum.CUSTOM,
-                    group = SettingGroupEnum.BACKUP,
-                    icon = Icons.Default.TableView
-                ),
-                onClick = {
-                    scope.launch {
-                        onSelectFormat(SettingOptions.ExportFormat.CSV)
-                        sheetState.hide()
-                    }
-                }
-            ) {}
-            SettingItem(
-                modifier = modifier,
-                data = SettingItemVO(
-                    id = 2L,
-                    key = "export_zip",
-                    name = "导出为ZIP",
-                    value = SettingOptions.Nop.NOP,
-                    description = "将数据导出为ZIP文件，包含应用图标",
-                    actionType = SettingActionTypeEnum.CUSTOM,
-                    group = SettingGroupEnum.BACKUP,
-                    icon = Icons.Default.FolderZip
-                ),
-                onClick = {
-                    scope.launch {
-                        onSelectFormat(SettingOptions.ExportFormat.ZIP)
-                        sheetState.hide()
-                    }
-                }
-            ) {}
-        }
-    }
-}
-
-@Composable
-//@PreviewLightDark
-private fun ExportSettingItemPreview() {
-    val fakeSettingItemVO = SettingItemVO(
-        id = 1L,
-        key = "theme",
-        value = SettingOptions.Theme.DEFAULT,
-        name = "主题模式",
-        actionType = SettingActionTypeEnum.SWITCH,
-        group = SettingGroupEnum.DISPLAY,
-        icon = Icons.Default.Palette
-    )
-
-    NBApplicationTheme {
-        ExportSettingItem(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(CardDefaults.shape)
-                .background(MaterialTheme.colorScheme.background)
-                .wrapContentHeight(),
-            data = fakeSettingItemVO,
-            onSelectFormat = {}
-        )
-    }
-}
+//@Composable
+////@PreviewLightDark
+//private fun ExportSettingItemPreview() {
+//    val fakeSettingItemVO = SettingItemVO(
+//        id = 1L,
+//        key = "theme",
+//        value = SettingOptions.Theme.DEFAULT,
+//        name = "主题模式",
+//        actionType = SettingActionTypeEnum.SWITCH,
+//        group = SettingGroupEnum.DISPLAY,
+//        icon = Icons.Default.Palette
+//    )
+//
+//    NBApplicationTheme {
+//        ExportSettingItem(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .clip(CardDefaults.shape)
+//                .background(MaterialTheme.colorScheme.background)
+//                .wrapContentHeight(),
+//            data = fakeSettingItemVO,
+//            onSelectFormat = {}
+//        )
+//    }
+//}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -656,7 +657,7 @@ fun ImportSettingItem(
 }
 
 @Composable
-@PreviewLightDark
+//@PreviewLightDark
 private fun ImportSettingItemPreview() {
     val fakeSettingItemVO = SettingItemVO(
         id = 1L,

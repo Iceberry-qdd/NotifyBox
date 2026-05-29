@@ -17,13 +17,10 @@
 package com.iceberry.notifybox.data.di
 
 import androidx.paging.PagingSource
-import com.iceberry.notifybox.data.AppRepository
-import com.iceberry.notifybox.data.DefaultAppRepository
 import com.iceberry.notifybox.data.DefaultNotifyRepository
 import com.iceberry.notifybox.data.DefaultSettingsRepository
 import com.iceberry.notifybox.data.NotifyRepository
 import com.iceberry.notifybox.data.SettingsRepository
-import com.iceberry.notifybox.data.local.database.App
 import com.iceberry.notifybox.data.local.database.BarChartData
 import com.iceberry.notifybox.data.local.database.Notify
 import com.iceberry.notifybox.data.local.database.PieChartData
@@ -49,13 +46,6 @@ interface DataModule {
     fun bindsNotifyRepository(
         notifyRepository: DefaultNotifyRepository
     ): NotifyRepository
-
-    @Singleton
-    @Binds
-    @Deprecated(message = "Not use")
-    fun bindsAppRepository(
-        appRepository: DefaultAppRepository
-    ): AppRepository
 
     @Singleton
     @Binds
@@ -107,18 +97,6 @@ class FakeNotifyRepository @Inject constructor() : NotifyRepository {
 }
 
 val fakeNotifies = listOf<Notify>()
-
-@Deprecated(message = "Not use")
-class FakeAppRepository @Inject constructor() : AppRepository {
-    override val apps: Flow<List<App>> = flowOf(fakeApps)
-
-    override suspend fun add(app: App) {
-        TODO("Not yet implemented")
-    }
-}
-
-@Deprecated(message = "Not use")
-val fakeApps = listOf<App>()
 
 class FakeSettingsRepository @Inject constructor() : SettingsRepository {
     override val settings: Flow<SettingsData> = flowOf()

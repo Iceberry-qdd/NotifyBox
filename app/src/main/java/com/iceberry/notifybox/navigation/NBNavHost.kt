@@ -49,7 +49,9 @@ fun NBNavHost(
             onItemClick = navController::navigateToGroupDetails
         )
 
-        forwardScreen()
+        forwardScreen(
+            appState = appState
+        )
 
         settingsScreen(
             appState = appState,
@@ -74,5 +76,12 @@ fun NBNavHost(
             onBackClick = navController::popBackStack,
         )
 
+        exportScreen(
+            onBackClick = navController::popBackStack,
+        )
+
+        importsScreen(
+            onBackClick = navController::popBackStack
+        )
     }
 }

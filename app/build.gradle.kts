@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 /*
  * Copyright (C) 2025 Iceberry-qdd
  *
@@ -16,6 +14,25 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
  * limitations under the License.
  */
 
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.io.ByteArrayOutputStream
+import javax.inject.Inject
+
+abstract class GitHashValueSource : ValueSource<String, ValueSourceParameters.None> {
+    @get:Inject
+    abstract val execOperations: ExecOperations
+
+    override fun obtain(): String {
+        val output = ByteArrayOutputStream()
+        execOperations.exec {
+            commandLine("git", "rev-parse", "--short=8", "HEAD")
+            standardOutput = output
+            isIgnoreExitValue = true
+        }
+        return output.toString().trim().ifEmpty { "unknown" }
+    }
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -26,6 +43,8 @@ plugins {
     alias(libs.plugins.room)
     alias(libs.plugins.protobuf)
 }
+
+val gitHashValue = providers.of(GitHashValueSource::class.java) {}.get()
 
 android {
     namespace = "com.iceberry.notifybox"
@@ -43,6 +62,9 @@ android {
             useSupportLibrary = true
         }
         versionNameSuffix = ".alpha"
+
+        buildConfigField("String", "GIT_HASH", "\"$gitHashValue\"")
+        buildConfigField("Long", "BUILD_TIME", "${System.currentTimeMillis()}L")
     }
 
     room {
@@ -114,6 +136,9 @@ dependencies {
     implementation(libs.protobuf.kotlin.lite)
     implementation(libs.androidx.appcompat)
     implementation(libs.timber)
+    implementation(libs.play.services.nearby)
+    implementation(libs.accompanist.permissions)
+    implementation(libs.eventbus)
     val composeBom = platform(libs.androidx.compose.bom)
 
     implementation(composeBom)

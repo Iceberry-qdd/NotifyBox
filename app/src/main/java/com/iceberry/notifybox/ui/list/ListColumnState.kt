@@ -21,7 +21,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.LazyPagingItems
+import kotlinx.coroutines.CoroutineScope
 
 
 @Composable
@@ -31,15 +33,17 @@ fun <T : Any> rememberListColumnState(
     loading: Boolean = false,
     query: String = "",
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    coroutineScope: CoroutineScope = rememberCoroutineScope(),
     canDelete: Boolean = true
 ): ListColumnState<T> {
-    return remember(items, lazyListState, loading, snackbarHostState) {
+    return remember(items, lazyListState, loading, snackbarHostState, coroutineScope) {
         ListColumnState(
             items = items,
             lazyListState = lazyListState,
             loading = loading,
             query = query,
             snackbarHostState = snackbarHostState,
+            coroutineScope = coroutineScope,
             canDelete = canDelete
         )
     }
@@ -51,5 +55,6 @@ class ListColumnState<T : Any>(
     internal val loading: Boolean,
     internal val query: String,
     internal val snackbarHostState: SnackbarHostState,
+    internal val coroutineScope: CoroutineScope,
     internal val canDelete: Boolean
 )

@@ -17,23 +17,25 @@
 package com.iceberry.notifybox.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.iceberry.notifybox.ui.NBAppState
-import com.iceberry.notifybox.ui.about.AboutScreen
 import com.iceberry.notifybox.ui.forward.ForwardScreen
 import com.iceberry.notifybox.ui.groupDetails.GroupDetailsScreen
 import com.iceberry.notifybox.ui.list.ListScreen
 import com.iceberry.notifybox.ui.list.ListViewModel
 import com.iceberry.notifybox.ui.list.NotifyVO
+import com.iceberry.notifybox.ui.log.LogScreen
 import com.iceberry.notifybox.ui.setting.NavigateData
+import com.iceberry.notifybox.ui.setting.SettingOptions
 import com.iceberry.notifybox.ui.setting.SettingScreen
+import com.iceberry.notifybox.ui.setting.about.AboutScreen
+import com.iceberry.notifybox.ui.setting.export.ExportScreen
+import com.iceberry.notifybox.ui.setting.imports.ImportsScreen
 import com.iceberry.notifybox.ui.statistic.StatisticScreen
 import kotlinx.serialization.Serializable
 
@@ -60,6 +62,12 @@ sealed interface Route {
     object LogRoute : Route
 
     @Serializable
+    object ExportRoute : Route
+
+    @Serializable
+    data class ImportsRoute(val mode: SettingOptions.ImportMethod) : Route
+
+    @Serializable
     object NopRoute : Route
 }
 
@@ -82,10 +90,13 @@ fun NavGraphBuilder.listScreen(
 
 fun NavController.navigateToForward(navOptions: NavOptions) = navigate(route = Route.ForwardRoute, navOptions)
 
-fun NavGraphBuilder.forwardScreen() {
+fun NavGraphBuilder.forwardScreen(
+    appState: NBAppState
+) {
     composable<Route.ForwardRoute> {
         ForwardScreen(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.fillMaxSize(),
+            appState = appState
         )
     }
 }
@@ -159,6 +170,30 @@ fun NavGraphBuilder.logScreen(
         LogScreen(
             modifier = Modifier.fillMaxSize(),
             onBackClick = onBackClick
+        )
+    }
+}
+
+fun NavGraphBuilder.exportScreen(
+    onBackClick: () -> Unit,
+) {
+    composable<Route.ExportRoute> { backStackEntry ->
+        ExportScreen(
+            modifier = Modifier.fillMaxSize(),
+            onBackClick = onBackClick
+        )
+    }
+}
+
+fun NavGraphBuilder.importsScreen(
+    onBackClick: () -> Unit
+) {
+    composable<Route.ImportsRoute> { backStackEntry ->
+        val route: Route.ImportsRoute = backStackEntry.toRoute()
+        ImportsScreen(
+            modifier = Modifier.fillMaxSize(),
+            onBackClick = onBackClick,
+            mode = route.mode
         )
     }
 }

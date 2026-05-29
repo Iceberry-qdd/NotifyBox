@@ -16,11 +16,11 @@
 
 package com.iceberry.notifybox.ui.list
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -57,6 +57,7 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -70,14 +71,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.itemKey
-import com.iceberry.notifybox.R
 import com.iceberry.notifybox.data.local.database.AppIcon
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 import com.iceberry.notifybox.ui.theme.Red80
@@ -94,7 +94,6 @@ internal fun ListColumnContent(
     onClickItem: (NotifyVO) -> Unit,
     onDeleteItem: (NotifyVO) -> Unit
 ) {
-    val scope = rememberCoroutineScope()
     val verticalArrangement by remember {
         derivedStateOf {
             if ((state.loading && state.query.isEmpty()) || state.items?.itemCount == 0) {
@@ -102,6 +101,12 @@ internal fun ListColumnContent(
             } else {
                 Arrangement.Top
             }
+        }
+    }
+    // Requirement #3: 当切换页面（组件销毁）时，立即提交当前挂起的删除操作
+    DisposableEffect(state.snackbarHostState) {
+        onDispose {
+            state.snackbarHostState.currentSnackbarData?.dismiss()
         }
     }
     LazyColumn(
@@ -163,8 +168,9 @@ internal fun ListColumnContent(
                             item = it,
                             onClick = { onClickItem(it) },
                             onDelete = {
-                                scope.launch {
+                                state.coroutineScope.launch {
                                     deleted.value = true
+                                    state.snackbarHostState.currentSnackbarData?.dismiss()
 
                                     val result = state.snackbarHostState.showSnackbar(
                                         message = "已删除${it.count}条[${it.appDisplayName}]通知",
@@ -216,6 +222,7 @@ private fun SwipeToDeleteItem(
 
     LaunchedEffect(dismissState.currentValue) {
         if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+            Log.d("listColumnContent", "220 on delete")
             onDelete()
         }
     }
@@ -377,19 +384,15 @@ internal fun AppIcon(
 internal fun DefaultAppIcon(
     modifier: Modifier = Modifier
 ) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-    ) {
-        Image(
-            painter = painterResource(R.drawable.ic_launcher_background),
-            contentDescription = "应用图标"
-        )
-        Image(
-            painter = painterResource(R.drawable.ic_launcher_foreground),
-            contentDescription = "应用图标背景"
-        )
+    val context = LocalContext.current
+    val drawable = remember(context) {
+        context.packageManager.defaultActivityIcon
     }
+    AdaptiveIconImage(
+        drawable = drawable,
+        modifier = modifier,
+        contentDescription = "默认应用图标"
+    )
 }
 
 @PreviewLightDark

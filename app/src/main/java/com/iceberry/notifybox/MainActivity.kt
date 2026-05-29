@@ -21,6 +21,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.getValue
@@ -31,6 +32,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.iceberry.notifybox.bg.NotificationMonitorWorker
+import com.iceberry.notifybox.bg.event.NearbyConnectionRequestEvent
+import com.iceberry.notifybox.bg.event.NearbyConnectionResponseEvent
 import com.iceberry.notifybox.data.SettingsRepository
 import com.iceberry.notifybox.ui.NBApp
 import com.iceberry.notifybox.ui.rememberNBAppState
@@ -41,6 +44,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 import javax.inject.Inject
 
 
@@ -96,6 +102,33 @@ class MainActivity() : AppCompatActivity() {
                 NBApp(appState)
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        EventBus.getDefault().register(this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        EventBus.getDefault().unregister(this)
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onNearbyConnectionRequest(event: NearbyConnectionRequestEvent) {
+        AlertDialog.Builder(this)
+            .setTitle("Accept connection to " + event.info.endpointName)
+            .setMessage("Confirm the code matches on both devices: " + event.info.authenticationDigits)
+            .setPositiveButton("Accept") { dialog, _ ->
+                EventBus.getDefault().post(NearbyConnectionResponseEvent(event.endpointId, true))
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                EventBus.getDefault().post(NearbyConnectionResponseEvent(event.endpointId, false))
+                dialog.dismiss()
+            }
+            .setIcon(R.drawable.ic_launcher_foreground)
+            .show()
     }
 
     fun changeLanguage(language: LocaleListCompat) {
