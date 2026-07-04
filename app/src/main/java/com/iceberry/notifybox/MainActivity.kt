@@ -117,13 +117,13 @@ class MainActivity() : AppCompatActivity() {
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onNearbyConnectionRequest(event: NearbyConnectionRequestEvent) {
         AlertDialog.Builder(this)
-            .setTitle("Accept connection to " + event.info.endpointName)
-            .setMessage("Confirm the code matches on both devices: " + event.info.authenticationDigits)
-            .setPositiveButton("Accept") { dialog, _ ->
+            .setTitle(getString(R.string.nearby_connection_title, event.info.endpointName))
+            .setMessage(getString(R.string.nearby_connection_message, event.info.authenticationDigits))
+            .setPositiveButton(R.string.accept_connection) { dialog, _ ->
                 EventBus.getDefault().post(NearbyConnectionResponseEvent(event.endpointId, true))
                 dialog.dismiss()
             }
-            .setNegativeButton("Cancel") { dialog, _ ->
+            .setNegativeButton(R.string.cancel) { dialog, _ ->
                 EventBus.getDefault().post(NearbyConnectionResponseEvent(event.endpointId, false))
                 dialog.dismiss()
             }

@@ -16,21 +16,38 @@
 
 package com.iceberry.notifybox.util
 
+import android.content.Context
+import com.iceberry.notifybox.R
 import java.time.Duration
 import java.time.LocalDateTime
 
 class RelativeTimeParser {
     companion object {
-        fun parse(time: LocalDateTime): String {
+        fun parse(time: LocalDateTime, context: Context): String {
             val now = LocalDateTime.now()
+            val timeStr = "%02d:%02d".format(time.hour, time.minute)
             return when {
-                time.year != now.year -> "${time.year}年${time.monthValue}月${time.dayOfMonth}日"
-                time.monthValue != now.monthValue -> "${time.monthValue}月${time.dayOfMonth}日"
-                now.dayOfMonth - time.dayOfMonth > 2 -> "${time.monthValue}月${time.dayOfMonth}日"
-                now.dayOfMonth - time.dayOfMonth == 2 -> "前天 %02d:%02d".format(time.hour, time.minute)
-                now.dayOfMonth - time.dayOfMonth == 1 -> "昨天 %02d:%02d".format(time.hour, time.minute)
-                Duration.between(time, now).toMinutes() < 1L -> "${Duration.between(time, now).seconds}秒前"
-                else -> "%02d:%02d".format(time.hour, time.minute)
+                time.year != now.year -> context.getString(R.string.date_full, time.year, time.monthValue, time.dayOfMonth)
+                time.monthValue != now.monthValue -> context.getString(
+                    R.string.date_month_day,
+                    time.monthValue,
+                    time.dayOfMonth
+                )
+
+                now.dayOfMonth - time.dayOfMonth > 2 -> context.getString(
+                    R.string.date_month_day,
+                    time.monthValue,
+                    time.dayOfMonth
+                )
+
+                now.dayOfMonth - time.dayOfMonth == 2 -> context.getString(R.string.date_before_yesterday, timeStr)
+                now.dayOfMonth - time.dayOfMonth == 1 -> context.getString(R.string.date_yesterday, timeStr)
+                Duration.between(time, now).toMinutes() < 1L -> context.getString(
+                    R.string.date_seconds_ago,
+                    Duration.between(time, now).seconds
+                )
+
+                else -> timeStr
             }
         }
     }

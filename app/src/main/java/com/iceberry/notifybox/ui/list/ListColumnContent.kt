@@ -16,7 +16,6 @@
 
 package com.iceberry.notifybox.ui.list
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
@@ -64,7 +63,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -72,18 +70,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.itemKey
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.data.local.database.AppIcon
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 import com.iceberry.notifybox.ui.theme.Red80
 import com.iceberry.notifybox.util.RelativeTimeParser
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import kotlin.math.min
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -94,6 +95,7 @@ internal fun ListColumnContent(
     onClickItem: (NotifyVO) -> Unit,
     onDeleteItem: (NotifyVO) -> Unit
 ) {
+    val context = LocalContext.current
     val verticalArrangement by remember {
         derivedStateOf {
             if ((state.loading && state.query.isEmpty()) || state.items?.itemCount == 0) {
@@ -140,7 +142,7 @@ internal fun ListColumnContent(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "暂无新消息",
+                        text = stringResource(R.string.list_no_messages),
                         style = MaterialTheme.typography.bodyMedium.merge(color = MaterialTheme.colorScheme.outline)
                     )
                 }
@@ -173,8 +175,8 @@ internal fun ListColumnContent(
                                     state.snackbarHostState.currentSnackbarData?.dismiss()
 
                                     val result = state.snackbarHostState.showSnackbar(
-                                        message = "已删除${it.count}条[${it.appDisplayName}]通知",
-                                        actionLabel = "恢复",
+                                        message = context.getString(R.string.list_delete_msg, it.count, it.appDisplayName),
+                                        actionLabel = context.getString(R.string.recover),
                                         duration = SnackbarDuration.Long
                                     )
 
@@ -222,7 +224,7 @@ private fun SwipeToDeleteItem(
 
     LaunchedEffect(dismissState.currentValue) {
         if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
-            Log.d("listColumnContent", "220 on delete")
+            Timber.d("220 on delete")
             onDelete()
         }
     }
@@ -244,7 +246,7 @@ private fun SwipeToDeleteItem(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Delete,
-                    contentDescription = "删除",
+                    contentDescription = stringResource(R.string.delete),
                     tint = MaterialTheme.colorScheme.onError
                 )
             }
@@ -268,6 +270,7 @@ private fun NotifyItem(
     onClick: () -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Card(
         modifier = modifier.clickable {
@@ -326,7 +329,7 @@ private fun NotifyItem(
                     }
                     val datetimeText by produceState("") {
                         snapshotFlow { item.createdTime }
-                            .map { RelativeTimeParser.parse(item.createdTime) }
+                            .map { RelativeTimeParser.parse(item.createdTime, context) }
                             .collect { value = it }
                     }
                     Text(
@@ -391,7 +394,7 @@ internal fun DefaultAppIcon(
     AdaptiveIconImage(
         drawable = drawable,
         modifier = modifier,
-        contentDescription = "默认应用图标"
+        contentDescription = stringResource(R.string.default_app_icon)
     )
 }
 

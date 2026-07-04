@@ -21,30 +21,31 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.iceberry.notifybox.R
 import kotlin.reflect.KClass
 
 enum class TopLevelDestination(
     val icon: ImageVector,
-    val iconText: String,
-    val titleText: String,
+    val iconTextId: Int,
+    val titleTextId: Int,
     val route: KClass<*>
 ) {
     LIST(
         icon = Icons.AutoMirrored.Filled.List,
-        iconText = "列表",
-        titleText = "列表",
+        iconTextId = R.string.nav_list,
+        titleTextId = R.string.nav_list,
         route = Route.ListRoute::class
     ),
     FORWARD(
         icon = Icons.Filled.SwapHoriz,
-        iconText = "转发",
-        titleText = "转发",
+        iconTextId = R.string.nav_forward,
+        titleTextId = R.string.nav_forward,
         route = Route.ForwardRoute::class
     ),
     SETTINGS(
         icon = Icons.Filled.Settings,
-        iconText = "设置",
-        titleText = "设置",
+        iconTextId = R.string.nav_settings,
+        titleTextId = R.string.nav_settings,
         route = Route.SettingRoute::class
     )
 }

@@ -42,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -50,6 +51,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 import java.time.Instant
 import java.time.ZoneId
@@ -99,7 +101,7 @@ fun LogContent(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "暂无日志",
+                        text = stringResource(R.string.log_empty),
                         style = MaterialTheme.typography.bodyMedium.merge(color = MaterialTheme.colorScheme.outline)
                     )
                 }
@@ -116,7 +118,7 @@ fun LogContent(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "数据加载失败",
+                        text = stringResource(R.string.log_load_failed),
                         style = MaterialTheme.typography.bodyMedium.merge(color = MaterialTheme.colorScheme.outline)
                     )
                 }

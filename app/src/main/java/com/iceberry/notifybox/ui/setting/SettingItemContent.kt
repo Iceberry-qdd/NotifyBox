@@ -31,10 +31,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Draw
-import androidx.compose.material.icons.filled.FolderZip
 import androidx.compose.material.icons.filled.Merge
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.TableView
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -59,9 +57,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 import kotlinx.coroutines.launch
 
@@ -130,10 +130,11 @@ fun DialogSettingItem(
     ) {}
 
     if (showDialog) {
+        val title = data.nameRes?.let { stringResource(it) } ?: data.name
         AlertDialog(
             onDismissRequest = { showDialog = false },
             confirmButton = {},
-            title = { Text(data.name) },
+            title = { Text(title) },
             text = {
                 Column {
                     data.actionOptions.forEach { option ->
@@ -157,7 +158,10 @@ fun DialogSettingItem(
                                     showDialog = false
                                 }
                             )
-                            Text(text = option.displayName, modifier = Modifier.padding(start = 16.dp))
+                            val optionRes = option.displayNameRes
+                            val optionName =
+                                if (optionRes != null && optionRes != 0) stringResource(optionRes) else option.displayName
+                            Text(text = optionName, modifier = Modifier.padding(start = 16.dp))
                         }
                     }
                 }
@@ -432,6 +436,7 @@ fun ReloadIconSettingItem(
     ) {}
 
     if (showDialog) {
+        val title = data.descriptionRes?.let { stringResource(it) } ?: data.description
         AlertDialog(
             onDismissRequest = { showDialog = false },
             confirmButton = {
@@ -440,17 +445,17 @@ fun ReloadIconSettingItem(
                         onConfirm()
                         showDialog = false
                     },
-                    content = { Text("确定") }
+                    content = { Text(stringResource(R.string.confirm)) }
                 )
             },
             dismissButton = {
                 TextButton(
                     onClick = { showDialog = false },
-                    content = { Text("取消") }
+                    content = { Text(stringResource(R.string.cancel)) }
                 )
             },
-            title = { Text(data.description) },
-            text = { Text("重载通知图标后，获取到的通知将统一显示为所属应用的图标。（非必要请勿执行此操作）") },
+            title = { Text(title) },
+            text = { Text(stringResource(R.string.reload_icons_warning)) },
             properties = DialogProperties(
                 dismissOnBackPress = true,
                 dismissOnClickOutside = false
@@ -619,9 +624,9 @@ fun ImportSettingItem(
                 data = SettingItemVO(
                     id = 1L,
                     key = "override_import",
-                    name = "覆盖导入",
+                    name = stringResource(R.string.setting_override_import),
                     value = SettingOptions.Nop.NOP,
-                    description = "删除所有数据后导入",
+                    description = stringResource(R.string.setting_override_import_description),
                     actionType = SettingActionTypeEnum.CUSTOM,
                     group = SettingGroupEnum.BACKUP,
                     icon = Icons.Default.Draw
@@ -638,9 +643,9 @@ fun ImportSettingItem(
                 data = SettingItemVO(
                     id = 2L,
                     key = "merge_import",
-                    name = "合并导入",
+                    name = stringResource(R.string.setting_merge_import),
                     value = SettingOptions.Nop.NOP,
-                    description = "导入数据与当前数据合并",
+                    description = stringResource(R.string.setting_merge_import_description),
                     actionType = SettingActionTypeEnum.CUSTOM,
                     group = SettingGroupEnum.BACKUP,
                     icon = Icons.Default.Merge
@@ -690,6 +695,9 @@ private fun SettingItem(
     onClick: () -> Unit = {},
     content: @Composable (() -> Unit)
 ) {
+    val name = data.nameRes?.let { stringResource(it) } ?: data.name
+    val description = data.descriptionRes?.let { stringResource(it) } ?: data.description
+
     Card(
         modifier = modifier
             .clickable(
@@ -712,9 +720,9 @@ private fun SettingItem(
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                Text(text = data.name)
+                Text(text = name)
                 Text(
-                    text = data.description,
+                    text = description,
                     style = MaterialTheme.typography.bodyMedium.merge(color = MaterialTheme.colorScheme.outline)
                 )
             }

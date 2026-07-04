@@ -38,9 +38,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.icon.P2p
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 
@@ -58,19 +60,19 @@ fun NoNearByPermissionsContent(
     val (defaultIcon, defaultTitle, settingIntent) = when (permissionsState) {
         PermissionsState.LOCATION_DISABLED -> Triple(
             Icons.Default.LocationOff,
-            "定位服务未启用，请前往开启",
+            stringResource(R.string.permission_location_disabled),
             Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
         )
 
         PermissionsState.BLUETOOTH_DISABLED -> Triple(
             Icons.Default.BluetoothDisabled,
-            "蓝牙未启用，请前往开启",
+            stringResource(R.string.permission_bluetooth_disabled),
             Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
         )
 
         else -> Triple(
             Icons.Default.P2p,
-            "需要启用附近设备权限，请前往授权",
+            stringResource(R.string.permission_nearby_needed),
             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                 data = "package:${context.packageName}".toUri()
             }
@@ -95,7 +97,8 @@ fun NoNearByPermissionsContent(
             style = MaterialTheme.typography.titleSmall.merge(color = MaterialTheme.colorScheme.outline)
         )
         if (permissionsState != PermissionsState.GRANTED) {
-            val isPermissionIssue = permissionsState == PermissionsState.DENIED || permissionsState == PermissionsState.RATIONALE
+            val isPermissionIssue =
+                permissionsState == PermissionsState.DENIED || permissionsState == PermissionsState.RATIONALE
             Button(
                 onClick = {
                     Log.i("71", permissionsState.toString())
@@ -108,12 +111,12 @@ fun NoNearByPermissionsContent(
                     }
                 }
             ) {
-                Text(if (isPermissionIssue) "立即授权" else "去开启")
+                Text(if (isPermissionIssue) stringResource(R.string.permission_authorize_now) else stringResource(R.string.permission_go_to_enable))
             }
             if (permissionsState == PermissionsState.DENIED) {
                 Text(
                     modifier = Modifier.clickable { context.startActivity(settingIntent) },
-                    text = "依然无法授权？前往系统设置",
+                    text = stringResource(R.string.permission_manual_fix),
                     style = MaterialTheme.typography.labelSmall.merge(color = MaterialTheme.colorScheme.primary)
                 )
             }

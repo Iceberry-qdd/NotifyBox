@@ -25,12 +25,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
+import com.iceberry.notifybox.R
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -40,14 +42,19 @@ fun ComposePermissions() {
     // Register and remember the permission state
     val callPermissionState = rememberPermissionState(Manifest.permission.CALL_PHONE)
 
+    val permissionCallTitle = stringResource(R.string.permission_call_title)
+    val permissionCallGrant = stringResource(R.string.permission_call_grant)
+    val permissionCallGranted = stringResource(R.string.permission_call_granted)
+    val permissionCallAction = stringResource(R.string.permission_call_action)
+
     // Utility function to calculate the state based on the PermissionState
     fun getScreenState(state: PermissionState) = when (state.status) {
         is PermissionStatus.Denied -> PermissionScreenState(
-            title = "Call a phone", buttonText = "Grant permission"
+            title = permissionCallTitle, buttonText = permissionCallGrant
         )
 
         PermissionStatus.Granted -> PermissionScreenState(
-            title = "You can now call!", buttonText = "Call"
+            title = permissionCallGranted, buttonText = permissionCallAction
         )
     }
 
@@ -63,16 +70,16 @@ fun ComposePermissions() {
             // before using an API that requires a permission.
             when (callPermissionState.status) {
                 PermissionStatus.Granted -> {
-                    Toast.makeText(context, "Faking a call...", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.permission_call_faking), Toast.LENGTH_SHORT).show()
                 }
 
                 is PermissionStatus.Denied -> {
                     if (callPermissionState.status.shouldShowRationale) {
                         // Update our UI based on the user interaction by showing a rationale
                         screenState = PermissionScreenState(
-                            title = "Call a phone",
-                            buttonText = "Grant permission",
-                            rationale = "In order to perform the call you need to grant access by accepting the next permission dialog.\n\nWould you like to continue?"
+                            title = permissionCallTitle,
+                            buttonText = permissionCallGrant,
+                            rationale = context.getString(R.string.permission_call_rationale)
                         )
                     } else {
                         // Directly launch the system permission dialog

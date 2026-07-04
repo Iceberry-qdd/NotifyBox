@@ -55,12 +55,15 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.icon.P2p
 import com.iceberry.notifybox.ui.ScrollToTopFab
 import com.iceberry.notifybox.ui.setting.SettingOptions
@@ -106,6 +109,7 @@ fun ImportsScreen(
             )
         }
     ) { paddingValues ->
+        val context = LocalContext.current
         val scope = rememberCoroutineScope()
         val params by rememberUpdatedState(mode)
         LaunchedEffect(params) {
@@ -128,7 +132,7 @@ fun ImportsScreen(
             uiState.error?.let {
                 val result = snackbarHostState.showSnackbar(
                     message = it,
-                    actionLabel = "确定",
+                    actionLabel = context.getString(R.string.confirm),
                     duration = SnackbarDuration.Indefinite
                 )
                 if (result == SnackbarResult.ActionPerformed) {
@@ -160,7 +164,7 @@ fun ImportsScreen(
                             .fillMaxSize()
                             .background(MaterialTheme.colorScheme.surface),
                         permissionsState = PermissionsState.GRANTED, // Reusing component for scanning state
-                        title = "正在发现附近设备...",
+                        title = stringResource(R.string.export_discovering_nearby),
                         icon = Icons.Default.P2p
                     )
                 } else {
@@ -202,13 +206,13 @@ fun ImportsScreen(
                 onDismissRequest = { },
                 confirmButton = {
                     TextButton(onClick = { viewModel.restartApp() }) {
-                        Text("立即重启")
+                        Text(stringResource(R.string.restart_now))
                     }
                 },
-                title = { Text("导入成功") },
+                title = { Text(stringResource(R.string.import_success)) },
                 text = {
-                    val text = if (mode == SettingOptions.ImportMethod.MERGE) "数据已成功合并，应用需要重启以使更改生效。"
-                    else "数据已成功覆盖，应用需要重启以使更改生效。"
+                    val text = if (mode == SettingOptions.ImportMethod.MERGE) stringResource(R.string.import_success_merge)
+                    else stringResource(R.string.import_success_overwrite)
                     Text(text)
                 },
                 properties = DialogProperties(
@@ -229,10 +233,10 @@ fun ImportsTopAppBar(
     windowInsets: WindowInsets = TopAppBarDefaults.windowInsets
 ) {
     TopAppBar(
-        title = { Text(text = "导入") },
+        title = { Text(text = stringResource(R.string.import_title)) },
         navigationIcon = {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
             }
         },
         modifier = modifier,

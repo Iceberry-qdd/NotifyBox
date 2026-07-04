@@ -31,6 +31,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavOptions
 import com.iceberry.notifybox.BuildConfig
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.data.SettingsRepository
 import com.iceberry.notifybox.icon.MoveItem
 import com.iceberry.notifybox.icon.ResetImage
@@ -47,13 +48,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) : ViewModel() {
     private val _loading = MutableStateFlow(true)
     private val _state2 = MutableStateFlow(true)
@@ -74,7 +74,7 @@ class SettingViewModel @Inject constructor(
                     id = 1L,
                     key = "theme",
                     value = it.darkThemeConfig,
-                    name = "主题模式",
+                    nameRes = R.string.setting_theme,
                     actionType = SettingActionTypeEnum.DIALOG,
                     group = SettingGroupEnum.DISPLAY,
                     icon = Icons.Default.Palette
@@ -83,7 +83,7 @@ class SettingViewModel @Inject constructor(
                     id = 2L,
                     key = "language",
                     value = it.languageConfig,
-                    name = "语言",
+                    nameRes = R.string.setting_language,
                     actionType = SettingActionTypeEnum.DIALOG,
                     group = SettingGroupEnum.DISPLAY,
                     icon = Icons.Default.Translate
@@ -92,8 +92,8 @@ class SettingViewModel @Inject constructor(
                     id = 3L,
                     key = "disable_battery_optimization",
                     value = SettingOptions.Bool.FALSE,
-                    name = "忽略电池优化",
-                    description = "请设置为无限制，常驻后台运行",
+                    nameRes = R.string.setting_battery_optimization,
+                    descriptionRes = R.string.setting_battery_optimization_desc,
                     actionType = SettingActionTypeEnum.INTENT,
                     group = SettingGroupEnum.DATA_PERMISSION,
                     icon = Icons.Default.BatteryStd
@@ -102,8 +102,8 @@ class SettingViewModel @Inject constructor(
                     id = 4L,
                     key = "auto_startup",
                     value = SettingOptions.Bool.FALSE,
-                    name = "允许自启动",
-                    description = "请设置为允许自启动，以确保正常运行",
+                    nameRes = R.string.setting_auto_startup,
+                    descriptionRes = R.string.setting_auto_startup_desc,
                     actionType = SettingActionTypeEnum.INTENT,
                     group = SettingGroupEnum.DATA_PERMISSION,
                     icon = Icons.Default.Autorenew
@@ -112,8 +112,8 @@ class SettingViewModel @Inject constructor(
                     id = 5L,
                     key = "reload_icon",
                     value = SettingOptions.Nop.NOP,
-                    name = "重载通知图标",
-                    description = "重新加载通知图标",
+                    nameRes = R.string.setting_reload_icons,
+                    descriptionRes = R.string.setting_reload_icons_desc,
                     actionType = SettingActionTypeEnum.CUSTOM,
                     group = SettingGroupEnum.DATA_PERMISSION,
                     icon = Icons.Filled.ResetImage
@@ -122,8 +122,8 @@ class SettingViewModel @Inject constructor(
                     id = 6L,
                     key = "log",
                     value = it.enableLog,
-                    name = "日志",
-                    description = if (it.enableLog.bool) "点击查看日志" else "记录应用运行日志",
+                    nameRes = R.string.setting_log,
+                    descriptionRes = if (it.enableLog.bool) R.string.setting_log_desc_enabled else R.string.setting_log_desc_disabled,
                     actionType = SettingActionTypeEnum.SWITCH,
                     group = SettingGroupEnum.DATA_PERMISSION,
                     icon = Icons.AutoMirrored.Filled.Article
@@ -132,8 +132,8 @@ class SettingViewModel @Inject constructor(
                     id = 7L,
                     key = "export",
                     value = SettingOptions.Nop.NOP,
-                    name = "导出数据",
-                    description = "将数据导出至另一台设备",
+                    nameRes = R.string.setting_export,
+                    descriptionRes = R.string.setting_export_desc,
                     actionType = SettingActionTypeEnum.NAVIGATE,
                     group = SettingGroupEnum.BACKUP,
                     icon = Icons.Default.MoveItem
@@ -142,8 +142,8 @@ class SettingViewModel @Inject constructor(
                     id = 8L,
                     key = "restore",
                     value = SettingOptions.Nop.NOP,
-                    name = "导入数据",
-                    description = "导入其它设备中的数据",
+                    nameRes = R.string.setting_import,
+                    descriptionRes = R.string.setting_import_desc,
                     actionType = SettingActionTypeEnum.CUSTOM,
                     group = SettingGroupEnum.BACKUP,
                     icon = Icons.AutoMirrored.Filled.Login
@@ -152,7 +152,7 @@ class SettingViewModel @Inject constructor(
                     id = 9L,
                     key = "about",
                     value = SettingOptions.Nop.NOP,
-                    name = "关于",
+                    nameRes = R.string.setting_about,
                     description = BuildConfig.VERSION_NAME,
                     actionType = SettingActionTypeEnum.NAVIGATE,
                     group = SettingGroupEnum.ABOUT,
@@ -206,7 +206,7 @@ class SettingViewModel @Inject constructor(
 
     fun reloadIcons(onComplete: () -> Unit) {
         viewModelScope.launch {
-            context.filesDir.listFiles { _, name -> name.endsWith(".webp") }?.forEach { 
+            context.filesDir.listFiles { _, name -> name.endsWith(".webp") }?.forEach {
                 it.delete()
             }
             onComplete()
@@ -222,9 +222,11 @@ data class SettingUiState(
 data class SettingItemVO<T>(
     val id: Long,
     val key: String,
-    val name: String = key,
+    val nameRes: Int? = null,
+    val name: String = "",
     val value: T,
-    val description: String = value.displayName,
+    val descriptionRes: Int? = null,
+    val description: String = "",
     val actionType: SettingActionTypeEnum,
     val actionOptions: List<T> = value.javaClass.enumConstants?.toList() ?: listOf(),
     val group: SettingGroupEnum,
@@ -237,11 +239,15 @@ data class NavigateData(
 )
 
 interface Enumeration {
+    val displayNameRes: Int? get() = null
     val displayName: String
 }
 
-enum class SettingGroupEnum(override val displayName: String) : Enumeration {
-    DISPLAY("界面与显示"), DATA_PERMISSION("数据与权限"), BACKUP("备份与恢复"), ABOUT("关于")
+enum class SettingGroupEnum(override val displayName: String, override val displayNameRes: Int) : Enumeration {
+    DISPLAY("界面与显示", R.string.setting_group_display),
+    DATA_PERMISSION("数据与权限", R.string.setting_group_permission),
+    BACKUP("备份与恢复", R.string.setting_group_backup),
+    ABOUT("关于", R.string.setting_group_about)
 }
 
 enum class SettingActionTypeEnum { SWITCH, DIALOG, LINK, NAVIGATE, INTENT, PLAIN, CUSTOM }
@@ -249,23 +255,29 @@ enum class SettingActionTypeEnum { SWITCH, DIALOG, LINK, NAVIGATE, INTENT, PLAIN
 object SettingOptions {
     enum class Nop(override val displayName: String) : Enumeration { NOP(""); }
 
-    enum class Bool(val bool: Boolean, override val displayName: String) : Enumeration {
-        TRUE(true, "已启用"), FALSE(false, "已禁用");
+    enum class Bool(val bool: Boolean, override val displayName: String, override val displayNameRes: Int) : Enumeration {
+        TRUE(true, "已启用", R.string.setting_option_enabled), FALSE(false, "已禁用", R.string.setting_option_disabled);
     }
 
-    enum class Theme(override val displayName: String) : Enumeration {
-        DEFAULT("跟随系统"), LIGHT("浅色模式"), NIGHT("深色模式");
+    enum class Theme(override val displayName: String, override val displayNameRes: Int) : Enumeration {
+        DEFAULT("跟随系统", R.string.setting_option_default),
+        LIGHT("浅色模式", R.string.setting_option_light),
+        NIGHT("深色模式", R.string.setting_option_night);
     }
 
-    enum class Language(override val displayName: String) : Enumeration {
-        DEFAULT("跟随系统"), ZH_CN("简体中文"), ZH_TW("繁體中文"), EN_US("English");
+    enum class Language(override val displayName: String, override val displayNameRes: Int) : Enumeration {
+        DEFAULT("跟随系统", R.string.setting_option_default),
+        ZH_CN("简体中文", R.string.setting_option_zh_cn),
+        ZH_TW("繁體中文", R.string.setting_option_zh_tw),
+        EN_US("English", R.string.setting_option_en);
     }
 
     enum class ExportFormat(override val displayName: String) : Enumeration {
         CSV("CSV"), ZIP("ZIP")
     }
 
-    enum class ImportMethod(override val displayName: String) : Enumeration {
-        OVERRIDE("覆盖"), MERGE("合并")
+    enum class ImportMethod(override val displayName: String, override val displayNameRes: Int) : Enumeration {
+        OVERRIDE("覆盖", R.string.setting_override_import),
+        MERGE("合并", R.string.setting_merge_import)
     }
 }

@@ -162,17 +162,17 @@ class NearByDiscoverService : Service() {
         val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
         val bleNotificationChannel = NotificationChannel(
             NAERBY_NOTIFICATION_CHANNEL_ID,
-            "附近设备",
+            getString(R.string.service_nearby_devices),
             NotificationManager.IMPORTANCE_LOW
         ).apply {
-            description = "附近设备服务通知"
+            description = getString(R.string.service_nearby_devices_description)
         }
         val nManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         nManager.createNotificationChannel(bleNotificationChannel)
 
         val nBuilder = Notification.Builder(this, NAERBY_NOTIFICATION_CHANNEL_ID)
-        val notification = nBuilder.setContentTitle("附近设备")
-            .setContentText("正在搜索附近的设备...")
+        val notification = nBuilder.setContentTitle(getString(R.string.service_nearby_devices))
+            .setContentText(getString(R.string.service_discovering))
             .setSmallIcon(R.mipmap.ic_launcher_round)
             .setContentIntent(pendingIntent)
             .build()

@@ -21,6 +21,7 @@ import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iceberry.notifybox.MainActivity
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.bg.event.NearbyConnectionRequestEvent
 import com.iceberry.notifybox.bg.event.NearbyConnectionResponseEvent
 import com.iceberry.notifybox.bg.event.NearbyConnectionResultEvent
@@ -45,8 +46,8 @@ import kotlinx.coroutines.flow.update
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
-import kotlin.system.exitProcess
 import javax.inject.Inject
+import kotlin.system.exitProcess
 
 @HiltViewModel
 class ImportsViewModel @Inject constructor(
@@ -69,7 +70,7 @@ class ImportsViewModel @Inject constructor(
             Triple(progress, error, showRestartDialog)
         }
     ) { (loading, deviceInfo, permissionsState), (progress, error, showRestartDialog) ->
-        
+
         val updatedDeviceInfo = if (progress != null && progress.endpointId == deviceInfo.endpointId) {
             deviceInfo.copy(
                 transferState = if (progress.isCompleted) {
@@ -80,7 +81,8 @@ class ImportsViewModel @Inject constructor(
             )
         } else deviceInfo
 
-        val isImportSuccess = progress?.isCompleted == true && progress.error == null && updatedDeviceInfo.transferState == TransferState.TRANSFERRED
+        val isImportSuccess =
+            progress?.isCompleted == true && progress.error == null && updatedDeviceInfo.transferState == TransferState.TRANSFERRED
 
         ImportsUiState(
             loading = loading,
@@ -106,11 +108,11 @@ class ImportsViewModel @Inject constructor(
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onNearbyConnectionRequest(event: NearbyConnectionRequestEvent) {
-        _deviceInfo.update { 
+        _deviceInfo.update {
             DeviceInfo(
                 endpointId = event.endpointId,
                 name = event.info.endpointName,
-                description = "正在请求连接...",
+                description = context.getString(R.string.export_connecting),
                 connectState = ConnectState.CONNECTING
             )
         }
@@ -122,7 +124,9 @@ class ImportsViewModel @Inject constructor(
             if (current.endpointId == event.endpointId) {
                 current.copy(
                     connectState = if (event.isConnected) ConnectState.CONNECTED else ConnectState.CONNECT_FAILED,
-                    description = if (event.isConnected) "连接成功" else "连接失败"
+                    description = if (event.isConnected) context.getString(R.string.export_connect_success) else context.getString(
+                        R.string.export_connect_failed
+                    )
                 )
             } else current
         }
@@ -141,6 +145,7 @@ class ImportsViewModel @Inject constructor(
         _mode.update { mode }
         transferManager.isMergeMode = mode == SettingOptions.ImportMethod.MERGE
     }
+
     fun clearError() = _error.update { null }
     fun changePermissionsState(state: PermissionsState) = _permissionsState.update { state }
 

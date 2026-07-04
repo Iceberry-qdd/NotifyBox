@@ -31,9 +31,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.navigation.NBNavHost
 import com.iceberry.notifybox.ui.list.ListViewModel
 import kotlinx.coroutines.launch
@@ -75,9 +77,9 @@ fun NBApp(
             NBAlertDialog(
                 onDismissRequest = { viewModel.cancelANLSSettingsDialog() },
                 onConfirmation = { viewModel.confirmANSSettingsDialog(context) },
-                confirmButtonText = "打开设置",
-                dialogTitle = "需要开启通知监听权限",
-                dialogText = "请转到设置界面并将此应用的通知监听权限打开。"
+                confirmButtonText = stringResource(R.string.open_settings),
+                dialogTitle = stringResource(R.string.notification_permission_title),
+                dialogText = stringResource(R.string.notification_permission_desc)
             )
         }
     }

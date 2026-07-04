@@ -44,7 +44,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -153,10 +152,10 @@ fun ListTopAppBar(
             title = { Text(text = stringResource(R.string.app_name)) },
             actions = {
                 IconButton(onClick = { showSearchBar = true }) {
-                    Icon(Icons.Filled.Search, "搜索")
+                    Icon(Icons.Filled.Search, stringResource(R.string.list_search))
                 }
                 IconButton(onClick = routeToStatistic) {
-                    Icon(Icons.Filled.PieChart, "统计分析")
+                    Icon(Icons.Filled.PieChart, stringResource(R.string.list_statistic))
                 }
                 ListTopAppBarMenu(orderBy = uiState.orderBy)
             },
@@ -173,15 +172,15 @@ fun ListTopAppBarMenu(
     orderBy: ListOrderBy
 ) {
     TopAppBarDropdownMenu(
-        iconContent = { Icon(Icons.Filled.MoreVert, "更多选项") }
+        iconContent = { Icon(Icons.Filled.MoreVert, stringResource(R.string.list_more_options)) }
     ) { closeMenu ->
         DropdownMenuItem(
             leadingIcon = {
                 if (orderBy.field == OrderField.TIME && orderBy.direction == OrderDirection.ASC) {
-                    Icon(Icons.Default.Check, contentDescription = "已选择")
+                    Icon(Icons.Default.Check, contentDescription = stringResource(R.string.common_selected))
                 }
             },
-            text = { Text("按日期正序") },
+            text = { Text(stringResource(R.string.sort_date_asc)) },
             onClick = {
                 viewModel.setOrderBy(
                     ListOrderBy(
@@ -194,10 +193,10 @@ fun ListTopAppBarMenu(
         DropdownMenuItem(
             leadingIcon = {
                 if (orderBy.field == OrderField.TIME && orderBy.direction == OrderDirection.DESC) {
-                    Icon(Icons.Default.Check, contentDescription = "已选择")
+                    Icon(Icons.Default.Check, contentDescription = stringResource(R.string.common_selected))
                 }
             },
-            text = { Text("按日期倒序") },
+            text = { Text(stringResource(R.string.sort_date_desc)) },
             onClick = {
                 viewModel.setOrderBy(
                     ListOrderBy(
@@ -210,10 +209,10 @@ fun ListTopAppBarMenu(
         DropdownMenuItem(
             leadingIcon = {
                 if (orderBy.field == OrderField.PACKAGE && orderBy.direction == OrderDirection.ASC) {
-                    Icon(Icons.Default.Check, contentDescription = "已选择")
+                    Icon(Icons.Default.Check, contentDescription = stringResource(R.string.common_selected))
                 }
             },
-            text = { Text("按包名正序") },
+            text = { Text(stringResource(R.string.sort_pkg_asc)) },
             onClick = {
                 viewModel.setOrderBy(
                     ListOrderBy(
@@ -226,10 +225,10 @@ fun ListTopAppBarMenu(
         DropdownMenuItem(
             leadingIcon = {
                 if (orderBy.field == OrderField.PACKAGE && orderBy.direction == OrderDirection.DESC) {
-                    Icon(Icons.Default.Check, contentDescription = "已选择")
+                    Icon(Icons.Default.Check, contentDescription = stringResource(R.string.common_selected))
                 }
             },
-            text = { Text("按包名倒序") },
+            text = { Text(stringResource(R.string.sort_pkg_desc)) },
             onClick = {
                 viewModel.setOrderBy(
                     ListOrderBy(
@@ -263,13 +262,13 @@ fun ListFloatActionBar(
             }
         ) {
             if (uiState.isServiceRunning) {
-                Icon(Icons.Filled.Square, "停止监听")
+                Icon(Icons.Filled.Square, stringResource(R.string.list_stop_listening))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "停止监听")
+                Text(text = stringResource(R.string.list_stop_listening))
             } else {
-                Icon(Icons.Filled.PlayArrow, "启动监听")
+                Icon(Icons.Filled.PlayArrow, stringResource(R.string.list_start_listening))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "启动监听")
+                Text(text = stringResource(R.string.list_start_listening))
             }
         }
     }

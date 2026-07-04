@@ -63,20 +63,18 @@ private class FakeNotifyRepository : NotifyRepository {
 
     private val data = mutableListOf<String>()
 
-    override val notifies: PagingSource<Int, Notify>
-        get() = NotifyRepository.EmptyPageSource()
-
     override suspend fun add(notify: Notify) {
         TODO("Not yet implemented")
     }
 
-    override fun queryByPaging(): PagingSource<Int, Notify> {
+    override fun queryByPaging(orderBy: ListOrderBy): PagingSource<Int, Notify> {
         TODO("Not yet implemented")
     }
 
     override fun queryByPaging(
         packageName: String,
-        timeRangeFilter: TimeRangeFilter
+        timeRangeFilter: TimeRangeFilter,
+        orderBy: ListOrderBy
     ): PagingSource<Int, Notify> {
         TODO("Not yet implemented")
     }

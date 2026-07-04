@@ -43,9 +43,11 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,20 +82,20 @@ fun SearchTopBar(
             value = query ?: "",
             onValueChange = onQueryChanged,
             placeholder = {
-                Text("应用名/标题/内容")
+                Text(stringResource(R.string.search_placeholder))
             },
             leadingIcon = {
                 Icon(
                     modifier = Modifier.clickable(onClick = onBack),
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "返回"
+                    contentDescription = stringResource(R.string.back)
                 )
             },
             trailingIcon = {
                 Icon(
                     modifier = Modifier.clickable(onClick = onClearQuery),
                     imageVector = Icons.Filled.Clear,
-                    contentDescription = "清除搜索内容"
+                    contentDescription = stringResource(R.string.clear_search)
                 )
             },
             visualTransformation = VisualTransformation.None,

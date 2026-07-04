@@ -25,20 +25,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.iceberry.notifybox.R
 
 @Composable
 fun NBAlertDialog(
     onDismissRequest: () -> Unit,
     onConfirmation: () -> Unit,
-    confirmButtonText: String = "确定",
-    dismissButtonText: String = "取消",
+    confirmButtonText: String = stringResource(R.string.confirm),
+    dismissButtonText: String = stringResource(R.string.cancel),
     dialogTitle: String,
     dialogText: String,
     icon: ImageVector? = null,
 ) {
     AlertDialog(
-        icon = { icon?.also { Icon(it, contentDescription = "Example Icon") } },
+        icon = { icon?.also { Icon(it, contentDescription = stringResource(R.string.example_icon)) } },
         title = { Text(text = dialogTitle) },
         text = { Text(text = dialogText) },
         onDismissRequest = { onDismissRequest() },

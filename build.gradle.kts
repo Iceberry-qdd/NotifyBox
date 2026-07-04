@@ -15,3 +15,12 @@
  */
 
 // Root build.gradle.kts
+buildscript {
+    repositories {
+        mavenCentral()
+        google()
+    }
+    dependencies {
+        classpath(libs.r8)
+    }
+}

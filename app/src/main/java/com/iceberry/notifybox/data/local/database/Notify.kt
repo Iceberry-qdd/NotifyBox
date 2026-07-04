@@ -18,7 +18,6 @@ package com.iceberry.notifybox.data.local.database
 
 import android.content.Context
 import android.graphics.drawable.Drawable
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.paging.PagingSource
 import androidx.room.ColumnInfo

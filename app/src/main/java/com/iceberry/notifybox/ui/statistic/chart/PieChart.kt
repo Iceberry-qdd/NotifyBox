@@ -30,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
@@ -43,13 +44,12 @@ import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.github.mikephil.charting.utils.MPPointF
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.data.local.database.AppIcon
 import com.iceberry.notifybox.databinding.PieChartBinding
 import com.iceberry.notifybox.ui.theme.COLOR_PALETTE
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 import com.iceberry.notifybox.ui.theme.convertToRGB
-
-const val DEFAULT_CENTER_TEXT = "按应用统计"
 
 @Composable
 fun PieChart(
@@ -62,12 +62,15 @@ fun PieChart(
 ) {
     val descTextColor = MaterialTheme.colorScheme.outline
     val centerTextColor = MaterialTheme.colorScheme.onSurface
+    val centerTextDefault = stringResource(R.string.stat_app_stat)
+    val pieDescriptionText = stringResource(R.string.stat_pie_desc)
+
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = DEFAULT_CENTER_TEXT,
+            text = centerTextDefault,
             style = MaterialTheme.typography.titleMedium
         )
 
@@ -99,7 +102,7 @@ fun PieChart(
 
                     override fun onNothingSelected() {
                         Log.i("PieChart#onNothingSelected", "nothing selected")
-                        centerText = DEFAULT_CENTER_TEXT
+                        centerText = centerTextDefault
                     }
                 })
 
@@ -110,7 +113,7 @@ fun PieChart(
 
                 legend.isEnabled = false
 
-                centerText = DEFAULT_CENTER_TEXT
+                centerText = centerTextDefault
                 setDrawCenterText(true)
                 setCenterTextColor(convertToRGB(centerTextColor))
                 setCenterTextSize(11f)
@@ -122,7 +125,7 @@ fun PieChart(
 
             pieChart.description.apply {
                 isEnabled = true
-                text = "*其它为小于1%的数据"
+                text = pieDescriptionText
                 textAlign = Paint.Align.RIGHT
                 textSize = 10f
                 textColor = convertToRGB(descTextColor)
@@ -177,11 +180,11 @@ data class PieChartDataVO(
 /**
  * @param pieChartDataList 要求按照dest从大到小排序
  */
-internal fun handlePieData(pieChartDataList: List<PieChartDataVO>): PieData {
+internal fun handlePieData(pieChartDataList: List<PieChartDataVO>, otherLabel: String = "其它"): PieData {
     val otherPieEntry = pieChartDataList
         .takeLastWhile { it.dest < 0.01 }
         .map { PieEntry(it.value, it.label) }
-        .reduceOrNull { agg, e -> PieEntry(agg.value + e.value, "其它", false) }
+        .reduceOrNull { agg, e -> PieEntry(agg.value + e.value, otherLabel, false) }
 
     val pieEntries = pieChartDataList
         .dropLastWhile { it.dest < 0.01 }
@@ -190,7 +193,7 @@ internal fun handlePieData(pieChartDataList: List<PieChartDataVO>): PieData {
         .apply { otherPieEntry?.let { this.add(it) } }
 
     return PieData().apply {
-        dataSet = PieDataSet(pieEntries, DEFAULT_CENTER_TEXT).apply {
+        dataSet = PieDataSet(pieEntries, "").apply {
             setDrawIcons(false)
             sliceSpace = 3f
             iconsOffset = MPPointF(0f, 40f)

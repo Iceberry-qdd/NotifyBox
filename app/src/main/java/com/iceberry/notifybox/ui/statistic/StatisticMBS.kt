@@ -53,7 +53,7 @@ fun StatisticModelBottomSheet(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val items = viewModel.pager.collectAsLazyPagingItems()
-    val listState = rememberListColumnState<NotifyVO>(
+    val listState = rememberListColumnState(
         items = items,
         lazyListState = lazyListState,
         loading = uiState.loading,

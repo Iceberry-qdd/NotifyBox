@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class GroupDetailsViewModel @Inject constructor(
@@ -69,7 +70,7 @@ class GroupDetailsViewModel @Inject constructor(
     }.flattenConcat()
         .map { notifies -> notifies.map(mappingNotifies(context, KeyPrefix.ITEM, KeySuffix.ID)) }
         .onEach {
-            delay(500L)
+            delay(500L.milliseconds)
             _loading.update { false }
         }
         .cachedIn(viewModelScope)

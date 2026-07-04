@@ -24,13 +24,14 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.ui.NBAppState
 import com.iceberry.notifybox.ui.rememberNBAppState
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
@@ -68,7 +69,7 @@ fun SettingTopAppBar(
     windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
 ) {
     TopAppBar(
-        title = { Text(text = "设置") },
+        title = { Text(text = stringResource(R.string.nav_settings)) },
         modifier = modifier,
         scrollBehavior = scrollBehavior,
         windowInsets = windowInsets

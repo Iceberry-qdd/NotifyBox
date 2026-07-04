@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2026 Iceberry-qdd.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources>
+    <string name="app_name">NotifyBox</string>
+    <string name="navigation_menu_index_id">Index</string>
+    <string name="navigation_menu_index_display_name">List</string>
+    <string name="app_description">An app that collects notifications from the status bar and forwards them to target devices.</string>
+
+    <!-- Navigation -->
+    <string name="nav_list">List</string>
+    <string name="nav_forward">Forward</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Export & Forward -->
+    <string name="export_title">Export</string>
+    <string name="export_discovering_nearby">Discovering nearby devices&#8230;</string>
+    <string name="export_nearby_devices">Nearby Devices</string>
+    <string name="export_history_devices">History Devices</string>
+    <string name="export_connect">Connect</string>
+    <string name="export_button">Export</string>
+    <string name="export_success">Export Successful</string>
+    <string name="export_retry">Retry Export</string>
+    <string name="export_reconnect">Reconnect</string>
+    <string name="export_connecting">Requesting connection&#8230;</string>
+    <string name="export_connect_success">Connection Successful</string>
+    <string name="export_connect_failed">Connection Failed</string>
+    <string name="unknown_device">Unknown Device</string>
+    <string name="forward_title">Forward</string>
+    <string name="forward_stats">Stats</string>
+    <string name="forward_rescan">Rescan</string>
+    <string name="back">Back</string>
+    <string name="transfer_interrupted">Transfer Interrupted</string>
+
+    <!-- Permissions -->
+    <string name="permission_location_disabled">Location services disabled, please enable them</string>
+    <string name="permission_bluetooth_disabled">Bluetooth disabled, please enable it</string>
+    <string name="permission_nearby_needed">Nearby devices permission needed, please authorize</string>
+    <string name="permission_authorize_now">Authorize Now</string>
+    <string name="permission_go_to_enable">Go to Enable</string>
+    <string name="permission_manual_fix">Still cannot authorize? Go to System Settings</string>
+    <string name="permission_call_title">Call Phone</string>
+    <string name="permission_call_grant">Grant Call Permission</string>
+    <string name="permission_call_granted">You can make calls now!</string>
+    <string name="permission_call_action">Call</string>
+    <string name="permission_call_rationale">To make calls, you need to grant access in the following dialog.\n\nDo you want to continue?</string>
+    <string name="permission_call_faking">Simulating call&#8230;</string>
+
+    <!-- List Screen -->
+    <string name="list_search">Search</string>
+    <string name="list_statistic">Statistics</string>
+    <string name="list_more_options">More Options</string>
+    <string name="list_stop_listening">Stop Listening</string>
+    <string name="list_start_listening">Start Listening</string>
+    <string name="list_no_messages">No new messages</string>
+    <string name="list_delete_msg">Deleted %1$d [%2$s] notifications</string>
+    <string name="recover">Recover</string>
+    <string name="sort_date_asc">Date Ascending</string>
+    <string name="sort_date_desc">Date Descending</string>
+    <string name="sort_pkg_asc">Package Ascending</string>
+    <string name="sort_pkg_desc">Package Descending</string>
+    <string name="common_selected">Selected</string>
+    <string name="delete">Delete</string>
+    <string name="default_app_icon">Default App Icon</string>
+
+    <!-- Search -->
+    <string name="search_placeholder">App/Title/Content</string>
+    <string name="clear_search">Clear search</string>
+
+    <!-- Settings & Common -->
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="back_to_top">Back to Top</string>
+    <string name="example_icon">Icon</string>
+    <string name="reload_icons_warning">After reloading notification icons, all notifications will display the app icon. (Do not perform this unless necessary)</string>
+    <string name="open_link">Open Link</string>
+    <string name="navigate_to">Navigate to</string>
+    <string name="continue_btn">Continue</string>
+    <string name="dismiss_btn">Cancel</string>
+    <string name="setting_toast_failed_navigate">Failed to navigate to screen</string>
+    <string name="setting_override_import">Overwrite Import</string>
+    <string name="setting_override_import_description">Import after deleting all data</string>
+    <string name="setting_merge_import">Merge Import</string>
+    <string name="setting_merge_import_description">Merge imported data with current data</string>
+    <string name="setting_reload_icons_done">Icons reloaded</string>
+
+    <string name="setting_theme">Theme Mode</string>
+    <string name="setting_language">Language</string>
+    <string name="setting_battery_optimization">Ignore Battery Optimization</string>
+    <string name="setting_battery_optimization_desc">Please set to Unrestricted to run in background</string>
+    <string name="setting_auto_startup">Allow Auto-startup</string>
+    <string name="setting_auto_startup_desc">Please allow auto-startup to ensure normal operation</string>
+    <string name="setting_reload_icons">Reload Icons</string>
+    <string name="setting_reload_icons_desc">Reload notification icons</string>
+    <string name="setting_log">Logs</string>
+    <string name="setting_log_desc_enabled">Click to view logs</string>
+    <string name="setting_log_desc_disabled">Record app logs</string>
+    <string name="setting_export">Export Data</string>
+    <string name="setting_export_desc">Export data to another device</string>
+    <string name="setting_import">Import Data</string>
+    <string name="setting_import_desc">Import data from another device</string>
+    <string name="setting_about">About</string>
+
+    <string name="setting_group_display">Appearance</string>
+    <string name="setting_group_permission">Data &amp; Permissions</string>
+    <string name="setting_group_backup">Backup &amp; Recovery</string>
+    <string name="setting_group_about">About</string>
+
+    <string name="setting_option_default">System Default</string>
+    <string name="setting_option_light">Light Mode</string>
+    <string name="setting_option_night">Dark Mode</string>
+    <string name="setting_option_zh_cn">简体中文</string>
+    <string name="setting_option_zh_tw">繁體中文</string>
+    <string name="setting_option_en">English</string>
+    <string name="setting_option_enabled">Enabled</string>
+    <string name="setting_option_disabled">Disabled</string>
+
+    <!-- Notifications -->
+    <string name="notification_monitor_channel">Monitor Service Status</string>
+    <string name="notification_monitor_description">Shows monitor service status in the notification bar.</string>
+    <string name="notification_listening_title">Listening for notifications</string>
+    <string name="click_for_details">Click for details</string>
+    <string name="notification_permission_title">Notification Access Needed</string>
+    <string name="notification_permission_desc">Please enable Notification Access for this app in Settings.</string>
+    <string name="open_settings">Open Settings</string>
+
+    <!-- Imports -->
+    <string name="import_title">Import</string>
+    <string name="restart_now">Restart Now</string>
+    <string name="import_success">Import Successful</string>
+    <string name="import_success_merge">Data merged. App needs to restart to apply changes.</string>
+    <string name="import_success_overwrite">Data overwritten. App needs to restart to apply changes.</string>
+    <string name="reject_connection">Reject</string>
+    <string name="accept_connection">Accept</string>
+    <string name="nearby_connection_title">Accept connection from %1$s</string>
+    <string name="nearby_connection_message">Confirm if the codes match on both devices: %1$s</string>
+    <string name="import_error_version_mismatch">Version mismatch, import failed</string>
+    <string name="import_error_unknown_version">Unknown backup version</string>
+    <string name="import_error_no_db">Database not found in backup</string>
+    <string name="import_error_merge_failed">Merge failed: %1$s</string>
+
+    <!-- Services -->
+    <string name="service_nearby_devices">Nearby Devices</string>
+    <string name="service_nearby_devices_description">Nearby devices service notification</string>
+    <string name="service_discovering">Discovering nearby devices&#8230;</string>
+    <string name="service_advertising">Waiting for connection requests&#8230;</string>
+    <string name="service_app_notification_listener_label">Notification Listener Service</string>
+    <string name="service_anls_started">Starting listener service&#8230;</string>
+    <string name="service_anls_stopped">Listener service stopped</string>
+
+    <!-- Statistic -->
+    <string name="stat_title">Statistics Details</string>
+    <string name="stat_view_group_all">View all items in this group</string>
+    <string name="stat_no_data">No data</string>
+    <string name="stat_load_failed">Failed to load data</string>
+    <string name="stat_time_stat">Statistics by Time</string>
+    <string name="stat_app_stat">Statistics by App</string>
+    <string name="stat_pie_desc">*Others represent data &lt; 1%</string>
+    <string name="stat_pie_other">Others</string>
+    <string name="stat_filter_all">All</string>
+    <string name="stat_filter_today">Today</string>
+    <string name="stat_filter_yesterday">Yesterday</string>
+    <string name="stat_filter_this_week">This Week</string>
+    <string name="stat_filter_this_month">This Month</string>
+    <string name="stat_filter_last_month">Last Month</string>
+    <string name="stat_filter_this_year">This Year</string>
+    <string name="stat_filter_last_year">Last Year</string>
+    <string name="stat_filter_custom">Custom Range</string>
+    <string name="selected_label">Selected %1$s</string>
+    <string name="clear_filter">Clear Filters</string>
+
+    <!-- Log -->
+    <string name="log_title">Logs</string>
+    <string name="log_empty">No logs</string>
+    <string name="log_load_failed">Failed to load data</string>
+    <string name="log_filter_level">Filter by log level</string>
+
+    <!-- About -->
+    <string name="about_title">About</string>
+    <string name="about_app_version">App Version</string>
+    <string name="about_build_time">Build Time</string>
+    <string name="about_build_version">Build Version</string>
+    <string name="about_build_type">Build Type</string>
+    <string name="about_abi">ABI</string>
+    <string name="about_install_source">Install Source</string>
+    <string name="about_db_version">DB Version</string>
+
+    <!-- Group Details -->
+    <string name="group_details_title">Group Details (%1$d)</string>
+    <string name="group_details_empty">Empty page, please go back</string>
+
+    <!-- Date Chart -->
+    <string name="date_year">%1$d Year(s)</string>
+    <string name="date_month">%1$d Month(s)</string>
+    <string name="date_day">%1$d Day(s)</string>
+    <string name="date_full">%1$d-%2$02d-%3$02d</string>
+    <string name="date_month_day">%1$d-%2$02d</string>
+    <string name="date_before_yesterday">Day before yesterday %1$s</string>
+    <string name="date_yesterday">Yesterday %1$s</string>
+    <string name="date_seconds_ago">%1$d seconds ago</string>
+</resources>

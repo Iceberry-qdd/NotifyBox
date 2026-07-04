@@ -44,10 +44,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.iceberry.notifybox.BuildConfig
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.ui.list.AppIcon
 import com.iceberry.notifybox.ui.list.DefaultAppIcon
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
@@ -64,17 +66,15 @@ fun AboutContent(
     val buildTime = BuildConfig.BUILD_TIME.toString()
     val buildType = BuildConfig.BUILD_TYPE
 
-    val infoItems = remember(buildTime, uiState) {
-        listOf(
-            "应用版本" to "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})",
-            "构建时间" to buildTime,
-            "构建版本" to BuildConfig.GIT_HASH,
-            "构建类型" to buildType,
-            "so库版本" to uiState.abi,
-            "安装来源" to uiState.installSource,
-            "db版本" to uiState.dbVersion
-        )
-    }
+    val infoItems = listOf(
+        stringResource(R.string.about_app_version) to "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})",
+        stringResource(R.string.about_build_time) to buildTime,
+        stringResource(R.string.about_build_version) to BuildConfig.GIT_HASH,
+        stringResource(R.string.about_build_type) to buildType,
+        stringResource(R.string.about_abi) to uiState.abi,
+        stringResource(R.string.about_install_source) to uiState.installSource,
+        stringResource(R.string.about_db_version) to uiState.dbVersion
+    )
 
     LazyColumn(
         modifier = modifier,
@@ -104,10 +104,10 @@ fun AboutContent(
                             .clip(RoundedCornerShape(percent = 25))
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "通知盒子",
+                    text = stringResource(R.string.app_name),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -127,7 +127,7 @@ fun AboutContent(
                 )
             }
         }
-        
+
         item {
             Spacer(modifier = Modifier.height(24.dp))
         }

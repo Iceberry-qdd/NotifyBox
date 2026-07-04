@@ -17,12 +17,15 @@
 package com.iceberry.notifybox.testdi
 
 import com.iceberry.notifybox.data.NotifyRepository
+import com.iceberry.notifybox.data.SettingsRepository
 import com.iceberry.notifybox.data.di.DataModule
 import com.iceberry.notifybox.data.di.FakeNotifyRepository
+import com.iceberry.notifybox.data.di.FakeSettingsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.components.SingletonComponent
 import dagger.hilt.testing.TestInstallIn
+import javax.inject.Singleton
 
 @Module
 @TestInstallIn(
@@ -31,8 +34,15 @@ import dagger.hilt.testing.TestInstallIn
 )
 interface FakeDataModule {
 
+    @Singleton
     @Binds
     fun bindNotifyRepository(
         fakeRepository: FakeNotifyRepository
     ): NotifyRepository
+
+    @Singleton
+    @Binds
+    fun bindSettingsRepository(
+        fakeRepository: FakeSettingsRepository
+    ): SettingsRepository
 }

@@ -59,7 +59,7 @@ class NBSettingsDatasource @Inject constructor(
                 },
                 shouldHidePolicy = it.shouldHidePolicy,
                 isANLSRunning = it.isAnlsRunning,
-                enableLog = SettingOptions.Bool.entries.firstOrNull{ v -> v.bool == it.enableLog } ?: SettingOptions.Bool.FALSE
+                enableLog = SettingOptions.Bool.entries.firstOrNull { v -> v.bool == it.enableLog } ?: SettingOptions.Bool.FALSE
             )
         }
 

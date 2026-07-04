@@ -17,7 +17,6 @@
 package com.iceberry.notifybox.data.local.di
 
 import android.content.Context
-import android.util.Log
 import androidx.room.Room
 import androidx.room.TypeConverter
 import com.iceberry.notifybox.data.local.database.AppDatabase
@@ -55,9 +54,6 @@ class DatabaseModule {
             AppDatabase::class.java,
             "Notifies.db"
         ).addMigrations(AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5)
-            .setQueryCallback({ sqlQuery, bindArgs ->
-            Log.d("Room", "sqlQuery = $sqlQuery, args = $bindArgs")
-        }) { it.run() }
             .build()
     }
 }

@@ -39,11 +39,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.navigation.Route
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 import kotlinx.coroutines.launch
@@ -112,7 +114,7 @@ fun SettingGroup(
     ) {
         Text(
             modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 24.dp),
-            text = group.displayName,
+            text = stringResource(group.displayNameRes),
             style = MaterialTheme.typography.titleSmall.merge(color = MaterialTheme.colorScheme.primary)
         )
         Column(modifier = modifier) {
@@ -242,10 +244,10 @@ fun SettingGroup(
                                         .background(MaterialTheme.colorScheme.background)
                                         .wrapContentHeight(),
                                     data = it,
-                                    onConfirm = { 
+                                    onConfirm = {
                                         viewModel.reloadIcons {
                                             scope.launch {
-                                                snackbarHostState.showSnackbar("重载图标完成")
+                                                snackbarHostState.showSnackbar(context.getString(R.string.setting_reload_icons_done))
                                             }
                                         }
                                     }
@@ -272,7 +274,7 @@ fun SettingGroup(
                                         .background(MaterialTheme.colorScheme.background)
                                         .wrapContentHeight(),
                                     data = it,
-                                    onSelectMethod = {mode ->
+                                    onSelectMethod = { mode ->
                                         onClickItem(NavigateData(route = Route.ImportsRoute(mode)))
                                     }
                                 )

@@ -22,6 +22,7 @@ import androidx.sqlite.db.SupportSQLiteQuery
 import com.iceberry.notifybox.data.local.database.BarChartData
 import com.iceberry.notifybox.data.local.database.Notify
 import com.iceberry.notifybox.data.local.database.NotifyDao
+import com.iceberry.notifybox.data.local.database.NotifyIcons
 import com.iceberry.notifybox.data.local.database.PieChartData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -60,15 +61,12 @@ class DefaultNotifyRepositoryTest {
 private class FakeNotifyDao : NotifyDao {
 
     private val data = mutableListOf<Notify>()
-    override fun getNotifies(): PagingSource<Int, Notify> {
+
+    override fun getNotifies(query: SupportSQLiteQuery): PagingSource<Int, Notify> {
         TODO("Not yet implemented")
     }
 
-    override fun getNotifies(
-        packageName: String,
-        startAt: LocalDateTime,
-        endAt: LocalDateTime
-    ): PagingSource<Int, Notify> {
+    override suspend fun getNotifiesCount(): Int {
         TODO("Not yet implemented")
     }
 
@@ -101,6 +99,14 @@ private class FakeNotifyDao : NotifyDao {
     }
 
     override suspend fun markDeletedById(id: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getIconsOfOldDeletedNotifies(threshold: LocalDateTime): List<NotifyIcons> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun deleteOldDeletedNotifies(threshold: LocalDateTime): Int {
         TODO("Not yet implemented")
     }
 

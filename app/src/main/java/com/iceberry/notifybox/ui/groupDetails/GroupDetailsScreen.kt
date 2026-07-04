@@ -50,15 +50,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.ui.NBAppState
 import com.iceberry.notifybox.ui.ScrollToTopFab
 import com.iceberry.notifybox.ui.list.ListColumnContent
-import com.iceberry.notifybox.ui.list.NotifyVO
 import com.iceberry.notifybox.ui.list.rememberListColumnState
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 import kotlinx.coroutines.launch
@@ -111,7 +112,7 @@ fun GroupDetailsScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "空页面，请返回",
+                    text = stringResource(R.string.group_details_empty),
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -173,10 +174,10 @@ fun GroupDetailsTopAppBar(
     windowInsets: WindowInsets = TopAppBarDefaults.windowInsets
 ) {
     TopAppBar(
-        title = { Text(text = "通知组详情(${count})") },
+        title = { Text(text = stringResource(R.string.group_details_title, count)) },
         navigationIcon = {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
             }
         },
         modifier = modifier,

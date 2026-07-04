@@ -32,7 +32,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hasRoute
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.navigation.TopLevelDestination
 import com.iceberry.notifybox.ui.list.ListFloatActionBar
 import kotlinx.coroutines.launch
@@ -74,7 +76,7 @@ fun ScrollToTopFab(
                 }
             }
         ) {
-            Icon(Icons.Filled.ArrowUpward, "返回顶部")
+            Icon(Icons.Filled.ArrowUpward, stringResource(R.string.back_to_top))
         }
     }
 }

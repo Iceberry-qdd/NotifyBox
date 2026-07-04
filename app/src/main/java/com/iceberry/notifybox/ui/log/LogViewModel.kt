@@ -48,7 +48,7 @@ class LogViewModel @Inject constructor(
         logs, _isLoading, _logLevel
     ) { logs, isLoading, logLevel ->
         val filteredLogs = logs.filter { logLevel == null || it.level.priority >= logLevel }
-        
+
         if (isLoading) {
             return@combine LogUiState(isLoading = true, level = logLevel)
         }

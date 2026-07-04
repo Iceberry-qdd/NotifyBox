@@ -22,6 +22,7 @@ import android.util.Log
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.Payload
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.bg.event.NearbyPayloadEvent
 import com.iceberry.notifybox.bg.event.NearbyPayloadTransferUpdateEvent
 import com.iceberry.notifybox.data.local.database.AppDatabase
@@ -57,12 +58,13 @@ class NearbyTransferManager @Inject constructor(
     var isMergeMode: Boolean = true
 
     data class ProgressInfo(
-        val endpointId: String, 
-        val payloadId: Long, 
-        val progress: Float, 
+        val endpointId: String,
+        val payloadId: Long,
+        val progress: Float,
         val isCompleted: Boolean = false,
         val error: String? = null
     )
+
     val transferProgress = MutableStateFlow<ProgressInfo?>(null)
 
     init {
@@ -79,7 +81,7 @@ class NearbyTransferManager @Inject constructor(
         val progress = if (event.update.totalBytes > 0) {
             event.update.bytesTransferred.toFloat() / event.update.totalBytes.toFloat()
         } else 0f
-        
+
         when (event.update.status) {
             PayloadTransferUpdate.Status.SUCCESS -> {
                 val payload = incomingPayloads.remove(event.update.payloadId)
@@ -89,14 +91,22 @@ class NearbyTransferManager @Inject constructor(
                 } else {
                     transferProgress.value = ProgressInfo(event.endpointId, event.update.payloadId, 1f, true)
                 }
-                
+
                 val exportFile = File(context.cacheDir, "export_package.zip")
                 if (exportFile.exists()) exportFile.delete()
             }
+
             PayloadTransferUpdate.Status.FAILURE, PayloadTransferUpdate.Status.CANCELED -> {
                 incomingPayloads.remove(event.update.payloadId)
-                transferProgress.value = ProgressInfo(event.endpointId, event.update.payloadId, progress, true, "传输中断")
+                transferProgress.value = ProgressInfo(
+                    event.endpointId,
+                    event.update.payloadId,
+                    progress,
+                    true,
+                    context.getString(R.string.transfer_interrupted)
+                )
             }
+
             else -> {
                 transferProgress.value = ProgressInfo(event.endpointId, event.update.payloadId, progress, false)
             }
@@ -119,7 +129,13 @@ class NearbyTransferManager @Inject constructor(
                         endpointId, payload.id, 0f, isCompleted = true, error = e.message
                     )
                 } finally {
-                    payload.asFile()?.asJavaFile()?.delete()
+                    payload.asFile()?.asUri()?.let { uri ->
+                        try {
+                            context.contentResolver.delete(uri, null, null)
+                        } catch (e: Exception) {
+                            Timber.tag(TAG).e(e, "Failed to delete payload file")
+                        }
+                    }
                 }
             }
         }
@@ -135,7 +151,7 @@ class NearbyTransferManager @Inject constructor(
 
             val dbFile = context.getDatabasePath("Notifies.db")
             if (dbFile.exists()) addToZip(zos, dbFile, "Notifies.db")
-            
+
             context.filesDir.listFiles { _, name -> name.endsWith(".webp") }?.forEach { file ->
                 addToZip(zos, file, "icons/${file.name}")
                 iconCount++
@@ -158,41 +174,43 @@ class NearbyTransferManager @Inject constructor(
         connectionsClient.sendPayload(endpointId, Payload.fromFile(file))
     }
 
-    suspend fun processImport(endpointId: String, payloadId: Long, inputStream: InputStream, isMerge: Boolean) = withContext(Dispatchers.IO) {
-        if (isMerge) mergeImport(endpointId, payloadId, inputStream)
-        else overwriteImport(endpointId, payloadId, inputStream)
-    }
+    suspend fun processImport(endpointId: String, payloadId: Long, inputStream: InputStream, isMerge: Boolean) =
+        withContext(Dispatchers.IO) {
+            if (isMerge) mergeImport(endpointId, payloadId, inputStream)
+            else overwriteImport(endpointId, payloadId, inputStream)
+        }
 
     private suspend fun overwriteImport(endpointId: String, payloadId: Long, inputStream: InputStream) {
         val currentVersion = database.openHelper.readableDatabase.version
         val tempZip = File(context.cacheDir, "temp_import_overwrite.zip")
         FileOutputStream(tempZip).use { fos -> inputStream.copyTo(fos) }
-        
+
         try {
             transferProgress.value = ProgressInfo(endpointId, payloadId, 0f, false)
 
             var dbFound = false
             var versionMatched = false
-            
+
             ZipInputStream(FileInputStream(tempZip)).use { zis ->
                 var entry = zis.nextEntry
                 while (entry != null) {
                     when (entry.name) {
                         ".db_version" -> {
                             if (zis.readBytes().decodeToString().toIntOrNull() != currentVersion) {
-                                throw Exception("应用版本不一致，导入失败")
+                                throw Exception(context.getString(R.string.import_error_version_mismatch))
                             }
                             versionMatched = true
                         }
+
                         "Notifies.db" -> dbFound = true
                     }
                     zis.closeEntry()
                     entry = zis.nextEntry
                 }
             }
-            
-            if (!versionMatched) throw Exception("无法识别备份文件版本")
-            if (!dbFound) throw Exception("备份文件中未找到数据库")
+
+            if (!versionMatched) throw Exception(context.getString(R.string.import_error_unknown_version))
+            if (!dbFound) throw Exception(context.getString(R.string.import_error_no_db))
 
             // 1. Close and Replace Database
             database.close()
@@ -200,7 +218,7 @@ class NearbyTransferManager @Inject constructor(
             File(dbFile.path + "-shm").delete()
             File(dbFile.path + "-wal").delete()
             File(dbFile.path + "-journal").delete()
-            
+
             ZipInputStream(FileInputStream(tempZip)).use { zis ->
                 var entry = zis.nextEntry
                 while (entry != null) {
@@ -212,10 +230,10 @@ class NearbyTransferManager @Inject constructor(
                     entry = zis.nextEntry
                 }
             }
-            
+
             // 2. Clear and Extract Icons
             context.filesDir.listFiles { _, name -> name.endsWith(".webp") }?.forEach { it.delete() }
-            
+
             ZipInputStream(FileInputStream(tempZip)).use { zis ->
                 var entry = zis.nextEntry
                 while (entry != null) {
@@ -242,7 +260,7 @@ class NearbyTransferManager @Inject constructor(
         val currentVersion = database.openHelper.readableDatabase.version
         val tempZip = File(context.cacheDir, "temp_import.zip")
         FileOutputStream(tempZip).use { fos -> inputStream.copyTo(fos) }
-        
+
         try {
             transferProgress.value = ProgressInfo(endpointId, payloadId, 0f, false)
 
@@ -251,19 +269,21 @@ class NearbyTransferManager @Inject constructor(
                 val iconFiles = mutableListOf<Pair<String, File>>()
                 var dbFound = false
                 var versionMatched = false
-                
+
                 while (entry != null) {
                     when {
                         entry.name == ".db_version" -> {
                             if (zis.readBytes().decodeToString().toIntOrNull() != currentVersion) {
-                                throw Exception("应用版本不一致，导入失败")
+                                throw Exception(context.getString(R.string.import_error_version_mismatch))
                             }
                             versionMatched = true
                         }
+
                         entry.name == "Notifies.db" -> {
                             FileOutputStream(tempDbFile).use { fos -> zis.copyTo(fos) }
                             dbFound = true
                         }
+
                         entry.name.startsWith("icons/") -> {
                             val iconName = entry.name.substring("icons/".length)
                             val iconFile = File(context.filesDir, iconName)
@@ -273,9 +293,9 @@ class NearbyTransferManager @Inject constructor(
                     zis.closeEntry()
                     entry = zis.nextEntry
                 }
-                
-                if (!versionMatched) throw Exception("无法识别备份文件版本")
-                if (!dbFound) throw Exception("备份文件中未找到数据库")
+
+                if (!versionMatched) throw Exception(context.getString(R.string.import_error_unknown_version))
+                if (!dbFound) throw Exception(context.getString(R.string.import_error_no_db))
 
                 // DB Merge WITH ATTACH (Reverted to before separate connection fix)
                 try {
@@ -290,7 +310,7 @@ class NearbyTransferManager @Inject constructor(
                     }
                 } catch (e: Exception) {
                     Timber.tag(TAG).e("Merge failed: ${e.message}")
-                    throw Exception("合并数据失败: ${e.message}")
+                    throw Exception(context.getString(R.string.import_error_merge_failed, e.message))
                 }
 
                 ZipInputStream(FileInputStream(tempZip)).use { zis2 ->
@@ -304,7 +324,7 @@ class NearbyTransferManager @Inject constructor(
                         entry2 = zis2.nextEntry
                     }
                 }
-                
+
                 database.invalidationTracker.refreshVersionsAsync()
                 transferProgress.value = ProgressInfo(endpointId, payloadId, 1f, true)
             }

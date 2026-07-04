@@ -33,18 +33,19 @@ import com.iceberry.notifybox.R
 class NotificationUtils {
     companion object {
         const val LISTEN_SERVICE_STATUS_ID = 0x10000000
-        val LISTEN_SERVICE_STATUS_CHANNEL = NotificationChannel(
-            "monitor",
-            "监听服务状态",
-            NotificationManager.IMPORTANCE_DEFAULT
-        ).apply {
-            description = "显示监听服务状态，将常驻通知栏便于您知晓服务运行状况。"
-        }
+        const val LISTEN_SERVICE_STATUS_CHANNEL_ID = "monitor"
 
         fun registerServiceStatusChannel(context: Context) {
+            val channel = NotificationChannel(
+                LISTEN_SERVICE_STATUS_CHANNEL_ID,
+                context.getString(R.string.notification_monitor_channel),
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = context.getString(R.string.notification_monitor_description)
+            }
             val notificationManager: NotificationManager? =
                 getSystemService(context, NotificationManager::class.java)
-            notificationManager?.createNotificationChannel(LISTEN_SERVICE_STATUS_CHANNEL)
+            notificationManager?.createNotificationChannel(channel)
         }
 
         @Suppress("SameReturnValue")
@@ -62,10 +63,10 @@ class NotificationUtils {
 
             val builder =
                 NotificationCompat
-                    .Builder(context, LISTEN_SERVICE_STATUS_CHANNEL.id)
+                    .Builder(context, LISTEN_SERVICE_STATUS_CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_stat_name)
-                    .setContentTitle("正在监听通知栏")
-                    .setContentText("点击查看详情")
+                    .setContentTitle(context.getString(R.string.notification_listening_title))
+                    .setContentText(context.getString(R.string.click_for_details))
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setContentIntent(pendingIntent)
                     .setOngoing(true)

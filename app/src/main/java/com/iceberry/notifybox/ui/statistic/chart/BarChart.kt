@@ -16,6 +16,7 @@
 
 package com.iceberry.notifybox.ui.statistic.chart
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
@@ -44,6 +46,7 @@ import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.github.mikephil.charting.utils.MPPointF
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.data.local.database.AppIcon
 import com.iceberry.notifybox.databinding.BarChartBinding
 import com.iceberry.notifybox.ui.statistic.chart.renderer.RoundedBarChartRenderer
@@ -73,12 +76,13 @@ fun BarChart(
     update: BarChartBinding.() -> Unit = {}
 ) {
     val lineTextColor = MaterialTheme.colorScheme.outline
+    val centerTextDefault = stringResource(R.string.stat_app_stat)
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "按时间统计",
+            text = stringResource(R.string.stat_time_stat),
             style = MaterialTheme.typography.titleMedium
         )
 
@@ -91,13 +95,14 @@ fun BarChart(
             onRelease = onRelease,
 //        update = {},
         ) {
+            val context = barChart.context
             barChart.xAxis.apply {
                 position = XAxis.XAxisPosition.BOTTOM
                 setDrawGridLines(false)
                 setDrawAxisLine(false)
                 granularity = 1f
                 labelCount = 3
-                valueFormatter = dimension.formatter
+                valueFormatter = dimension.formatter(context)
                 textColor = convertToRGB(lineTextColor)
                 axisLineColor = convertToRGB(lineTextColor)
             }
@@ -173,14 +178,15 @@ data class BarChartDataVO(
  */
 fun handleBarData(
     barChartDataList: List<BarChartDataVO>,
-    colors: List<Int> = ColorTemplate.MATERIAL_COLORS.toList()
+    colors: List<Int> = ColorTemplate.MATERIAL_COLORS.toList(),
+    label: String
 ): BarData {
     val barEntries = barChartDataList
         .map { BarEntry(it.xValue, it.yValue, it.extra) }
 
     return BarData().apply {
         addDataSet(
-            BarDataSet(barEntries, DEFAULT_CENTER_TEXT).apply {
+            BarDataSet(barEntries, label).apply {
                 setDrawIcons(false)
                 iconsOffset = MPPointF(0f, 40f)
                 this.colors = colors
@@ -213,28 +219,29 @@ val INIT_BAR_DATA = handleBarData(
                 xLabel = "NaN",
                 appIcon = AppIcon()
             )
-        }
+        },
+    label = ""
 )
 
 enum class TimeDimension(
     val groupBy: Array<String>,
-    val formatter: ValueFormatter,
+    val formatter: (Context) -> ValueFormatter,
     val iteratorFun: (t: LocalDateTime) -> LocalDateTime
 ) {
-    YEAR(arrayOf("%Y"), YearAxisValueFormatter(), { it.plusYears(1) }),
-    MONTH(arrayOf("%Y", "%m"), MonthAxisValueFormatter(), { it.plusMonths(1) }),
-    WEEK(arrayOf("%Y", "%m", "%d"), WeekAxisValueFormatter(), { it.plusDays(1) }),
-    DAY(arrayOf("%Y", "%m", "%d"), DayAxisValueFormatter(), { it.plusDays(1) }),
-    HOUR(arrayOf("%Y", "%m", "%d", "%H"), HourAxisValueFormatter(), { it.plusHours(1) })
+    YEAR(arrayOf("%Y"), { YearAxisValueFormatter(it) }, { it.plusYears(1) }),
+    MONTH(arrayOf("%Y", "%m"), { MonthAxisValueFormatter(it) }, { it.plusMonths(1) }),
+    WEEK(arrayOf("%Y", "%m", "%d"), { WeekAxisValueFormatter(it) }, { it.plusDays(1) }),
+    DAY(arrayOf("%Y", "%m", "%d"), { DayAxisValueFormatter(it) }, { it.plusDays(1) }),
+    HOUR(arrayOf("%Y", "%m", "%d", "%H"), { HourAxisValueFormatter(it) }, { it.plusHours(1) })
 }
 
 enum class TimeRangeFilter(
-    val label: String,
+    val labelRes: Int,
     val range: () -> Pair<LocalDateTime, LocalDateTime>,
     val dimension: TimeDimension
 ) {
     ALL(
-        "全部",
+        R.string.stat_filter_all,
         {
             Pair(
                 LocalDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()),
@@ -244,7 +251,7 @@ enum class TimeRangeFilter(
         TimeDimension.YEAR
     ),
     TODAY(
-        "今天",
+        R.string.stat_filter_today,
         {
             Pair(
                 now().with(LocalTime.MIN),
@@ -254,7 +261,7 @@ enum class TimeRangeFilter(
         TimeDimension.HOUR
     ),
     YESTERDAY(
-        "昨天",
+        R.string.stat_filter_yesterday,
         {
             Pair(
                 now().minusDays(1L).with(LocalTime.MAX).with(LocalTime.MIN),
@@ -264,7 +271,7 @@ enum class TimeRangeFilter(
         TimeDimension.HOUR
     ),
     THIS_WEEK(
-        "本周",
+        R.string.stat_filter_this_week,
         {
             Pair(
                 now().with(LocalTime.MIN).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
@@ -274,7 +281,7 @@ enum class TimeRangeFilter(
         TimeDimension.WEEK
     ),
     THIS_MONTH(
-        "本月",
+        R.string.stat_filter_this_month,
         {
             Pair(
                 now().with(LocalTime.MIN).with(TemporalAdjusters.firstDayOfMonth()),
@@ -284,7 +291,7 @@ enum class TimeRangeFilter(
         TimeDimension.DAY
     ),
     LAST_MONTH(
-        "上月",
+        R.string.stat_filter_last_month,
         {
             Pair(
                 now().minusMonths(1).with(LocalTime.MIN).with(TemporalAdjusters.firstDayOfMonth()),
@@ -294,7 +301,7 @@ enum class TimeRangeFilter(
         TimeDimension.DAY
     ),
     THIS_YEAR(
-        "今年",
+        R.string.stat_filter_this_year,
         {
             Pair(
                 now().with(LocalTime.MIN).with(TemporalAdjusters.firstDayOfYear()),
@@ -304,7 +311,7 @@ enum class TimeRangeFilter(
         TimeDimension.MONTH
     ),
     LAST_YEAR(
-        "去年",
+        R.string.stat_filter_last_year,
         {
             Pair(
                 now().with(LocalTime.MIN).minusYears(1L).with(TemporalAdjusters.firstDayOfYear()),
@@ -314,7 +321,7 @@ enum class TimeRangeFilter(
         TimeDimension.MONTH
     ),
     CUSTOM(
-        "自定义",
+        R.string.stat_filter_custom,
         {
             Pair(
                 LocalDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()),
@@ -341,7 +348,7 @@ class BarValueFormatter(digits: Int) : DefaultValueFormatter(digits) {
     }
 }
 
-class YearAxisValueFormatter() : ValueFormatter() {
+class YearAxisValueFormatter(private val context: Context) : ValueFormatter() {
     /**
      * Use this as getAxisLabel()
      */
@@ -350,15 +357,15 @@ class YearAxisValueFormatter() : ValueFormatter() {
         barEntry: BarEntry?
     ): String? {
         val timestamp = barEntry?.data as Long?
-        val year = timestamp?.let {
+        val yearStr = timestamp?.let {
             val year = LocalDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneId.systemDefault()).year
-            "${year}年"
+            context.getString(R.string.date_year, year)
         }
-        return year
+        return yearStr
     }
 }
 
-class MonthAxisValueFormatter() : ValueFormatter() {
+class MonthAxisValueFormatter(private val context: Context) : ValueFormatter() {
     /**
      * Use this as getAxisLabel()
      */
@@ -369,12 +376,12 @@ class MonthAxisValueFormatter() : ValueFormatter() {
         val timestamp = barEntry?.data as Long?
         return timestamp?.let {
             val month = LocalDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneId.systemDefault()).monthValue
-            "${month}月"
+            context.getString(R.string.date_month, month)
         }
     }
 }
 
-class WeekAxisValueFormatter() : ValueFormatter() {
+class WeekAxisValueFormatter(private val context: Context) : ValueFormatter() {
     /**
      * Use this as getAxisLabel()
      */
@@ -390,7 +397,7 @@ class WeekAxisValueFormatter() : ValueFormatter() {
     }
 }
 
-class DayAxisValueFormatter() : ValueFormatter() {
+class DayAxisValueFormatter(private val context: Context) : ValueFormatter() {
     /**
      * Use this as getAxisLabel()
      */
@@ -401,12 +408,12 @@ class DayAxisValueFormatter() : ValueFormatter() {
         val timestamp = barEntry?.data as Long?
         return timestamp?.let {
             val day = LocalDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneId.systemDefault()).dayOfMonth
-            "${day}日"
+            context.getString(R.string.date_day, day)
         }
     }
 }
 
-class HourAxisValueFormatter() : ValueFormatter() {
+class HourAxisValueFormatter(private val context: Context) : ValueFormatter() {
     /**
      * Use this as getAxisLabel()
      */

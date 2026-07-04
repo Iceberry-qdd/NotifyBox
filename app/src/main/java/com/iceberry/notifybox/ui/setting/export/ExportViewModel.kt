@@ -19,14 +19,12 @@ package com.iceberry.notifybox.ui.setting.export
 import android.content.Context
 import android.content.Intent
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PhoneIphone
 import androidx.compose.material.icons.filled.PhonelinkSetup
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.bg.event.NearbyConnectAction
-import com.iceberry.notifybox.bg.event.NearbyConnectionRequestEvent
-import com.iceberry.notifybox.bg.event.NearbyConnectionResponseEvent
 import com.iceberry.notifybox.bg.event.NearbyConnectionResultEvent
 import com.iceberry.notifybox.bg.event.NearbyEndpointFoundEvent
 import com.iceberry.notifybox.bg.event.NearbyEndpointLostEvent
@@ -46,13 +44,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import com.google.android.gms.nearby.connection.Payload
-import com.google.android.gms.nearby.connection.PayloadTransferUpdate
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -77,7 +71,7 @@ class ExportViewModel @Inject constructor(
         transferManager.transferProgress
     ) { cached, discovered, progress ->
         _loading.update { false }
-        
+
         // Merge cached and discovered
         val allDevices = (cached.map { device ->
             val disc = discovered.values.find { it.deviceUniqueId == device.deviceUniqueId }
@@ -136,7 +130,7 @@ class ExportViewModel @Inject constructor(
                     val updated = current.toMutableMap()
                     cached.forEach { device ->
                         if (!updated.containsKey(device.deviceUniqueId)) {
-                             // This is just a placeholder to ensure the merge logic in pager has access to all info
+                            // This is just a placeholder to ensure the merge logic in pager has access to all info
                         }
                     }
                     updated
@@ -156,26 +150,28 @@ class ExportViewModel @Inject constructor(
             endpointId = event.endpointId,
             deviceUniqueId = event.deviceUniqueId,
             name = event.info.endpointName.split("|").getOrNull(0) ?: event.info.endpointName,
-            description = "附近设备",
+            description = context.getString(R.string.export_nearby_devices),
             isDiscovered = true,
             lastSeen = System.currentTimeMillis()
         )
         _discoveredDevices.update { it + (event.deviceUniqueId to info) }
         viewModelScope.launch {
-            deviceDao.insertDevice(Device(
-                deviceUniqueId = event.deviceUniqueId,
-                endpointId = event.endpointId,
-                name = info.name,
-                description = info.description,
-                lastSeen = info.lastSeen
-            ))
+            deviceDao.insertDevice(
+                Device(
+                    deviceUniqueId = event.deviceUniqueId,
+                    endpointId = event.endpointId,
+                    name = info.name,
+                    description = info.description,
+                    lastSeen = info.lastSeen
+                )
+            )
         }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onEndpointLost(event: NearbyEndpointLostEvent) {
         _discoveredDevices.update { current ->
-            current.values.find { it.endpointId == event.endpointId }?.let { 
+            current.values.find { it.endpointId == event.endpointId }?.let {
                 current - it.deviceUniqueId
             } ?: current
         }
@@ -215,7 +211,7 @@ class ExportViewModel @Inject constructor(
 
     fun doConnect(deviceUniqueId: String) {
         _discoveredDevices.update { devices ->
-            devices[deviceUniqueId]?.let { 
+            devices[deviceUniqueId]?.let {
                 Timber.tag("ExportViewModel").i("Connecting to ${it.name} (${it.endpointId})")
                 EventBus.getDefault().post(NearbyConnectAction(it.endpointId))
                 devices + (deviceUniqueId to it.copy(connectState = ConnectState.CONNECTING))
@@ -229,20 +225,20 @@ class ExportViewModel @Inject constructor(
             if (endpointId.isEmpty()) return@launch
 
             _discoveredDevices.update { devices ->
-                devices[deviceUniqueId]?.let { 
+                devices[deviceUniqueId]?.let {
                     devices + (deviceUniqueId to it.copy(transferState = TransferState.TRANSFERRING, transferProgress = 0f))
                 } ?: devices
             }
             try {
                 transferManager.sendData(endpointId)
                 _discoveredDevices.update { devices ->
-                    devices[deviceUniqueId]?.let { 
+                    devices[deviceUniqueId]?.let {
                         devices + (deviceUniqueId to it.copy(transferState = TransferState.TRANSFERRED, transferProgress = 1f))
                     } ?: devices
                 }
             } catch (e: Exception) {
                 _discoveredDevices.update { devices ->
-                    devices[deviceUniqueId]?.let { 
+                    devices[deviceUniqueId]?.let {
                         devices + (deviceUniqueId to it.copy(transferState = TransferState.TRANSFER_FAILED))
                     } ?: devices
                 }
@@ -262,15 +258,18 @@ class ExportViewModel @Inject constructor(
         // Since the app is in foreground, startService is allowed.
         context.startService(intent)
     }
+
     fun startNearByAdvertising() {
         if (_permissionsState.value != PermissionsState.GRANTED) return
         val intent = Intent(context, NearByAdvertisingService::class.java)
         context.startService(intent)
     }
+
     fun stopNearByDiscovery() {
         val intent = Intent(context, NearByDiscoverService::class.java)
         context.stopService(intent)
     }
+
     fun stopNearByAdvertising() {
         val intent = Intent(context, NearByAdvertisingService::class.java)
         context.stopService(intent)
@@ -284,8 +283,8 @@ enum class PermissionsState { GRANTED, DENIED, RATIONALE, LOCATION_DISABLED, BLU
 data class DeviceInfo(
     val endpointId: String = "",
     val deviceUniqueId: String = "",
-    val name: String = "未知设备",
-    val description: String = "未知设备",
+    val name: String = "",
+    val description: String = "",
     val icon: ImageVector = Icons.Filled.PhonelinkSetup,
     val connectState: ConnectState = ConnectState.NOT_CONNECT,
     val transferState: TransferState = TransferState.TRANSFER_INIT,

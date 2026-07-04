@@ -23,6 +23,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.navigation.NavDestination.Companion.hasRoute
 import com.iceberry.notifybox.navigation.Route
@@ -44,8 +45,8 @@ fun NBNavigationBar(
                 val selected = currentDestination?.hasRoute(dest.route) == true
                 NavigationBarItem(
                     selected = selected,
-                    icon = { Icon(dest.icon, contentDescription = dest.iconText) },
-                    label = { Text(dest.titleText) },
+                    icon = { Icon(dest.icon, contentDescription = stringResource(dest.iconTextId)) },
+                    label = { Text(stringResource(dest.titleTextId)) },
                     alwaysShowLabel = false,
                     onClick = {
                         if (selected && currentDestination.hasRoute(Route.ListRoute::class)) {

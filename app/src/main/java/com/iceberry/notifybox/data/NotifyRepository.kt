@@ -59,7 +59,7 @@ interface NotifyRepository {
 
 class DefaultNotifyRepository @Inject constructor(
     private val notifyDao: NotifyDao,
-    private val database: AppDatabase
+    private val database: AppDatabase? = null
 ) : NotifyRepository {
     private val accessMutex = Mutex()
 
@@ -143,12 +143,14 @@ class DefaultNotifyRepository @Inject constructor(
 
     override suspend fun markDeletedByGroup(notifyId: Int, packageName: String) = accessMutex.withLock {
         notifyDao.markDeletedByGroup(notifyId, packageName)
-        database.invalidationTracker.refreshVersionsAsync()
+        database?.invalidationTracker?.refreshVersionsAsync()
+        Unit
     }
 
     override suspend fun markDeletedById(notifyId: Int) = accessMutex.withLock {
         notifyDao.markDeletedById(notifyId)
-        database.invalidationTracker.refreshVersionsAsync()
+        database?.invalidationTracker?.refreshVersionsAsync()
+        Unit
     }
 
     override fun searchByQuery(query: String): PagingSource<Int, Notify> {

@@ -53,24 +53,25 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.core.location.LocationManagerCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.ui.ScrollToTopFab
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 import kotlinx.coroutines.launch
@@ -182,10 +183,10 @@ fun ExportTopAppBar(
     onScan: () -> Unit = {}
 ) {
     TopAppBar(
-        title = { Text(text = "导出") },
+        title = { Text(text = stringResource(R.string.export_title)) },
         navigationIcon = {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
             }
         },
         modifier = modifier,
@@ -195,7 +196,7 @@ fun ExportTopAppBar(
             IconButton(onClick = onScan) {
                 Icon(
                     imageVector = Icons.Default.Refresh,
-                    contentDescription = "重新扫描"
+                    contentDescription = stringResource(R.string.forward_rescan)
                 )
             }
         }

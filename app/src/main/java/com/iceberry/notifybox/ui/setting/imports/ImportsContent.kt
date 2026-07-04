@@ -35,7 +35,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.PhoneIphone
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,8 +50,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.ui.setting.export.ConnectState
 import com.iceberry.notifybox.ui.setting.export.DeviceInfo
 import com.iceberry.notifybox.ui.setting.export.TransferState
@@ -152,7 +153,7 @@ fun ImportsItemContent(
                             )
                             .padding(16.dp),
                         imageVector = data.icon,
-                        contentDescription = "附近设备"
+                        contentDescription = stringResource(R.string.export_nearby_devices)
                     )
                     if (transferring) {
                         if (data.transferProgress > 0f && data.transferProgress < 1f) {
@@ -203,7 +204,7 @@ fun ImportsItemContent(
                 if (data.transferState == TransferState.TRANSFERRED) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = "导入成功",
+                        contentDescription = stringResource(R.string.import_success),
                         tint = Green500
                     )
                 }
@@ -215,8 +216,8 @@ fun ImportsItemContent(
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(space = 16.dp, alignment = Alignment.End)
                 ) {
-                    FilledTonalButton(onClick = doReject) { Text("拒绝连接") }
-                    Button(onClick = doAccept) { Text("接受连接") }
+                    FilledTonalButton(onClick = doReject) { Text(stringResource(R.string.reject_connection)) }
+                    Button(onClick = doAccept) { Text(stringResource(R.string.accept_connection)) }
                 }
             }
         }

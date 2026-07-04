@@ -24,9 +24,9 @@ import android.content.pm.ApplicationInfo
 import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.data.DefaultNotifyRepository
 import com.iceberry.notifybox.data.DefaultSettingsRepository
 import com.iceberry.notifybox.data.local.database.Notify
@@ -74,11 +74,11 @@ class AppNotificationListenerService() : NotificationListenerService() {
         val packageName = sbn?.packageName
         val displayName = getDisplayName(context, packageName)
 
-        if (packageName == null){
+        if (packageName == null) {
             Timber.tag("sbn-${sbn?.id}").w("The packageName is null, skipped")
             return
         }
-        if (title == null && content == null){
+        if (title == null && content == null) {
             Timber.tag("sbn-${packageName}").w("[${sbn.id}]The title or content is null, skipped")
             return
         }
@@ -118,7 +118,7 @@ class AppNotificationListenerService() : NotificationListenerService() {
             settingsRepository.setANLSRunning(true)
         }
         Timber.tag("NLService").i("Start notify listener service...")
-        Toast.makeText(context, "启动监听服务...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, getString(R.string.service_anls_started), Toast.LENGTH_SHORT).show()
         return START_STICKY
     }
 
@@ -127,7 +127,7 @@ class AppNotificationListenerService() : NotificationListenerService() {
             settingsRepository.setANLSRunning(false)
         }
         Timber.tag("NLService").i("Stop notify listener service...")
-        Toast.makeText(context, "监听服务已停止", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, getString(R.string.service_anls_stopped), Toast.LENGTH_SHORT).show()
     }
 
     companion object {

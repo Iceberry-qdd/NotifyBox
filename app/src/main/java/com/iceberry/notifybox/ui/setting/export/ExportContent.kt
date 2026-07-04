@@ -38,7 +38,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.PhoneIphone
-import androidx.compose.material.icons.filled.PhonelinkSetup
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -53,14 +52,15 @@ import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.icon.P2p
 import com.iceberry.notifybox.ui.theme.Green500
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
@@ -79,7 +79,7 @@ fun ExportContent(
         NoNearByPermissionsContent(
             modifier = modifier.fillMaxSize(),
             permissionsState = PermissionsState.GRANTED,
-            title = "正在发现附近设备...",
+            title = stringResource(R.string.export_discovering_nearby),
             icon = Icons.Default.P2p
         )
         return
@@ -114,16 +114,16 @@ fun ExportContent(
             key = { list[it].deviceUniqueId },
             contentType = { DeviceInfo("") }
         ) { i ->
-                ExportItemContent(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(CardDefaults.shape)
-                        .wrapContentHeight()
-                        .background(MaterialTheme.colorScheme.background),
-                    data = list[i],
-                    doConnect = { doConnect(list[i].deviceUniqueId) },
-                    doExport = { doExport(list[i].deviceUniqueId) }
-                )
+            ExportItemContent(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(CardDefaults.shape)
+                    .wrapContentHeight()
+                    .background(MaterialTheme.colorScheme.background),
+                data = list[i],
+                doConnect = { doConnect(list[i].deviceUniqueId) },
+                doExport = { doExport(list[i].deviceUniqueId) }
+            )
         }
     }
 }
@@ -153,60 +153,6 @@ private fun ExportContentPreview() {
                     connectState = ConnectState.NOT_CONNECT,
                     transferState = TransferState.TRANSFER_INIT,
                     transferProgress = 0.0f
-                ),
-                DeviceInfo(
-                    endpointId = "3",
-                    name = "NasTile的手机",
-                    description = "测试描述测试描述测试描述测试描述测试描述",
-                    icon = Icons.Filled.PhonelinkSetup,
-                    connectState = ConnectState.CONNECTING,
-                    transferState = TransferState.TRANSFER_INIT,
-                    transferProgress = 0.0f
-                ),
-                DeviceInfo(
-                    endpointId = "4",
-                    name = "NasTile的手机",
-                    description = "测试描述测试描述测试描述测试描述测试描述",
-                    icon = Icons.Filled.PhonelinkSetup,
-                    connectState = ConnectState.CONNECTED,
-                    transferState = TransferState.TRANSFER_INIT,
-                    transferProgress = 0.0f
-                ),
-                DeviceInfo(
-                    endpointId = "5",
-                    name = "NasTile的手机",
-                    description = "测试描述测试描述测试描述测试描述测试描述",
-                    icon = Icons.Filled.PhonelinkSetup,
-                    connectState = ConnectState.CONNECT_FAILED,
-                    transferState = TransferState.TRANSFER_INIT,
-                    transferProgress = 0.0f
-                ),
-                DeviceInfo(
-                    endpointId = "6",
-                    name = "NasTile的手机",
-                    description = "测试描述测试描述测试描述测试描述测试描述",
-                    icon = Icons.Filled.PhonelinkSetup,
-                    connectState = ConnectState.CONNECTED,
-                    transferState = TransferState.TRANSFERRING,
-                    transferProgress = 21.5f
-                ),
-                DeviceInfo(
-                    endpointId = "7",
-                    name = "NasTile的手机",
-                    description = "测试描述测试描述测试描述测试描述测试描述",
-                    icon = Icons.Filled.PhonelinkSetup,
-                    connectState = ConnectState.CONNECTED,
-                    transferState = TransferState.TRANSFERRED,
-                    transferProgress = 100.0f
-                ),
-                DeviceInfo(
-                    endpointId = "8",
-                    name = "NasTile的手机",
-                    description = "测试描述测试描述测试描述测试描述测试描述",
-                    icon = Icons.Filled.PhonelinkSetup,
-                    connectState = ConnectState.CONNECTED,
-                    transferState = TransferState.TRANSFER_FAILED,
-                    transferProgress = 10.1f
                 )
             )
         )
@@ -226,7 +172,8 @@ fun ExportItemContent(
         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
         label = "transferProgress"
     )
-    val transferring = (data.connectState == ConnectState.CONNECTED || data.endpointId.isNotEmpty()) && data.transferState == TransferState.TRANSFERRING
+    val transferring =
+        (data.connectState == ConnectState.CONNECTED || data.endpointId.isNotEmpty()) && data.transferState == TransferState.TRANSFERRING
     val connecting = data.connectState == ConnectState.CONNECTING
     val connected = data.connectState == ConnectState.CONNECTED
     val isHistory = !data.isDiscovered
@@ -254,7 +201,7 @@ fun ExportItemContent(
                         )
                         .padding(16.dp),
                     imageVector = data.icon,
-                    contentDescription = "附近设备"
+                    contentDescription = stringResource(R.string.export_nearby_devices)
                 )
                 if (transferring) {
                     if (data.transferProgress > 0f && data.transferProgress < 1f) {
@@ -297,32 +244,38 @@ fun ExportItemContent(
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = if (isHistory) "历史设备" else data.description,
+                    text = if (isHistory) stringResource(R.string.export_history_devices) else data.description,
                     style = MaterialTheme.typography.bodySmall.merge(color = MaterialTheme.colorScheme.outline)
                 )
             }
             if (!isHistory) {
                 when (data.connectState) {
-                    ConnectState.NOT_CONNECT -> Button(onClick = doConnect) { Text("连接") }
+                    ConnectState.NOT_CONNECT -> Button(onClick = doConnect) { Text(stringResource(R.string.export_connect)) }
                     ConnectState.CONNECTING -> {}
                     ConnectState.CONNECTED -> when (data.transferState) {
-                        TransferState.TRANSFER_INIT -> Button(onClick = doExport) { Text("导出") }
+                        TransferState.TRANSFER_INIT -> Button(onClick = doExport) { Text(stringResource(R.string.export_button)) }
                         TransferState.TRANSFERRING -> {}
                         TransferState.TRANSFERRED -> IconButton(onClick = {}, enabled = false) {
                             Icon(
                                 imageVector = Icons.Default.Check,
-                                contentDescription = "导出成功",
+                                contentDescription = stringResource(R.string.export_success),
                                 tint = Green500
                             )
                         }
 
                         TransferState.TRANSFER_FAILED -> IconButton(onClick = doExport) {
-                            Icon(imageVector = Icons.Default.Refresh, contentDescription = "重新导出")
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = stringResource(R.string.export_retry)
+                            )
                         }
                     }
 
                     ConnectState.CONNECT_FAILED -> IconButton(onClick = doConnect) {
-                        Icon(imageVector = Icons.Default.Refresh, contentDescription = "重新连接")
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = stringResource(R.string.export_reconnect)
+                        )
                     }
                 }
             } else {

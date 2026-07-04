@@ -35,10 +35,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.ui.NBAppState
 import com.iceberry.notifybox.ui.rememberNBAppState
 import com.iceberry.notifybox.ui.setting.export.ExportContent
@@ -46,7 +48,6 @@ import com.iceberry.notifybox.ui.setting.export.ExportViewModel
 import com.iceberry.notifybox.ui.setting.export.NearByPermissionsEffect
 import com.iceberry.notifybox.ui.setting.export.NoNearByPermissionsContent
 import com.iceberry.notifybox.ui.setting.export.PermissionsState
-import com.iceberry.notifybox.ui.setting.rememberSettingColumnState
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 import kotlinx.coroutines.launch
 
@@ -115,7 +116,7 @@ fun ForwardScreen(
 internal fun InternalForwardScreen(
     modifier: Modifier = Modifier
 ) {
-    Text("统计")
+    Text(stringResource(R.string.forward_stats))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -130,7 +131,7 @@ fun ForwardTopAppBar(
 
     TopAppBar(
         modifier = modifier,
-        title = { Text(text = "转发") },
+        title = { Text(text = stringResource(R.string.forward_title)) },
         windowInsets = windowInsets,
         scrollBehavior = scrollBehavior,
         actions = {
@@ -141,7 +142,7 @@ fun ForwardTopAppBar(
             ) {
                 Icon(
                     imageVector = Icons.Default.Refresh,
-                    contentDescription = "重新扫描"
+                    contentDescription = stringResource(R.string.forward_rescan)
                 )
             }
         }

@@ -62,11 +62,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.iceberry.notifybox.R
 import com.iceberry.notifybox.ui.list.AppIcon
 import com.iceberry.notifybox.ui.list.NotifyVO
 import com.iceberry.notifybox.ui.statistic.chart.BarChart
@@ -93,6 +95,7 @@ fun StatisticContent(
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     val mbsViewModel: MBSViewModel = hiltViewModel()
+    val otherLabel = stringResource(R.string.stat_pie_other)
 
     LazyColumn(
         modifier = modifier,
@@ -131,7 +134,7 @@ fun StatisticContent(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "暂无数据",
+                        text = stringResource(R.string.stat_no_data),
                         style = MaterialTheme.typography.bodyMedium.merge(color = MaterialTheme.colorScheme.outline)
                     )
                 }
@@ -148,7 +151,7 @@ fun StatisticContent(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "数据加载失败",
+                        text = stringResource(R.string.stat_load_failed),
                         style = MaterialTheme.typography.bodyMedium.merge(color = MaterialTheme.colorScheme.outline)
                     )
                 }
@@ -158,7 +161,7 @@ fun StatisticContent(
 
         item {
             val colors = listOf(convertToRGB(MaterialTheme.colorScheme.primary))
-            val pieData = handleBarData(uiState.barChartUiState.barChartData, colors)
+            val pieData = handleBarData(uiState.barChartUiState.barChartData, colors, stringResource(R.string.stat_app_stat))
 
             BarChart(
                 modifier = Modifier
@@ -174,7 +177,7 @@ fun StatisticContent(
 
         val pieChartData = uiState.pieChartUiState.pieChartData
         item {
-            val pieData = handlePieData(pieChartData)
+            val pieData = handlePieData(pieChartData, otherLabel)
 
             PieChart(
                 modifier = Modifier
@@ -249,7 +252,12 @@ fun StatisticItem(
     ) {
         Row(
             modifier = Modifier
-                .clickable(enabled = true, onClickLabel = "查看该组全部条目", role = Role.ValuePicker, onClick = onClick)
+                .clickable(
+                    enabled = true,
+                    onClickLabel = stringResource(R.string.stat_view_group_all),
+                    role = Role.ValuePicker,
+                    onClick = onClick
+                )
                 .padding(12.dp),
         ) {
             AppIcon(
@@ -332,7 +340,7 @@ private fun DateFilterChips(
                 onClick = { onToggle(it) },
                 label = {
                     Text(
-                        text = it.label,
+                        text = stringResource(it.labelRes),
                         maxLines = 1,
                         style = if (selected) {
                             MaterialTheme.typography.bodyMedium.merge(color = MaterialTheme.colorScheme.primary)
@@ -345,7 +353,7 @@ private fun DateFilterChips(
                     if (selected) {
                         Icon(
                             imageVector = Icons.Filled.Check,
-                            contentDescription = "已选中${it.label}",
+                            contentDescription = stringResource(R.string.selected_label, stringResource(it.labelRes)),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -354,7 +362,7 @@ private fun DateFilterChips(
                     if (isCustomFilter) {
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription = "清除筛选条件",
+                            contentDescription = stringResource(R.string.clear_filter),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
