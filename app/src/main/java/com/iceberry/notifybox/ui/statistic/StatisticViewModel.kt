@@ -122,7 +122,10 @@ class StatisticViewModel @Inject constructor(
         val zoneOffset = ZoneOffset.systemDefault().rules.getOffset(Instant.now())
         val startAt = if (filter == TimeRangeFilter.ALL) {
             LocalDateTime
-                .ofInstant(getAppInstalledTime(), zoneOffset)
+                .ofInstant(
+                    notifyDataList.firstOrNull()?.let { Instant.ofEpochMilli(it.x) } ?: getAppInstalledTime(),
+                    zoneOffset
+                )
                 .with(LocalTime.MIN)
                 .with(TemporalAdjusters.firstDayOfYear())
         } else {

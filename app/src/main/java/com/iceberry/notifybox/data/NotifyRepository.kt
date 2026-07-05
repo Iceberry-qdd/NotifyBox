@@ -173,10 +173,10 @@ class DefaultNotifyRepository @Inject constructor(
         val endAt = second.toInstant(zoneOffset).toEpochMilli()
 
         val sqlTemplate =
-            "SELECT COUNT(*) AS y, created_time AS x FROM tb_notify WHERE deleted_time IS NULL AND created_time BETWEEN ? AND ? GROUP BY $groupBy ORDER BY created_time ASC"
+            "SELECT COUNT(*) AS y, MIN(created_time) AS x FROM tb_notify WHERE deleted_time IS NULL AND created_time BETWEEN ? AND ? GROUP BY $groupBy ORDER BY x ASC"
         val query = SimpleSQLiteQuery(
             sqlTemplate,
-            arrayOf<Any>(startAt, endAt)
+            arrayOf(startAt, endAt)
         )
         return notifyDao.statisticForBarChart(query)
     }

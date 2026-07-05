@@ -48,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -107,12 +108,16 @@ fun AdaptiveIconImage(
     modifier: Modifier,
     contentDescription: String?
 ) {
-    val bitmap = createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight).applyCanvas {
-        drawable.setBounds(0, 0, this.width, this.height)
-        drawable.draw(this)
+    val fallbackSize = with(LocalDensity.current) { 48.dp.roundToPx().coerceAtLeast(1) }
+    val width = drawable.intrinsicWidth.takeIf { it > 0 } ?: fallbackSize
+    val height = drawable.intrinsicHeight.takeIf { it > 0 } ?: fallbackSize
+    val imageBitmap = remember(drawable, width, height) {
+        createBitmap(width, height).applyCanvas {
+            drawable.setBounds(0, 0, this.width, this.height)
+            drawable.draw(this)
+        }.asImageBitmap()
     }
 
-    val imageBitmap = remember { bitmap.asImageBitmap() }
     Image(
         bitmap = imageBitmap,
         modifier = modifier,

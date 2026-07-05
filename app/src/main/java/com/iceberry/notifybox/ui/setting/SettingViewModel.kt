@@ -75,6 +75,7 @@ class SettingViewModel @Inject constructor(
                     key = "theme",
                     value = it.darkThemeConfig,
                     nameRes = R.string.setting_theme,
+                    descriptionRes = it.darkThemeConfig.displayNameRes,
                     actionType = SettingActionTypeEnum.DIALOG,
                     group = SettingGroupEnum.DISPLAY,
                     icon = Icons.Default.Palette
@@ -84,6 +85,7 @@ class SettingViewModel @Inject constructor(
                     key = "language",
                     value = it.languageConfig,
                     nameRes = R.string.setting_language,
+                    descriptionRes = it.languageConfig.displayNameRes,
                     actionType = SettingActionTypeEnum.DIALOG,
                     group = SettingGroupEnum.DISPLAY,
                     icon = Icons.Default.Translate
