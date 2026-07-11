@@ -17,6 +17,7 @@
 package com.iceberry.notifybox.ui.forward
 
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
@@ -102,7 +103,7 @@ fun ForwardScreen(
 
         else -> {
             NoNearByPermissionsContent(
-                modifier = modifier,
+                modifier = modifier.padding(paddingValues),
                 permissionsState = uiState.permissionsState,
                 onPermissionsChange = {
                     viewModel.changePermissionsState(it)

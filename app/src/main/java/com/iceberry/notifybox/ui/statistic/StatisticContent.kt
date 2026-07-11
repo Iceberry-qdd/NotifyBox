@@ -97,6 +97,11 @@ fun StatisticContent(
     var showBottomSheet by remember { mutableStateOf(false) }
     val mbsViewModel: MBSViewModel = hiltViewModel()
     val otherLabel = stringResource(R.string.stat_pie_other)
+    val mbsState: StatisticMBSState = rememberStatisticMBSState(
+        sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = false
+        )
+    )
 
     LazyColumn(
         modifier = modifier,
@@ -187,8 +192,8 @@ fun StatisticContent(
                     .height(250.dp),
                 data = pieData,
                 onClickEntry = {
-                    showBottomSheet = true
                     mbsViewModel.setPagerParams(pieChartData[it].packageName, uiState.selectedFilter)
+                    showBottomSheet = true
                 },
                 onRest = {},
                 onRelease = {},
@@ -210,20 +215,14 @@ fun StatisticContent(
                     appIcon = pieChartData[i].appIcon,
                 ),
                 onClick = {
-                    showBottomSheet = true
                     mbsViewModel.setPagerParams(pieChartData[i].packageName, uiState.selectedFilter)
+                    showBottomSheet = true
                 }
             )
         }
     }
 
     if (showBottomSheet) {
-        val mbsState: StatisticMBSState = rememberStatisticMBSState(
-            sheetState = rememberModalBottomSheetState(
-                skipPartiallyExpanded = false
-            )
-        )
-
         StatisticModelBottomSheet(
             modifier = Modifier.fillMaxWidth(),
             state = mbsState,

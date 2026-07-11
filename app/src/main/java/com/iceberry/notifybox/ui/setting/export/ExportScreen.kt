@@ -153,11 +153,7 @@ fun ExportScreen(
                 Log.i("137", "NOT GRANTED")
                 NoNearByPermissionsContent(
                     modifier = Modifier
-                        .padding(
-                            start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),
-                            end = innerPadding.calculateEndPadding(LocalLayoutDirection.current),
-                            top = innerPadding.calculateTopPadding()
-                        )
+                        .padding(innerPadding)
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.surface),
                     permissionsState = uiState.permissionsState,
