@@ -128,7 +128,49 @@ interface NotifyDao {
     @Query("UPDATE tb_notify SET deleted_time = DATETIME('now') WHERE rowid = :id AND deleted_time IS NULL")
     suspend fun markDeletedById(id: Int)
 
-    @Query("SELECT small_icon, large_icon FROM tb_notify WHERE deleted_time < :threshold")
+    @Query(
+        """
+            SELECT deleted.small_icon AS small_icon, NULL AS large_icon
+            FROM tb_notify deleted
+            WHERE deleted.deleted_time < :threshold
+                AND deleted.small_icon IS NOT NULL
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM (
+                        SELECT active.small_icon AS icon
+                        FROM tb_notify active
+                        WHERE active.deleted_time IS NULL
+                            AND active.small_icon IS NOT NULL
+                        UNION ALL
+                        SELECT active.large_icon AS icon
+                        FROM tb_notify active
+                        WHERE active.deleted_time IS NULL
+                            AND active.large_icon IS NOT NULL
+                    ) active_icons
+                    WHERE active_icons.icon = deleted.small_icon
+                )
+            UNION ALL
+            SELECT NULL AS small_icon, deleted.large_icon AS large_icon
+            FROM tb_notify deleted
+            WHERE deleted.deleted_time < :threshold
+                AND deleted.large_icon IS NOT NULL
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM (
+                        SELECT active.small_icon AS icon
+                        FROM tb_notify active
+                        WHERE active.deleted_time IS NULL
+                            AND active.small_icon IS NOT NULL
+                        UNION ALL
+                        SELECT active.large_icon AS icon
+                        FROM tb_notify active
+                        WHERE active.deleted_time IS NULL
+                            AND active.large_icon IS NOT NULL
+                    ) active_icons
+                    WHERE active_icons.icon = deleted.large_icon
+                )
+        """
+    )
     suspend fun getIconsOfOldDeletedNotifies(threshold: LocalDateTime): List<NotifyIcons>
 
     @Query("DELETE FROM tb_notify WHERE deleted_time < :threshold")
