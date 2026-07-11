@@ -71,8 +71,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -168,6 +172,7 @@ internal fun ListColumnContent(
                                 .animateItem()
                                 .fillMaxWidth(),
                             item = it,
+                            query = state.query,
                             onClick = { onClickItem(it) },
                             onDelete = {
                                 state.coroutineScope.launch {
@@ -198,6 +203,7 @@ internal fun ListColumnContent(
                                 .clip(CardDefaults.shape)
                                 .background(MaterialTheme.colorScheme.background),
                             item = it,
+                            query = state.query,
                             onClick = { onClickItem(it) }
                         )
                     }
@@ -217,6 +223,7 @@ internal fun ListColumnContent(
 private fun SwipeToDeleteItem(
     modifier: Modifier,
     item: NotifyVO,
+    query: String = "",
     onClick: () -> Unit,
     onDelete: () -> Unit
 ) {
@@ -258,6 +265,7 @@ private fun SwipeToDeleteItem(
                 .clip(CardDefaults.shape)
                 .background(MaterialTheme.colorScheme.background),
             item = item,
+            query = query,
             onClick = onClick
         )
     }
@@ -267,6 +275,7 @@ private fun SwipeToDeleteItem(
 private fun NotifyItem(
     modifier: Modifier,
     item: NotifyVO,
+    query: String = "",
     onClick: () -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
@@ -321,7 +330,7 @@ private fun NotifyItem(
                     Row(verticalAlignment = Alignment.CenterVertically) {
 
                         Text(
-                            text = item.appDisplayName,
+                            text = buildHighlightedText(item.appDisplayName, query),
                             style = MaterialTheme.typography.bodySmall,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -342,7 +351,7 @@ private fun NotifyItem(
                 }
                 item.title?.let {
                     Text(
-                        text = it,
+                        text = buildHighlightedText(it, query),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
@@ -352,7 +361,7 @@ private fun NotifyItem(
 
                 item.content?.let {
                     Text(
-                        text = item.content,
+                        text = buildHighlightedText(it, query),
                         maxLines = if (isExpanded) Int.MAX_VALUE else 3,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.animateContentSize(),
@@ -361,6 +370,37 @@ private fun NotifyItem(
                             .bodyMedium
                             .merge(color = MaterialTheme.colorScheme.outline),
                     )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun buildHighlightedText(
+    text: String,
+    query: String,
+): AnnotatedString {
+    val highlightColor = MaterialTheme.colorScheme.secondaryContainer
+    val highlightTextColor = MaterialTheme.colorScheme.primary
+
+    return remember(text, query, highlightColor, highlightTextColor) {
+        if (query.isEmpty() || !text.contains(query, ignoreCase = true)) {
+            AnnotatedString(text)
+        } else {
+            buildAnnotatedString {
+                var start = 0
+                while (start < text.length) {
+                    val index = text.indexOf(query, start, ignoreCase = true)
+                    if (index == -1) {
+                        append(text.substring(start))
+                        break
+                    }
+                    append(text.substring(start, index))
+                    withStyle(SpanStyle(background = highlightColor, color = highlightTextColor)) {
+                        append(text.substring(index, index + query.length))
+                    }
+                    start = index + query.length
                 }
             }
         }
