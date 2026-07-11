@@ -16,8 +16,10 @@
 
 package com.iceberry.notifybox.ui.statistic
 
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -67,20 +69,25 @@ fun StatisticModelBottomSheet(
         modifier = modifier,
         sheetState = state.sheetState,
         onDismissRequest = onDismissRequest,
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = { WindowInsets(0) }
     ) {
-        val isEmpty by remember {
+        val isLoading by remember {
             derivedStateOf {
-                items.itemCount == 0 || items.loadState == LoadState.Loading
+                items.loadState.refresh is LoadState.Loading
             }
         }
 
-        if (!isEmpty) {
+        val appDisplayName = remember(items.itemCount) {
+            if (items.itemCount > 0) items[0]?.appDisplayName else null
+        }
+
+        if (!isLoading && appDisplayName != null) {
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
-                text = "${items[0]?.appDisplayName}",
+                text = appDisplayName,
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center,
                 maxLines = 1
@@ -89,7 +96,7 @@ fun StatisticModelBottomSheet(
 
         ListColumnContent(
             state = listState,
-            paddingValues = PaddingValues(0.dp),
+            paddingValues = WindowInsets.navigationBars.asPaddingValues(),
             onClickItem = onClickItem,
             onDeleteItem = {}
         )
