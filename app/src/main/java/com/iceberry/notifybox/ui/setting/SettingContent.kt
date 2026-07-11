@@ -44,7 +44,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.iceberry.notifybox.R
 import com.iceberry.notifybox.navigation.Route
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
@@ -55,12 +55,14 @@ fun SettingContent(
     modifier: Modifier = Modifier,
     state: SettingColumnState,
     data: Map<SettingGroupEnum, List<SettingItemVO<*>>> = mapOf(),
+    paddingValues: androidx.compose.foundation.layout.PaddingValues,
     onClickItem: (NavigateData) -> Unit
 ) {
     LazyColumn(
         modifier = modifier
             .background(MaterialTheme.colorScheme.background),
-        state = state.lazyListState
+        state = state.lazyListState,
+        contentPadding = paddingValues
     ) {
         items(
             count = SettingGroupEnum.entries.size,
@@ -91,7 +93,8 @@ private fun SettingContentPreview() {
                 lazyListState = rememberLazyListState(),
                 loading = false,
                 snackbarHostState = SnackbarHostState()
-            )
+            ),
+            paddingValues = androidx.compose.foundation.layout.PaddingValues(0.dp)
         )
     }
 }

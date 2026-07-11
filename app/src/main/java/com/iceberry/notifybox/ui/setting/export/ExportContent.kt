@@ -72,12 +72,15 @@ fun ExportContent(
     list: List<DeviceInfo>,
     uiState: ExportUiState,
     lazyListState: LazyListState,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues,
     doConnect: (String) -> Unit = {},
     doExport: (String) -> Unit = {}
 ) {
     if (!uiState.loading && list.isEmpty()) {
         NoNearByPermissionsContent(
-            modifier = modifier.fillMaxSize(),
+            modifier = modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
             permissionsState = PermissionsState.GRANTED,
             title = stringResource(R.string.export_discovering_nearby),
             icon = Icons.Default.P2p
@@ -87,7 +90,8 @@ fun ExportContent(
 
     LazyColumn(
         modifier = modifier,
-        state = lazyListState
+        state = lazyListState,
+        contentPadding = paddingValues
     ) {
         if (uiState.scanning) {
             item {
@@ -142,6 +146,7 @@ private fun ExportContentPreview() {
                 loading = false,
                 scanning = true
             ),
+            paddingValues = androidx.compose.foundation.layout.PaddingValues(0.dp),
             lazyListState = rememberLazyListState(),
             list = listOf(
                 DeviceInfo(endpointId = "1"),

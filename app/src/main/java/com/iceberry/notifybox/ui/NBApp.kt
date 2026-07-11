@@ -17,10 +17,7 @@
 package com.iceberry.notifybox.ui
 
 import android.content.Context
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
@@ -30,10 +27,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iceberry.notifybox.R
 import com.iceberry.notifybox.navigation.NBNavHost
@@ -64,13 +59,8 @@ fun NBApp(
         }
     ) { paddingValues ->
         NBNavHost(
-            modifier = Modifier
-                .padding(
-                    start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
-                    end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
-                    top = if (appState.isTopLevelDestination) paddingValues.calculateTopPadding() else 0.dp
-                ),
-            appState = appState
+            appState = appState,
+            paddingValues = paddingValues
         )
 
         if (uiState.showANLSDialog) {

@@ -21,7 +21,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import com.iceberry.notifybox.ui.NBAppState
 import com.iceberry.notifybox.ui.list.ListViewModel
@@ -31,6 +31,7 @@ import com.iceberry.notifybox.ui.list.ListViewModel
 fun NBNavHost(
     modifier: Modifier = Modifier,
     appState: NBAppState,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues,
     listViewModel: ListViewModel = hiltViewModel() // XXX 此处获取ListScreen的viewmodel是为了保证即时搜索功能可用
 ) {
     val navController = appState.navController
@@ -46,15 +47,18 @@ fun NBNavHost(
         listScreen(
             appState = appState,
             viewModel = listViewModel,
+            paddingValues = paddingValues,
             onItemClick = navController::navigateToGroupDetails
         )
 
         forwardScreen(
-            appState = appState
+            appState = appState,
+            paddingValues = paddingValues
         )
 
         settingsScreen(
             appState = appState,
+            paddingValues = paddingValues,
             onItemClick = { navController.navigate(route = it.route, navOptions = it.navOptions) }
         )
 

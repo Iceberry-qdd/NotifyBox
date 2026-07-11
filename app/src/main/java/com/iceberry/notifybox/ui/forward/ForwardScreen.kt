@@ -38,7 +38,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iceberry.notifybox.R
 import com.iceberry.notifybox.ui.NBAppState
@@ -57,7 +58,8 @@ fun ForwardScreen(
     modifier: Modifier = Modifier,
     viewModel: ForwardViewModel = hiltViewModel(),
     exportViewModel: ExportViewModel = hiltViewModel(),
-    appState: NBAppState
+    appState: NBAppState,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val exportUiState by exportViewModel.uiState.collectAsStateWithLifecycle()
@@ -92,6 +94,7 @@ fun ForwardScreen(
                 uiState = exportUiState,
                 lazyListState = lazyListState,
                 list = pager,
+                paddingValues = paddingValues,
                 doConnect = { exportViewModel.doConnect(it) },
                 doExport = { exportViewModel.doExport(it) }
             )
@@ -156,7 +159,8 @@ fun ForwardTopAppBar(
 private fun DefaultPreview() {
     NBApplicationTheme {
         ForwardScreen(
-            appState = rememberNBAppState()
+            appState = rememberNBAppState(),
+            paddingValues = androidx.compose.foundation.layout.PaddingValues(0.dp)
         )
     }
 }
@@ -166,7 +170,8 @@ private fun DefaultPreview() {
 private fun PortraitPreview() {
     NBApplicationTheme {
         ForwardScreen(
-            appState = rememberNBAppState()
+            appState = rememberNBAppState(),
+            paddingValues = androidx.compose.foundation.layout.PaddingValues(0.dp)
         )
     }
 }

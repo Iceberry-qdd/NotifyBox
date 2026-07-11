@@ -29,7 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iceberry.notifybox.R
 import com.iceberry.notifybox.ui.NBAppState
@@ -42,6 +43,7 @@ fun SettingScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingViewModel = hiltViewModel(),
     appState: NBAppState,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues,
     onClickItem: (NavigateData) -> Unit
 ) {
     val items by viewModel.pager.collectAsStateWithLifecycle()
@@ -57,6 +59,7 @@ fun SettingScreen(
         modifier = modifier,
         state = listState,
         data = items,
+        paddingValues = paddingValues,
         onClickItem = onClickItem
     )
 }
@@ -82,7 +85,8 @@ private fun DefaultPreview() {
     NBApplicationTheme {
         SettingScreen(
             onClickItem = {},
-            appState = rememberNBAppState()
+            appState = rememberNBAppState(),
+            paddingValues = androidx.compose.foundation.layout.PaddingValues(0.dp)
         )
     }
 }
@@ -93,7 +97,8 @@ private fun PortraitPreview() {
     NBApplicationTheme {
         SettingScreen(
             appState = rememberNBAppState(),
-            onClickItem = {}
+            onClickItem = {},
+            paddingValues = androidx.compose.foundation.layout.PaddingValues(0.dp)
         )
     }
 }

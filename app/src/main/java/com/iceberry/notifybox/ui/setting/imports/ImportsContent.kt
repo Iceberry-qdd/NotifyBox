@@ -65,12 +65,13 @@ import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 fun ImportsContent(
     modifier: Modifier = Modifier,
     data: DeviceInfo,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues,
     doAccept: () -> Unit = {},
     doReject: () -> Unit = {},
     doImports: () -> Unit = {}
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier.padding(paddingValues)
     ) {
         if (data.endpointId.isNotEmpty()) {
             ImportsItemContent(
@@ -106,7 +107,8 @@ private fun ImportsContentPreview() {
                 connectState = ConnectState.NOT_CONNECT,
                 transferState = TransferState.TRANSFER_INIT,
                 transferProgress = 0.0f
-            )
+            ),
+            paddingValues = androidx.compose.foundation.layout.PaddingValues(0.dp)
         )
     }
 }

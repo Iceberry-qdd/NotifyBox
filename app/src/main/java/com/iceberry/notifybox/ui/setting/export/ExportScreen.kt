@@ -67,7 +67,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.core.location.LocationManagerCompat
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -119,7 +119,7 @@ fun ExportScreen(
                 lazyListState = lazyListState
             )
         }
-    ) { paddingValues ->
+    ) { innerPadding ->
         var launchTrigger by remember { mutableIntStateOf(0) }
         NearByPermissionsEffect(
             launchTrigger = launchTrigger,
@@ -138,16 +138,12 @@ fun ExportScreen(
                 }
                 ExportContent(
                     modifier = Modifier
-                        .padding(
-                            start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
-                            end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
-                            top = paddingValues.calculateTopPadding()
-                        )
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.surface),
+                    list = items,
                     uiState = uiState,
                     lazyListState = lazyListState,
-                    list = items,
+                    paddingValues = innerPadding,
                     doConnect = { viewModel.doConnect(it) },
                     doExport = { viewModel.doExport(it) }
                 )
@@ -158,9 +154,9 @@ fun ExportScreen(
                 NoNearByPermissionsContent(
                     modifier = Modifier
                         .padding(
-                            start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
-                            end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
-                            top = paddingValues.calculateTopPadding()
+                            start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),
+                            end = innerPadding.calculateEndPadding(LocalLayoutDirection.current),
+                            top = innerPadding.calculateTopPadding()
                         )
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.surface),

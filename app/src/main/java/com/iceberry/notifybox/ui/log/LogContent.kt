@@ -63,6 +63,7 @@ import kotlin.time.Clock
 fun LogContent(
     modifier: Modifier = Modifier,
     uiState: LogUiState,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues,
     lazyListState: LazyListState,
     onToggleLogLevel: (Int?) -> Unit
 ) {
@@ -74,7 +75,8 @@ fun LogContent(
 
     LazyColumn(
         modifier = modifier,
-        state = lazyListState
+        state = lazyListState,
+        contentPadding = paddingValues
     ) {
 
         if (uiState.isLoading) {
@@ -246,6 +248,7 @@ private fun LogScreenPreview() {
                     )
                 )
             ),
+            paddingValues = androidx.compose.foundation.layout.PaddingValues(0.dp),
             lazyListState = rememberLazyListState(),
             onToggleLogLevel = {},
         )

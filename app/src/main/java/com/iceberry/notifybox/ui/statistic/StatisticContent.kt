@@ -67,7 +67,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.iceberry.notifybox.R
 import com.iceberry.notifybox.ui.list.AppIcon
 import com.iceberry.notifybox.ui.list.NotifyVO
@@ -89,6 +89,7 @@ import com.iceberry.notifybox.ui.theme.convertToRGB
 fun StatisticContent(
     modifier: Modifier = Modifier,
     uiState: StatisticUiState,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues,
     lazyListState: LazyListState,
     onToggleFilter: (TimeRangeFilter) -> Unit,
     onNavToDetails: (NotifyVO) -> Unit
@@ -99,7 +100,8 @@ fun StatisticContent(
 
     LazyColumn(
         modifier = modifier,
-        state = lazyListState
+        state = lazyListState,
+        contentPadding = paddingValues
     ) {
         item {
             DateFilterChips(
@@ -419,6 +421,7 @@ private fun StatisticScreenPreview() {
                     barChartData = listOf(INIT_BAR_CHART_DATA)
                 )
             ),
+            paddingValues = androidx.compose.foundation.layout.PaddingValues(0.dp),
             lazyListState = rememberLazyListState(),
             onToggleFilter = {},
             onNavToDetails = {}

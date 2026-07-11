@@ -76,6 +76,7 @@ fun NavController.navigateToList(navOptions: NavOptions) = navigate(route = Rout
 fun NavGraphBuilder.listScreen(
     appState: NBAppState,
     viewModel: ListViewModel,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues,
     onItemClick: (NotifyVO) -> Unit
 ) {
     composable<Route.ListRoute> {
@@ -83,6 +84,7 @@ fun NavGraphBuilder.listScreen(
             modifier = Modifier.fillMaxSize(),
             appState = appState,
             viewModel = viewModel,
+            paddingValues = paddingValues,
             onClickItem = onItemClick
         )
     }
@@ -91,12 +93,14 @@ fun NavGraphBuilder.listScreen(
 fun NavController.navigateToForward(navOptions: NavOptions) = navigate(route = Route.ForwardRoute, navOptions)
 
 fun NavGraphBuilder.forwardScreen(
-    appState: NBAppState
+    appState: NBAppState,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues
 ) {
     composable<Route.ForwardRoute> {
         ForwardScreen(
             modifier = Modifier.fillMaxSize(),
-            appState = appState
+            appState = appState,
+            paddingValues = paddingValues
         )
     }
 }
@@ -105,13 +109,15 @@ fun NavController.navigateToSettings(navOptions: NavOptions) = navigate(route = 
 
 fun NavGraphBuilder.settingsScreen(
     appState: NBAppState,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues,
     onItemClick: (NavigateData) -> Unit
 ) {
     composable<Route.SettingRoute> {
         SettingScreen(
             modifier = Modifier.fillMaxSize(),
             onClickItem = onItemClick,
-            appState = appState
+            appState = appState,
+            paddingValues = paddingValues
         )
     }
 }

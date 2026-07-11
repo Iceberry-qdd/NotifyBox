@@ -18,8 +18,6 @@ package com.iceberry.notifybox.ui.groupDetails
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -49,11 +47,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.iceberry.notifybox.R
@@ -145,13 +142,9 @@ fun GroupDetailsScreen(
 
             ListColumnContent(
                 modifier = Modifier
-                    .padding(
-                        start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
-                        end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
-                        top = paddingValues.calculateTopPadding()
-                    )
                     .fillMaxSize(),
                 state = listState,
+                paddingValues = paddingValues,
                 onClickItem = {},
                 onDeleteItem = { notify ->
                     appState.coroutineScope.launch {

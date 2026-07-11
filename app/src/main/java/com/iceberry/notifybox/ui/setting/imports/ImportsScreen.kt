@@ -19,11 +19,8 @@ package com.iceberry.notifybox.ui.setting.imports
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -57,11 +54,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.window.DialogProperties
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iceberry.notifybox.R
 import com.iceberry.notifybox.icon.P2p
@@ -160,7 +156,6 @@ fun ImportsScreen(
                 if (uiState.deviceInfo.endpointId.isEmpty()) {
                     NoNearByPermissionsContent(
                         modifier = Modifier
-                            .padding(paddingValues)
                             .fillMaxSize()
                             .background(MaterialTheme.colorScheme.surface),
                         permissionsState = PermissionsState.GRANTED, // Reusing component for scanning state
@@ -170,14 +165,10 @@ fun ImportsScreen(
                 } else {
                     ImportsContent(
                         modifier = modifier
-                            .padding(
-                                start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
-                                end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
-                                top = paddingValues.calculateTopPadding()
-                            )
                             .fillMaxSize()
                             .background(MaterialTheme.colorScheme.surface),
                         data = uiState.deviceInfo,
+                        paddingValues = paddingValues,
                         doAccept = { viewModel.acceptConnection() },
                         doReject = { viewModel.rejectConnection() }
                     )
@@ -187,11 +178,6 @@ fun ImportsScreen(
             else -> {
                 NoNearByPermissionsContent(
                     modifier = Modifier
-                        .padding(
-                            start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
-                            end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
-                            top = paddingValues.calculateTopPadding()
-                        )
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.surface),
                     permissionsState = uiState.permissionsState,

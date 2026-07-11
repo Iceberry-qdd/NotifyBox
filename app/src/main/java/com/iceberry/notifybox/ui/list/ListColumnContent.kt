@@ -96,6 +96,7 @@ import kotlin.math.min
 internal fun ListColumnContent(
     modifier: Modifier = Modifier,
     state: ListColumnState<NotifyVO>,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues,
     onClickItem: (NotifyVO) -> Unit,
     onDeleteItem: (NotifyVO) -> Unit
 ) {
@@ -120,7 +121,8 @@ internal fun ListColumnContent(
             .then(if (!state.query.isEmpty()) Modifier.imeNestedScroll() else Modifier),
         reverseLayout = false,
         verticalArrangement = verticalArrangement,
-        state = state.lazyListState
+        state = state.lazyListState,
+        contentPadding = paddingValues
     ) {
         if (state.loading && state.query.isEmpty()) {
             item {

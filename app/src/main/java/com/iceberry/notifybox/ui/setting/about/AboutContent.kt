@@ -60,6 +60,7 @@ import com.iceberry.notifybox.util.IconUtils
 fun AboutContent(
     modifier: Modifier = Modifier,
     uiState: AboutUiState,
+    paddingValues: androidx.compose.foundation.layout.PaddingValues,
     lazyListState: LazyListState
 ) {
     val context = LocalContext.current
@@ -79,7 +80,8 @@ fun AboutContent(
     LazyColumn(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
-        state = lazyListState
+        state = lazyListState,
+        contentPadding = paddingValues
     ) {
         item {
             Column(
@@ -182,6 +184,7 @@ private fun AboutContentPreview() {
                 abi = "arm64-v8a",
                 installSource = "play"
             ),
+            paddingValues = androidx.compose.foundation.layout.PaddingValues(0.dp),
             lazyListState = rememberLazyListState()
         )
     }
