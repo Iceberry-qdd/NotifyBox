@@ -16,6 +16,8 @@
 
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.ByteArrayOutputStream
+import java.io.FileInputStream
+import java.util.Properties
 import javax.inject.Inject
 
 abstract class GitHashValueSource : ValueSource<String, ValueSourceParameters.None> {
@@ -46,6 +48,10 @@ plugins {
 
 val gitHashValue = providers.of(GitHashValueSource::class.java) {}.get()
 
+val localProperties = Properties().apply {
+    load(FileInputStream(rootProject.file("local.properties")))
+}
+
 android {
     namespace = "com.iceberry.notifybox"
     compileSdk = 35
@@ -68,10 +74,10 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file(project.findProperty("RELEASE_STORE_FILE") ?: "keystore.jks")
-            storePassword = project.findProperty("RELEASE_STORE_PASSWORD") as String?
-            keyAlias = project.findProperty("RELEASE_KEY_ALIAS") as String?
-            keyPassword = project.findProperty("RELEASE_KEY_PASSWORD") as String?
+            storeFile = file(localProperties.getProperty("RELEASE_STORE_FILE") ?: "keystore.jks")
+            storePassword = localProperties.getProperty("RELEASE_STORE_PASSWORD")
+            keyAlias = localProperties.getProperty("RELEASE_KEY_ALIAS")
+            keyPassword = localProperties.getProperty("RELEASE_KEY_PASSWORD")
         }
     }
 
@@ -118,6 +124,12 @@ android {
         }
         jniLibs {
             useLegacyPackaging = false
+        }
+    }
+
+    bundle {
+        language {
+            enableSplit = false
         }
     }
 }
