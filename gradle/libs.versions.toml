@@ -1,30 +1,28 @@
 [versions]
-androidGradlePlugin = "8.13.0"
-r8 = "9.1.31"
-androidxCore = "1.15.0"
+androidGradlePlugin = "9.2.1"
+androidxCore = "1.19.0"
 androidxCoreSplashscreen = "1.2.0"
-androidxLifecycle = "2.8.7"
-androidxActivity = "1.9.3"
+androidxLifecycle = "2.11.0"
+androidxActivity = "1.13.0"
 androidxComposeBom = "2026.06.01"
 androidxComposeUi = "1.11.4"
-androidxHilt = "1.2.0"
-androidxNavigation = "2.8.8"
-androidxMaterial3 = "1.4.0"
+androidxHilt = "1.4.0"
+androidxNavigation = "2.9.8"
+androidxMaterial3 = "1.5.0-alpha23"
 androidxRoom = "2.8.4"
 androidxTest = "1.7.0"
 androidxTestExt = "1.3.0"
 androidxTestRunner = "1.7.0"
 coroutines = "1.11.0"
-hilt = "2.57.1"
+hilt = "2.60.1"
 junit = "4.13.2"
 kotlin = "2.3.10"
 ksp = "2.3.10"
 kotlinxSerializationJson = "1.11.0"
 materialIconsExtended = "1.7.8"
-r8Version = "9.1.31"
 workRuntimeKtx = "2.11.2"
-hiltWork = "1.3.0"
-hiltCompiler = "1.3.0"
+hiltWork = "1.4.0"
+hiltCompiler = "1.4.0"
 paging = "3.5.0"
 datastorePreferences = "1.2.1"
 mpAndroidChart = "v3.1.0"
@@ -35,7 +33,6 @@ appcompat = "1.7.1"
 timber = "5.0.1"
 playServicesNearby = "19.3.0"
 accompanistPermissions = "0.37.3"
-eventbus = "3.3.1"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCore" }
@@ -79,16 +76,13 @@ androidx-datastore = { group = "androidx.datastore", name = "datastore", version
 protobuf-kotlin-lite = { group = "com.google.protobuf", name = "protobuf-kotlin-lite", version.ref = "protobufKotlinLite" }
 protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobufKotlinLite" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-r8 = { module = "com.android.tools:r8", version.ref = "r8Version" }
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 play-services-nearby = { group = "com.google.android.gms", name = "play-services-nearby", version.ref = "playServicesNearby" }
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanistPermissions" }
-eventbus = { module = "org.greenrobot:eventbus", version.ref = "eventbus" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt-gradle = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 serialization-compiler = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

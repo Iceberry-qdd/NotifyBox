@@ -20,7 +20,4 @@ buildscript {
         mavenCentral()
         google()
     }
-    dependencies {
-        classpath(libs.r8)
-    }
 }

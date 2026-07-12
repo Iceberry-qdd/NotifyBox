@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import com.android.build.api.dsl.ApplicationExtension
 import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import java.util.Properties
-import javax.inject.Inject
 
 abstract class GitHashValueSource : ValueSource<String, ValueSourceParameters.None> {
     @get:Inject
@@ -37,7 +36,6 @@ abstract class GitHashValueSource : ValueSource<String, ValueSourceParameters.No
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.hilt.gradle)
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
@@ -52,7 +50,7 @@ val localProperties = Properties().apply {
     load(FileInputStream(rootProject.file("local.properties")))
 }
 
-android {
+extensions.configure<ApplicationExtension> {
     namespace = "com.iceberry.notifybox"
     compileSdk = 37
 
@@ -81,11 +79,6 @@ android {
         }
     }
 
-    room {
-        // Enable room auto-migrations
-        schemaDirectory("$projectDir/schemas")
-    }
-
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
@@ -101,12 +94,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlin {
-        compilerOptions {
-            jvmTarget = JvmTarget.JVM_17
-        }
     }
 
     buildFeatures {
@@ -132,6 +119,15 @@ android {
             enableSplit = false
         }
     }
+}
+
+kotlin {
+    jvmToolchain(17)
+}
+
+room {
+    // Enable room auto-migrations
+    schemaDirectory("$projectDir/schemas")
 }
 
 protobuf {
@@ -163,7 +159,6 @@ dependencies {
     implementation(libs.timber)
     implementation(libs.play.services.nearby)
     implementation(libs.accompanist.permissions)
-    implementation(libs.eventbus)
     val composeBom = platform(libs.androidx.compose.bom)
 
     implementation(composeBom)
