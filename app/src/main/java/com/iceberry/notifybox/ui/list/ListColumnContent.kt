@@ -45,7 +45,8 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -91,7 +92,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import kotlin.math.min
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun ListColumnContent(
     modifier: Modifier = Modifier,
@@ -132,7 +133,11 @@ internal fun ListColumnContent(
                         .fillMaxWidth(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    CircularProgressIndicator()
+                    if (state.fromMBS) {
+                        ContainedLoadingIndicator()
+                    } else {
+                        ContainedLoadingIndicator(modifier = Modifier.size(72.dp))
+                    }
                 }
             }
             return@LazyColumn

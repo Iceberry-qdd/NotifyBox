@@ -29,7 +29,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BluetoothDisabled
 import androidx.compose.material.icons.filled.LocationOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -46,6 +48,7 @@ import com.iceberry.notifybox.R
 import com.iceberry.notifybox.icon.P2p
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NoNearByPermissionsContent(
     modifier: Modifier = Modifier,
@@ -87,11 +90,17 @@ fun NoNearByPermissionsContent(
         verticalArrangement = Arrangement.spacedBy(space = 16.dp, alignment = Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-            modifier = Modifier.size(64.dp),
-            imageVector = displayIcon,
-            contentDescription = displayTitle
-        )
+
+        if (permissionsState == PermissionsState.GRANTED) {
+            ContainedLoadingIndicator(modifier = Modifier.size(72.dp))
+        } else {
+            Icon(
+                modifier = Modifier.size(64.dp),
+                imageVector = displayIcon,
+                contentDescription = displayTitle
+            )
+        }
+
         Text(
             text = displayTitle,
             style = MaterialTheme.typography.titleSmall.merge(color = MaterialTheme.colorScheme.outline)

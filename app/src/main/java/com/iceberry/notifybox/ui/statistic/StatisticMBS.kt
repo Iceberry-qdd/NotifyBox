@@ -63,6 +63,7 @@ fun StatisticModelBottomSheet(
         query = "",
         snackbarHostState = SnackbarHostState(),
         canDelete = false,
+        fromMBS = true
     )
 
     ModalBottomSheet(

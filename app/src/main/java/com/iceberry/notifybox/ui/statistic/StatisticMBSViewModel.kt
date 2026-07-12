@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class MBSViewModel @Inject constructor(
@@ -82,7 +83,7 @@ class MBSViewModel @Inject constructor(
             )
         }.cachedIn(viewModelScope)
     }.onEach {
-        delay(500L)
+        delay(1000L.milliseconds)
         _loading.update { false }
     }
 

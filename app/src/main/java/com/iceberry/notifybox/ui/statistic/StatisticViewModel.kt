@@ -29,6 +29,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -37,6 +38,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import java.time.Instant
@@ -45,13 +47,13 @@ import java.time.LocalTime
 import java.time.ZoneOffset
 import java.time.temporal.TemporalAdjusters
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class StatisticViewModel @Inject constructor(
     notifyRepository: NotifyRepository,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
-    private val _isLoading = MutableStateFlow(true)
     private val _timeRangeFilter = MutableStateFlow(TimeRangeFilter.ALL)
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -59,6 +61,10 @@ class StatisticViewModel @Inject constructor(
         .flatMapLatest { filter ->
             notifyRepository.statisticForPieChart(filter)
                 .map { if (it.isEmpty()) Async.Empty else Async.Success(it) }
+                .onStart {
+                    emit(Async.Loading)
+                    delay(1000.milliseconds)
+                }
                 .catch { e -> emit(Async.Error(e)) }
         }
 
@@ -69,6 +75,10 @@ class StatisticViewModel @Inject constructor(
                 .map {
                     val barData = handleBarChartData(it, filter)
                     if (barData.isEmpty()) Async.Empty else Async.Success(barData)
+                }
+                .onStart {
+                    emit(Async.Loading)
+                    delay(1000.milliseconds)
                 }
                 .catch { e -> emit(Async.Error(e)) }
         }
@@ -98,7 +108,7 @@ class StatisticViewModel @Inject constructor(
                 )
             }
         )
-    }.debounce(150)
+    }.debounce(150.milliseconds)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),

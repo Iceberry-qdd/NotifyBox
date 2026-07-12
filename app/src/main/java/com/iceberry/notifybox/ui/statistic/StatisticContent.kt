@@ -41,8 +41,9 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -84,7 +85,7 @@ import com.iceberry.notifybox.ui.theme.COLOR_PALETTE
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
 import com.iceberry.notifybox.ui.theme.convertToRGB
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun StatisticContent(
     modifier: Modifier = Modifier,
@@ -126,7 +127,7 @@ fun StatisticContent(
                         .background(MaterialTheme.colorScheme.surface),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    ContainedLoadingIndicator(modifier = Modifier.size(72.dp))
                 }
             }
             return@LazyColumn

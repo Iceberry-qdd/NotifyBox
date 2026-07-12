@@ -34,7 +34,8 @@ fun <T : Any> rememberListColumnState(
     query: String = "",
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
-    canDelete: Boolean = true
+    canDelete: Boolean = true,
+    fromMBS: Boolean = false
 ): ListColumnState<T> {
     return remember(items, lazyListState, loading, snackbarHostState, coroutineScope) {
         ListColumnState(
@@ -44,7 +45,8 @@ fun <T : Any> rememberListColumnState(
             query = query,
             snackbarHostState = snackbarHostState,
             coroutineScope = coroutineScope,
-            canDelete = canDelete
+            canDelete = canDelete,
+            fromMBS = fromMBS
         )
     }
 }
@@ -56,5 +58,6 @@ class ListColumnState<T : Any>(
     internal val query: String,
     internal val snackbarHostState: SnackbarHostState,
     internal val coroutineScope: CoroutineScope,
-    internal val canDelete: Boolean
+    internal val canDelete: Boolean,
+    internal val fromMBS: Boolean
 )
