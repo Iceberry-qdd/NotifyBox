@@ -256,7 +256,7 @@ data class PieChartData(
             dest = dest,
             appIcon = AppIcon(
                 icon = packageIcon ?: smallIcon,
-                largeIcon = largeIcon,
+                largeIcon = packageIcon ?: largeIcon,
                 appDisplayName = label
             ),
             packageName = packageName
