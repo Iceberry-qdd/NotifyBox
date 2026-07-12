@@ -26,15 +26,14 @@ import com.iceberry.notifybox.R
 import com.iceberry.notifybox.bg.event.NearbyPayloadEvent
 import com.iceberry.notifybox.bg.event.NearbyPayloadTransferUpdateEvent
 import com.iceberry.notifybox.data.local.database.AppDatabase
+import com.iceberry.notifybox.util.EventBus
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
 import timber.log.Timber
 import java.io.File
 import java.io.FileInputStream
@@ -53,7 +52,8 @@ class NearbyTransferManager @Inject constructor(
 ) {
     private val TAG = "NearbyTransferManager"
     private val connectionsClient = Nearby.getConnectionsClient(context)
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val eventScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val incomingPayloads = mutableMapOf<Long, Payload>()
     var isMergeMode: Boolean = true
 
@@ -68,15 +68,18 @@ class NearbyTransferManager @Inject constructor(
     val transferProgress = MutableStateFlow<ProgressInfo?>(null)
 
     init {
-        EventBus.getDefault().register(this)
+        eventScope.launch {
+            EventBus.subscribe<NearbyPayloadEvent> { onNearbyPayload(it) }
+        }
+        eventScope.launch {
+            EventBus.subscribe<NearbyPayloadTransferUpdateEvent> { onNearbyPayloadTransferUpdate(it) }
+        }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
     fun onNearbyPayload(event: NearbyPayloadEvent) {
         incomingPayloads[event.payload.id] = event.payload
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
     fun onNearbyPayloadTransferUpdate(event: NearbyPayloadTransferUpdateEvent) {
         val progress = if (event.update.totalBytes > 0) {
             event.update.bytesTransferred.toFloat() / event.update.totalBytes.toFloat()

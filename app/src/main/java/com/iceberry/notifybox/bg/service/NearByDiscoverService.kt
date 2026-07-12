@@ -44,9 +44,12 @@ import com.iceberry.notifybox.bg.event.NearbyEndpointFoundEvent
 import com.iceberry.notifybox.bg.event.NearbyEndpointLostEvent
 import com.iceberry.notifybox.bg.event.NearbyPayloadEvent
 import com.iceberry.notifybox.bg.event.NearbyPayloadTransferUpdateEvent
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
+import com.iceberry.notifybox.util.EventBus
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
@@ -59,14 +62,15 @@ class NearByDiscoverService : Service() {
     private val NAERBY_NOTIFICATION_CHANNEL_ID = "nearby"
     private val FOREGROUND_NOTIFICATION_ID = 0x00251401
     private var connectionsClient: ConnectionsClient? = null
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private val payloadCallback: PayloadCallback = object : PayloadCallback() {
         override fun onPayloadReceived(endpointId: String, payload: Payload) {
-            EventBus.getDefault().post(NearbyPayloadEvent(endpointId, payload))
+            publishEvent(NearbyPayloadEvent(endpointId, payload))
         }
 
         override fun onPayloadTransferUpdate(endpointId: String, payloadTransferUpdate: PayloadTransferUpdate) {
-            EventBus.getDefault().post(NearbyPayloadTransferUpdateEvent(endpointId, payloadTransferUpdate))
+            publishEvent(NearbyPayloadTransferUpdateEvent(endpointId, payloadTransferUpdate))
         }
     }
 
@@ -91,12 +95,12 @@ class NearByDiscoverService : Service() {
             } else {
                 Timber.tag(TAG).w("Connection failed with $endpointId: ${result.status.statusCode}")
             }
-            EventBus.getDefault().post(NearbyConnectionResultEvent(endpointId, isConnected))
+            publishEvent(NearbyConnectionResultEvent(endpointId, isConnected))
         }
 
         override fun onDisconnected(endpointId: String) {
             Timber.tag(TAG).i("Disconnected from $endpointId")
-            EventBus.getDefault().post(NearbyConnectionResultEvent(endpointId, false))
+            publishEvent(NearbyConnectionResultEvent(endpointId, false))
         }
     }
 
@@ -111,12 +115,12 @@ class NearByDiscoverService : Service() {
             val name = parts.getOrNull(0) ?: info.endpointName
             val uniqueId = parts.getOrNull(1) ?: name
 
-            EventBus.getDefault().post(NearbyEndpointFoundEvent(endpointId, uniqueId, info))
+            publishEvent(NearbyEndpointFoundEvent(endpointId, uniqueId, info))
         }
 
         override fun onEndpointLost(endpointId: String) {
             Log.d(TAG, "onEndpointLost: endpointId=$endpointId")
-            EventBus.getDefault().post(NearbyEndpointLostEvent(endpointId))
+            publishEvent(NearbyEndpointLostEvent(endpointId))
         }
     }
     private var handler: Handler = Handler(Looper.myLooper()!!)
@@ -134,7 +138,9 @@ class NearByDiscoverService : Service() {
         connectionsClient = Nearby.getConnectionsClient(applicationContext)
         val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
         localEndpointName = "${android.os.Build.MODEL}|$androidId"
-        EventBus.getDefault().register(this)
+        serviceScope.launch {
+            EventBus.subscribe<NearbyConnectAction> { onNearbyConnectAction(it) }
+        }
     }
 
     override fun onDestroy() {
@@ -142,15 +148,20 @@ class NearByDiscoverService : Service() {
 
         handler.removeCallbacksAndMessages(null);
         stopDiscovery()
-        EventBus.getDefault().unregister(this)
+        serviceScope.cancel()
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
     fun onNearbyConnectAction(action: NearbyConnectAction) {
         connectionsClient?.requestConnection(localEndpointName, action.endpointId, connectionLifecycleCallback)
             ?.addOnFailureListener {
-                EventBus.getDefault().post(NearbyConnectionResultEvent(action.endpointId, false))
+                publishEvent(NearbyConnectionResultEvent(action.endpointId, false))
             }
+    }
+
+    private fun publishEvent(event: EventBus.Event) {
+        serviceScope.launch {
+            EventBus.publish(event)
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder? {

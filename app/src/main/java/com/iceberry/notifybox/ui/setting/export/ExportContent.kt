@@ -82,8 +82,7 @@ fun ExportContent(
                 .padding(paddingValues)
                 .fillMaxSize(),
             permissionsState = PermissionsState.GRANTED,
-            title = stringResource(R.string.export_discovering_nearby),
-            icon = Icons.Default.P2p
+            title = stringResource(R.string.export_discovering_nearby)
         )
         return
     }

@@ -28,13 +28,12 @@ import com.iceberry.notifybox.bg.event.NearbyConnectAction
 import com.iceberry.notifybox.bg.event.NearbyConnectionResultEvent
 import com.iceberry.notifybox.bg.event.NearbyEndpointFoundEvent
 import com.iceberry.notifybox.bg.event.NearbyEndpointLostEvent
-import com.iceberry.notifybox.bg.event.NearbyPayloadEvent
-import com.iceberry.notifybox.bg.event.NearbyPayloadTransferUpdateEvent
 import com.iceberry.notifybox.bg.service.NearByAdvertisingService
 import com.iceberry.notifybox.bg.service.NearByDiscoverService
 import com.iceberry.notifybox.data.NearbyTransferManager
 import com.iceberry.notifybox.data.local.database.Device
 import com.iceberry.notifybox.data.local.database.DeviceDao
+import com.iceberry.notifybox.util.EventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -47,9 +46,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -123,7 +119,15 @@ class ExportViewModel @Inject constructor(
     )
 
     init {
-        EventBus.getDefault().register(this)
+        viewModelScope.launch {
+            EventBus.subscribe<NearbyEndpointFoundEvent> { onEndpointFound(it) }
+        }
+        viewModelScope.launch {
+            EventBus.subscribe<NearbyEndpointLostEvent> { onEndpointLost(it) }
+        }
+        viewModelScope.launch {
+            EventBus.subscribe<NearbyConnectionResultEvent> { onNearbyConnectionResult(it) }
+        }
         viewModelScope.launch {
             deviceDao.getAllDevices().collect { cached ->
                 _discoveredDevices.update { current ->
@@ -139,12 +143,6 @@ class ExportViewModel @Inject constructor(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        EventBus.getDefault().unregister(this)
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
     fun onEndpointFound(event: NearbyEndpointFoundEvent) {
         val info = DeviceInfo(
             endpointId = event.endpointId,
@@ -168,7 +166,6 @@ class ExportViewModel @Inject constructor(
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
     fun onEndpointLost(event: NearbyEndpointLostEvent) {
         _discoveredDevices.update { current ->
             current.values.find { it.endpointId == event.endpointId }?.let {
@@ -177,7 +174,6 @@ class ExportViewModel @Inject constructor(
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
     fun onNearbyConnectionResult(event: NearbyConnectionResultEvent) {
         _discoveredDevices.update { devices ->
             val device = devices.values.find { it.endpointId == event.endpointId }
@@ -193,14 +189,6 @@ class ExportViewModel @Inject constructor(
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onNearbyPayload(event: NearbyPayloadEvent) {
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onNearbyPayloadTransferUpdate(event: NearbyPayloadTransferUpdateEvent) {
-    }
-
     fun enableScan() {
         viewModelScope.launch {
             _scanning.update { true }
@@ -210,10 +198,13 @@ class ExportViewModel @Inject constructor(
     }
 
     fun doConnect(deviceUniqueId: String) {
+        val endpointId = _discoveredDevices.value[deviceUniqueId]?.endpointId ?: return
+        Timber.tag("ExportViewModel").i("Connecting to $deviceUniqueId ($endpointId)")
+        viewModelScope.launch {
+            EventBus.publish(NearbyConnectAction(endpointId))
+        }
         _discoveredDevices.update { devices ->
             devices[deviceUniqueId]?.let {
-                Timber.tag("ExportViewModel").i("Connecting to ${it.name} (${it.endpointId})")
-                EventBus.getDefault().post(NearbyConnectAction(it.endpointId))
                 devices + (deviceUniqueId to it.copy(connectState = ConnectState.CONNECTING))
             } ?: devices
         }

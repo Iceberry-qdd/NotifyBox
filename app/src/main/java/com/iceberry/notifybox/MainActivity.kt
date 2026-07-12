@@ -39,15 +39,13 @@ import com.iceberry.notifybox.data.SettingsRepository
 import com.iceberry.notifybox.ui.NBApp
 import com.iceberry.notifybox.ui.rememberNBAppState
 import com.iceberry.notifybox.ui.theme.NBApplicationTheme
+import com.iceberry.notifybox.util.EventBus
 import com.iceberry.notifybox.util.NotificationUtils
 import com.iceberry.notifybox.util.isSystemInDarkTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
 import javax.inject.Inject
 
 
@@ -98,6 +96,7 @@ class MainActivity() : AppCompatActivity() {
                     }
             }
         }
+        subscribeNearbyConnectionRequestEvent()
 
         setContent {
             val appState = rememberNBAppState()
@@ -109,31 +108,31 @@ class MainActivity() : AppCompatActivity() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        EventBus.getDefault().register(this)
-    }
+    private fun subscribeNearbyConnectionRequestEvent() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                EventBus.subscribe<NearbyConnectionRequestEvent> { event ->
+                    AlertDialog.Builder(this@MainActivity)
+                        .setTitle(getString(R.string.nearby_connection_title, event.info.endpointName))
+                        .setMessage(getString(R.string.nearby_connection_message, event.info.authenticationDigits))
+                        .setPositiveButton(R.string.accept_connection) { dialog, _ ->
+                            lifecycleScope.launch {
+                                EventBus.publish(NearbyConnectionResponseEvent(event.endpointId, true))
+                            }
+                            dialog.dismiss()
+                        }
+                        .setNegativeButton(R.string.cancel) { dialog, _ ->
+                            lifecycleScope.launch {
+                                EventBus.publish(NearbyConnectionResponseEvent(event.endpointId, false))
+                            }
+                            dialog.dismiss()
+                        }
+                        .setIcon(R.drawable.ic_launcher_foreground)
+                        .show()
 
-    override fun onStop() {
-        super.onStop()
-        EventBus.getDefault().unregister(this)
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onNearbyConnectionRequest(event: NearbyConnectionRequestEvent) {
-        AlertDialog.Builder(this)
-            .setTitle(getString(R.string.nearby_connection_title, event.info.endpointName))
-            .setMessage(getString(R.string.nearby_connection_message, event.info.authenticationDigits))
-            .setPositiveButton(R.string.accept_connection) { dialog, _ ->
-                EventBus.getDefault().post(NearbyConnectionResponseEvent(event.endpointId, true))
-                dialog.dismiss()
+                }
             }
-            .setNegativeButton(R.string.cancel) { dialog, _ ->
-                EventBus.getDefault().post(NearbyConnectionResponseEvent(event.endpointId, false))
-                dialog.dismiss()
-            }
-            .setIcon(R.drawable.ic_launcher_foreground)
-            .show()
+        }
     }
 
     fun changeLanguage(language: LocaleListCompat) {

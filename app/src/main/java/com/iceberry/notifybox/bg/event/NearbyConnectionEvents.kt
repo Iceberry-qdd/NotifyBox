@@ -17,42 +17,43 @@
 package com.iceberry.notifybox.bg.event
 
 import com.google.android.gms.nearby.connection.ConnectionInfo
+import com.iceberry.notifybox.util.EventBus
 
 data class NearbyConnectionRequestEvent(
     val endpointId: String,
     val info: ConnectionInfo
-)
+) : EventBus.Event
 
 data class NearbyConnectionResponseEvent(
     val endpointId: String,
     val accept: Boolean
-)
+) : EventBus.Event
 
 data class NearbyConnectAction(
     val endpointId: String
-)
+) : EventBus.Event
 
 data class NearbyConnectionResultEvent(
     val endpointId: String,
     val isConnected: Boolean
-)
+) : EventBus.Event
 
 data class NearbyPayloadEvent(
     val endpointId: String,
     val payload: com.google.android.gms.nearby.connection.Payload
-)
+) : EventBus.Event
 
 data class NearbyPayloadTransferUpdateEvent(
     val endpointId: String,
     val update: com.google.android.gms.nearby.connection.PayloadTransferUpdate
-)
+) : EventBus.Event
 
 data class NearbyEndpointFoundEvent(
     val endpointId: String,
     val deviceUniqueId: String,
     val info: com.google.android.gms.nearby.connection.DiscoveredEndpointInfo
-)
+) : EventBus.Event
 
 data class NearbyEndpointLostEvent(
     val endpointId: String
-)
+) : EventBus.Event

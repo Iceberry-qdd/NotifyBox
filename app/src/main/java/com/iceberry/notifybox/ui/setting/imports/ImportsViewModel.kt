@@ -25,8 +25,6 @@ import com.iceberry.notifybox.R
 import com.iceberry.notifybox.bg.event.NearbyConnectionRequestEvent
 import com.iceberry.notifybox.bg.event.NearbyConnectionResponseEvent
 import com.iceberry.notifybox.bg.event.NearbyConnectionResultEvent
-import com.iceberry.notifybox.bg.event.NearbyPayloadEvent
-import com.iceberry.notifybox.bg.event.NearbyPayloadTransferUpdateEvent
 import com.iceberry.notifybox.bg.service.NearByAdvertisingService
 import com.iceberry.notifybox.data.NearbyTransferManager
 import com.iceberry.notifybox.data.NotifyRepository
@@ -35,6 +33,7 @@ import com.iceberry.notifybox.ui.setting.export.ConnectState
 import com.iceberry.notifybox.ui.setting.export.DeviceInfo
 import com.iceberry.notifybox.ui.setting.export.PermissionsState
 import com.iceberry.notifybox.ui.setting.export.TransferState
+import com.iceberry.notifybox.util.EventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,9 +42,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.system.exitProcess
 
@@ -98,15 +95,14 @@ class ImportsViewModel @Inject constructor(
     )
 
     init {
-        EventBus.getDefault().register(this)
+        viewModelScope.launch {
+            EventBus.subscribe<NearbyConnectionRequestEvent> { onNearbyConnectionRequest(it) }
+        }
+        viewModelScope.launch {
+            EventBus.subscribe<NearbyConnectionResultEvent> { onNearbyConnectionResult(it) }
+        }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        EventBus.getDefault().unregister(this)
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
     fun onNearbyConnectionRequest(event: NearbyConnectionRequestEvent) {
         _deviceInfo.update {
             DeviceInfo(
@@ -118,7 +114,6 @@ class ImportsViewModel @Inject constructor(
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
     fun onNearbyConnectionResult(event: NearbyConnectionResultEvent) {
         _deviceInfo.update { current ->
             if (current.endpointId == event.endpointId) {
@@ -132,15 +127,6 @@ class ImportsViewModel @Inject constructor(
         }
     }
 
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onNearbyPayload(event: NearbyPayloadEvent) {
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onNearbyPayloadTransferUpdate(event: NearbyPayloadTransferUpdateEvent) {
-    }
-
     fun getParams(mode: SettingOptions.ImportMethod) {
         _mode.update { mode }
         transferManager.isMergeMode = mode == SettingOptions.ImportMethod.MERGE
@@ -152,14 +138,18 @@ class ImportsViewModel @Inject constructor(
     fun acceptConnection() {
         val endpointId = _deviceInfo.value.endpointId
         if (endpointId.isNotEmpty()) {
-            EventBus.getDefault().post(NearbyConnectionResponseEvent(endpointId, true))
+            viewModelScope.launch {
+                EventBus.publish(NearbyConnectionResponseEvent(endpointId, true))
+            }
         }
     }
 
     fun rejectConnection() {
         val endpointId = _deviceInfo.value.endpointId
         if (endpointId.isNotEmpty()) {
-            EventBus.getDefault().post(NearbyConnectionResponseEvent(endpointId, false))
+            viewModelScope.launch {
+                EventBus.publish(NearbyConnectionResponseEvent(endpointId, false))
+            }
             _deviceInfo.update { DeviceInfo() }
         }
     }

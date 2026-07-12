@@ -45,9 +45,12 @@ import com.iceberry.notifybox.bg.event.NearbyConnectionResponseEvent
 import com.iceberry.notifybox.bg.event.NearbyConnectionResultEvent
 import com.iceberry.notifybox.bg.event.NearbyPayloadEvent
 import com.iceberry.notifybox.bg.event.NearbyPayloadTransferUpdateEvent
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
+import com.iceberry.notifybox.util.EventBus
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
@@ -61,39 +64,40 @@ class NearByAdvertisingService : Service() {
     private var SERVICE_ID: String? = null
     private var connectionsClient: ConnectionsClient? = null
     private lateinit var localEndpointName: String
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private val payloadCallback: PayloadCallback = object : PayloadCallback() {
         override fun onPayloadReceived(endpointId: String, payload: Payload) {
             Log.d(TAG, "onPayloadReceived(endpointId=$endpointId, payload=$payload)")
-            EventBus.getDefault().post(NearbyPayloadEvent(endpointId, payload))
+            publishEvent(NearbyPayloadEvent(endpointId, payload))
         }
 
         override fun onPayloadTransferUpdate(endpointId: String, payloadTransferUpdate: PayloadTransferUpdate) {
             Log.d(TAG, "onPayloadTransferUpdate(endpointId=$endpointId, payloadTransferUpdate=$payloadTransferUpdate)")
-            EventBus.getDefault().post(NearbyPayloadTransferUpdateEvent(endpointId, payloadTransferUpdate))
+            publishEvent(NearbyPayloadTransferUpdateEvent(endpointId, payloadTransferUpdate))
         }
     }
     private var connectionLifecycleCallback: ConnectionLifecycleCallback = object : ConnectionLifecycleCallback() {
         override fun onConnectionInitiated(endpointId: String, info: ConnectionInfo) {
             Timber.tag(TAG).i("onConnectionInitiated(endpointId=$endpointId, info=${info.endpointName})")
-            EventBus.getDefault().post(NearbyConnectionRequestEvent(endpointId, info))
+            publishEvent(NearbyConnectionRequestEvent(endpointId, info))
         }
 
         override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
             when (result.status.statusCode) {
                 ConnectionsStatusCodes.STATUS_OK -> {
                     Timber.tag(TAG).i("Connection established with $endpointId")
-                    EventBus.getDefault().post(NearbyConnectionResultEvent(endpointId, true))
+                    publishEvent(NearbyConnectionResultEvent(endpointId, true))
                 }
 
                 ConnectionsStatusCodes.STATUS_CONNECTION_REJECTED -> {
                     Timber.tag(TAG).w("Connection rejected by $endpointId")
-                    EventBus.getDefault().post(NearbyConnectionResultEvent(endpointId, false))
+                    publishEvent(NearbyConnectionResultEvent(endpointId, false))
                 }
 
                 ConnectionsStatusCodes.STATUS_ERROR -> {
                     Timber.tag(TAG).e("Connection error with $endpointId")
-                    EventBus.getDefault().post(NearbyConnectionResultEvent(endpointId, false))
+                    publishEvent(NearbyConnectionResultEvent(endpointId, false))
                 }
 
                 else -> {
@@ -104,7 +108,7 @@ class NearByAdvertisingService : Service() {
 
         override fun onDisconnected(endpointId: String) {
             Timber.tag(TAG).i("Disconnected from $endpointId")
-            EventBus.getDefault().post(NearbyConnectionResultEvent(endpointId, false))
+            publishEvent(NearbyConnectionResultEvent(endpointId, false))
         }
     }
     private var handler: Handler = Handler(Looper.myLooper()!!)
@@ -122,7 +126,9 @@ class NearByAdvertisingService : Service() {
         connectionsClient = Nearby.getConnectionsClient(applicationContext)
         val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
         localEndpointName = "${android.os.Build.MODEL}|$androidId"
-        EventBus.getDefault().register(this)
+        serviceScope.launch {
+            EventBus.subscribe<NearbyConnectionResponseEvent> { onNearbyConnectionResponse(it) }
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -192,15 +198,20 @@ class NearByAdvertisingService : Service() {
 
         handler.removeCallbacksAndMessages(null)
         stopAdvertising()
-        EventBus.getDefault().unregister(this)
+        serviceScope.cancel()
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
     fun onNearbyConnectionResponse(event: NearbyConnectionResponseEvent) {
         if (event.accept) {
             connectionsClient?.acceptConnection(event.endpointId, payloadCallback)
         } else {
             connectionsClient?.rejectConnection(event.endpointId)
+        }
+    }
+
+    private fun publishEvent(event: EventBus.Event) {
+        serviceScope.launch {
+            EventBus.publish(event)
         }
     }
 }
