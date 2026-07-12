@@ -22,6 +22,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import com.iceberry.notifybox.ui.NBAppState
 import com.iceberry.notifybox.ui.list.ListViewModel
@@ -35,14 +36,39 @@ fun NBNavHost(
     listViewModel: ListViewModel = hiltViewModel() // XXX 此处获取ListScreen的viewmodel是为了保证即时搜索功能可用
 ) {
     val navController = appState.navController
-    val isTopLevelDestination = appState.isTopLevelDestination
 
     NavHost(
         navController = navController,
         startDestination = Route.ListRoute,
         modifier = modifier,
-        enterTransition = { slideInHorizontally(animationSpec = spring()) { fullWidth -> fullWidth * if (isTopLevelDestination) -1 else 1 } },
-        exitTransition = { slideOutHorizontally(animationSpec = spring()) { fullWidth -> fullWidth * if (isTopLevelDestination) -1 else 1 } }
+        enterTransition = {
+            val initialTopLevelDestination = TopLevelDestination.entries.firstOrNull { initialState.destination.hasRoute(it.route) }
+            val targetTopLevelDestination = TopLevelDestination.entries.firstOrNull { targetState.destination.hasRoute(it.route) }
+
+            if (initialTopLevelDestination != null && targetTopLevelDestination != null) {
+                val initialIndex = initialTopLevelDestination.ordinal
+                val targetIndex = targetTopLevelDestination.ordinal
+                val direction = if (targetIndex > initialIndex) 1 else -1
+                slideInHorizontally(animationSpec = spring()) { it * direction }
+            } else {
+                slideInHorizontally(animationSpec = spring()) { it }
+            }
+        },
+        exitTransition = {
+            val initialTopLevelDestination = TopLevelDestination.entries.firstOrNull { initialState.destination.hasRoute(it.route) }
+            val targetTopLevelDestination = TopLevelDestination.entries.firstOrNull { targetState.destination.hasRoute(it.route) }
+
+            if (initialTopLevelDestination != null && targetTopLevelDestination != null) {
+                val initialIndex = initialTopLevelDestination.ordinal
+                val targetIndex = targetTopLevelDestination.ordinal
+                val direction = if (targetIndex > initialIndex) -1 else 1
+                slideOutHorizontally(animationSpec = spring()) { it * direction }
+            } else {
+                slideOutHorizontally(animationSpec = spring()) { -it }
+            }
+        },
+        popEnterTransition = { slideInHorizontally(animationSpec = spring()) { -it } },
+        popExitTransition = { slideOutHorizontally(animationSpec = spring()) { it } }
     ) {
         listScreen(
             appState = appState,
