@@ -33,10 +33,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.iceberry.notifybox.navigation.Route
 import com.iceberry.notifybox.navigation.TopLevelDestination
-import com.iceberry.notifybox.navigation.TopLevelDestination.FORWARD
 import com.iceberry.notifybox.navigation.TopLevelDestination.LIST
 import com.iceberry.notifybox.navigation.TopLevelDestination.SETTINGS
-import com.iceberry.notifybox.navigation.navigateToForward
 import com.iceberry.notifybox.navigation.navigateToList
 import com.iceberry.notifybox.navigation.navigateToSettings
 import kotlinx.coroutines.CoroutineScope
@@ -141,7 +139,6 @@ class NBAppState(
 
             when (topLevelDestination) {
                 LIST -> navController.navigateToList(topLevelNavOptions)
-                FORWARD -> navController.navigateToForward(topLevelNavOptions)
                 SETTINGS -> navController.navigateToSettings(topLevelNavOptions)
             }
         }

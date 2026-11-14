@@ -19,7 +19,6 @@ package com.iceberry.notifybox.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.iceberry.notifybox.R
 import kotlin.reflect.KClass
@@ -35,12 +34,6 @@ enum class TopLevelDestination(
         iconTextId = R.string.nav_list,
         titleTextId = R.string.nav_list,
         route = Route.ListRoute::class
-    ),
-    FORWARD(
-        icon = Icons.Filled.SwapHoriz,
-        iconTextId = R.string.nav_forward,
-        titleTextId = R.string.nav_forward,
-        route = Route.ForwardRoute::class
     ),
     SETTINGS(
         icon = Icons.Filled.Settings,
