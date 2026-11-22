@@ -1,0 +1,14 @@
+{
+    "tabWidth": 4,
+    "useTabs": false,
+    "overrides": [
+        {
+            "files": "*.svelte",
+            "options": {
+                "printWidth": 160,
+                "singleAttributePerLine": true,
+                "bracketSameLine": true
+            }
+        }
+    ]
+}
